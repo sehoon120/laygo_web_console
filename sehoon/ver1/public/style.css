@@ -10,7 +10,7 @@ a {
 }
 
 .container {
-  max-width: 800px;
+  max-width: 1600px;  /* 최대 너비를 800px로 제한 */
   margin: 0 auto;
   padding: 0 15px;
   position: relative;
@@ -49,7 +49,7 @@ header nav a {
 
 /* list */
 #site-main {
-  width: 800px;
+  width: 1600px;  /* 혹은 max-width가 아닌 width를 800px로 고정 */
   margin: 6em auto 0;
 }
 .button-box {

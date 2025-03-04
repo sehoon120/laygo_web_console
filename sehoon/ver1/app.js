@@ -6,11 +6,6 @@ const cookieParser = require('cookie-parser');
 
 const app = express();
 
-// app.use((req, res, next) => {
-//     console.log('Hi');
-//     next();
-// });
-
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
@@ -26,11 +21,13 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());
 
+// routes
 app.use('/', require('./routes/loginRoutes'));
-app.use('/contacts', require('./routes/middleRoutes')); // 미들웨어 테스트
-app.use('/contacts', require('./routes/contactRoutes'));
+app.use('/logout', require('./routes/logoutRoutes'));   // 로그아웃 라우트트
+app.use('/main', require('./routes/middleRoutes'));     // 미들웨어 테스트 -> 토큰검사
+app.use('/main', require('./routes/contactRoutes'));
 
-// app.use('/', require('./routes/404'));
+
 app.use((req, res, next) => {       // 에러 페이지지
     res.render('404');
     next();

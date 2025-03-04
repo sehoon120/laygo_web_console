@@ -28,7 +28,7 @@ const loginUser = asyncHandler(async(req, res) => {
 
     const token = jwt.sign({ id: user._id}, jwtSecrest, { expiresIn: '12h' });
     res.cookie('token', token, {httpOnly: true});
-    res.redirect('/contacts');
+    res.redirect('/main');
 
 });
 
@@ -43,7 +43,8 @@ const registerUser = asyncHandler(async(req, res) => {
     if (password === password2) {
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await User.create( { username, password: hashedPassword});
-        res.json( {message: "Register successed", user});
+        // res.json( {message: "Register successed", user});
+        res.redirect('/');
     } else {
         res.send("Register Failed");
     }

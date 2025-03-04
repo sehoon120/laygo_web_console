@@ -9,27 +9,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-
   <!-- Header -->
   <header class="border-shadow">
     <div class="container ">
       <nav>
-        <a href="/main"><i class="fa-solid fa-drafting-compass"></i> Laygo</a>
+        <a href="/"><i class="fa-solid fa-drafting-compass"></i> Laygo</a>
       </nav>
-      <!-- 우측 상단 로그아웃 버튼 -->
-      <div class="login-box">
-        <button id="logoutButton" class="btn btn-secondary">로그아웃</button>
-      </div>
-      <script>
-        document.getElementById('logoutButton').addEventListener('click', function() {
-          // localStorage에서 token 삭제 (만약 있다면)
-          localStorage.removeItem('token');
-          // 서버 로그아웃 엔드포인트 호출: 이 엔드포인트에서 HttpOnly 쿠키를 삭제합니다.
-          window.location.href = '/logout';
-        });
-      </script>
-      
-      
     </div>
   </header>
   <!-- /Header -->

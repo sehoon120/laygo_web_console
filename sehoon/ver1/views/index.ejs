@@ -3,7 +3,7 @@
   <!-- Main -->
   <main id="site-main">
     <div class="button-box">
-      <a href="/contacts/add" class="btn btn-light"><i class="fa-solid fa-user-plus"></i>연락처 추가</a>
+      <a href="/main/add" class="btn btn-light"><i class="fa-solid fa-user-plus"></i>연락처 추가</a>
     </div>
   
     <table class="table">
@@ -23,10 +23,10 @@
           <td><%= contact.mail %></td>
           <td><%= contact.phone %></td>
           <td>
-            <a href="/contacts/<%= contact._id %>" class="btn update" title="수정">
+            <a href="/main/<%= contact._id %>" class="btn update" title="수정">
               <i class="fas fa-pencil-alt"></i>
             </a>
-            <form action="/contacts/<%= contact._id %>?_method=DELETE" method="POST" style="display: inline">
+            <form action="/main/<%= contact._id %>?_method=DELETE" method="POST" style="display: inline">
               <input type="submit" class="btn-delete" title="삭제" value="X">
             </form>
             <!-- <a href="#" class="btn delete" title="삭제">

@@ -45,7 +45,8 @@ const createContact = asyncHandler(async (req, res) => {
     const contact = await Contact.create({
         name, mail, phone
     });
-    res.send('Create Contacts');
+    // res.send('Create Contacts');
+    res.redirect('/main');
 });
 
 // GET
@@ -76,7 +77,7 @@ const updateContact = asyncHandler(async (req, res) => {
     //     `);
     // res.json(contact);  // 결과 표시
 
-    res.redirect('/contacts');
+    res.redirect('/main');
 });
 
 // DEL
@@ -91,7 +92,7 @@ const deleteContact = asyncHandler(async (req, res) => {
     // res.send(`Delete Contact for ID : ${req.params.id}
     //     Deleted
     //     `);
-    res.redirect('/contacts')
+    res.redirect('/main')
 
 });
 

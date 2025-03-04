@@ -1,5 +1,5 @@
 # laygo_web_console
 
-
-nodemon sehoon/ver1/app.js
+cd sehoon/ver1
+nodemon app.js
 http://localhost:3000/
