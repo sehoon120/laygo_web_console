@@ -24,8 +24,12 @@ app.use(cookieParser());
 // routes
 app.use('/', require('./routes/loginRoutes'));
 app.use('/logout', require('./routes/logoutRoutes'));   // 로그아웃 라우트트
-app.use('/main', require('./routes/middleRoutes'));     // 미들웨어 테스트 -> 토큰검사
-app.use('/main', require('./routes/contactRoutes'));
+// app.use('/main', require('./routes/middleRoutes'));     // 미들웨어 테스트 -> 토큰검사
+
+const authenticateJWT = require('./middlewares/JWT');
+app.use('/main', authenticateJWT);
+
+app.use('/main', require('./routes/fileRoutes'));
 
 
 app.use((req, res, next) => {       // 에러 페이지지

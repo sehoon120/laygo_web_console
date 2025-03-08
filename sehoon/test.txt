@@ -1,1 +1,48 @@
-test_test
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>반반 웹 페이지 예시</title>
+  <style>
+    /* 기본 설정 */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+    /* 컨테이너를 flex로 지정하여 자식 요소를 좌우로 배치 */
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+    /* 좌우 섹션은 동일한 너비를 가지며 내부 여백을 줌 */
+    .half {
+      flex: 1;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    /* 각 섹션의 배경색을 다르게 설정 */
+    .left {
+      background-color: #f0f0f0;
+    }
+    .right {
+      background-color: #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 왼쪽 영역: 예를 들어, 연락처 목록 -->
+    <div class="half left">
+      <h1>연락처 목록</h1>
+      <p>여기에 연락처 관련 내용을 배치할 수 있습니다.</p>
+    </div>
+    <!-- 오른쪽 영역: 예를 들어, 파일 업로드 또는 기타 기능 -->
+    <div class="half right">
+      <h1>파일 업로드</h1>
+      <p>여기에 파일 업로드나 다른 기능을 배치할 수 있습니다.</p>
+    </div>
+  </div>
+</body>
+</html>

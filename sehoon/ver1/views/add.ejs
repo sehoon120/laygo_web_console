@@ -4,32 +4,32 @@
   <!-- Main -->
     <main id="site-main">
       <div class="button-box">        
-        <a href="/main" class="btn btn-light"><i class="fa-solid fa-list"></i>연락처 목록</a>
+        <a href="/main" class="btn btn-light"><i class="fa-solid fa-list"></i>파일 목록</a>
       </div>
       </div>
-      <h2>연락처 추가</h2>          
-      <p>연락처 정보를 추가합니다.</p>
+      <h2>파일 추가</h2>          
+      <p>새로운 파일을 추가합니다.</p>
       <form action="/main/add" method="POST" id="add-user">
         <div class="user-info">
           <div class="col-12">
-            <label for="name" class="col-form-label">이름(Full Name)</label>
+            <label for="filename" class="col-form-label">이름(File Name)</label>
             <div>
-              <input type="text" class="form-control" name="name" id="name" placeholder="홍길동">
+              <input type="text" class="form-control" name="filename" id="filename" placeholder="Generator">
             </div>
           </div>
           <div class="col-12">
-            <label for="mail" class="col-form-label">메일 주소(E-mail)</label>
+            <label for="filetype" class="col-form-label">유형(File Type)</label>
             <div>
-              <input type="text" class="form-control" name="mail" id="mail" placeholder="hong@abc.def">
+              <input type="text" class="form-control" name="filetype" id="filetype" placeholder="py">
             </div>
           </div>
-          <div class="col-12">
+          <!-- <div class="col-12">
             <label for="phone" class="col-form-label">전화번호(Mobile)</label>
             <div>
               <input type="text" class="form-control" name="phone" id="phone" placeholder="123-4567-8901">
             </div>
-          </div>
-          <button type="submit">저장하기</button>
+          </div> -->
+          <button type="submit">저장</button>
         </div>
       </form>   
     </main>

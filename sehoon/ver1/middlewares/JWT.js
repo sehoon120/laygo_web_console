@@ -1,6 +1,6 @@
 const asyncHandler = require('express-async-handler');
 require('dotenv').config();
-const jwtSecrest= process.env.JWT_SECRET;
+const jwtSecret= process.env.JWT_SECRET;
 const jwt = require('jsonwebtoken');
 
 const { promisify } = require('util');
@@ -31,8 +31,9 @@ const authenticateJWT =  asyncHandler(async(req, res, next) => {
     }
     // console.log(token);
     try {
-        const user = await verifyAsync(token, jwtSecrest);
+        const user = await verifyAsync(token, jwtSecret);
         req.user = user;
+        // console.log(user);
         next();
     } catch (error) {
         // console.error(error);

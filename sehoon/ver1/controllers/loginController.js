@@ -2,7 +2,7 @@ const asyncHandler = require('express-async-handler');
 const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
-const jwtSecrest= process.env.JWT_SECRET;
+const jwtSecret= process.env.JWT_SECRET;
 const jwt = require('jsonwebtoken');
 
 
@@ -26,7 +26,7 @@ const loginUser = asyncHandler(async(req, res) => {
         return res.json({ message: '비밀번호가 일치하지 않습니다.'});
     }
 
-    const token = jwt.sign({ id: user._id}, jwtSecrest, { expiresIn: '12h' });
+    const token = jwt.sign({username: username, id: user._id}, jwtSecret, { expiresIn: '12h' });
     res.cookie('token', token, {httpOnly: true});
     res.redirect('/main');
 

@@ -1,0 +1,55 @@
+<%- include('./include/_header') %>
+
+<%
+  // 날짜 포맷 헬퍼 함수 추가 (헤더 바로 아래에 삽입)
+  function formatDate(date) {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = ('0' + (d.getMonth() + 1)).slice(-2);
+    const day = ('0' + d.getDate()).slice(-2);
+    const hour = ('0' + d.getHours()).slice(-2);
+    const minute = ('0' + d.getMinutes()).slice(-2);
+    const second = ('0' + d.getSeconds()).slice(-2);
+    return `${year}-${month}-${day}  ${hour}:${minute}:${second}`;
+  }
+%>
+
+<!-- Main -->
+<main id="site-main">
+  <div class="button-box">
+    <a href="/main/add" class="btn btn-light"><i class="fa-solid fa-file-circle-plus"></i>파일 추가</a>
+  </div>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>이름</th>
+        <th>유형</th>
+        <th style="padding-right: 20px; text-align: right;">수정한 날짜</th>
+        <th>&nbsp;</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% files.forEach(file => { %>
+      <tr>
+        <td><%= file.filename %></td>
+        <td><%= file.filetype %></td>
+        <!-- formatDate 함수를 사용하여 날짜 포맷 출력 -->
+        <td style="padding-right: 20px; text-align: right;"><%= formatDate(file.updatedAt) %></td>
+        
+        <td>
+          <a href="/main/<%= file._id %>" class="btn update" title="수정">
+            <i class="fas fa-pencil-alt"></i>
+          </a>
+          <form action="/main/<%= file._id %>?_method=DELETE" method="POST" style="display: inline">
+            <input type="submit" class="btn-delete" title="삭제" value="X">
+          </form>
+        </td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</main>
+<!-- /Main -->
+
+<%- include('./include/_footer') %>
