@@ -112,6 +112,10 @@ app.get("/mypage/logout", (req, res) => {
     })
 })
 
+app.post("/mypage", (req, res) =>{
+    const {script} = req.body;
+    res.redirect('/mypage')
+})
 
 
 //port 3000, callback function
