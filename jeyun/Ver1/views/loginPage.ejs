@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login page</title>
+</head>
+<body>
+
+    <% if(typeof loginResult !== 'undefined' && loginResult === 'fail') {%>
+        <script> alert("login fail")</script>
+    <%} %>
+    <h1>Login</h1>
+</body>
+<form method="post">
+    <table>
+        <tr>
+            <td><label>ID</label></td>
+            <td>
+                <label>
+                    <input type="text" name="userID">
+                </label>
+            </td>
+            <td><label>PW</label></td>
+            <td>
+                <label>
+                    <input type="text" name="userPW">
+                </label>
+            </td>
+        </tr>
+    </table>
+    <td><input type="submit" value="Login" name=""></td>
+</form>
+
+</body>
+</html>

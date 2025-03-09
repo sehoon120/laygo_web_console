@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>mypage</title>
+</head>
+<body>
+    <h1>MyPage</h1>
+    <button id="logout">로그아웃</button>
+    <button id="signout">회원탈퇴</button>
+    <script>
+        const logoutButton = document.getElementById("logout");
+        const signoutButton = document.getElementById("signout");
+
+
+        logoutButton.addEventListener('click', () => {
+            window.location = 'http://localhost:3000/mypage/logout';
+        });
+        signoutButton.addEventListener('click', () => {
+            window.location = 'http://localhost:3000/mypage/signout';
+        });
+    </script>
+
+</body>
+</html>
