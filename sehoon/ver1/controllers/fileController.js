@@ -2,7 +2,7 @@ const asyncHandler = require('express-async-handler');
 const File = require('../models/fileModel');
 
 
-// GET
+// GET  /
 const getAllContacts = asyncHandler(async (req, res) => {
     // console.log(req.user);
     // console.log(req.user.username);
@@ -21,15 +21,16 @@ const getAllContacts = asyncHandler(async (req, res) => {
     // res.render('getallfiles', { user: user, files: File});
 });
 
-// View add contact form
-// GET  /contacts/add
+// add file
+// GET  /add
 const addContactForm = (req, res) => {
     // console.log(req.user);
     res.render('add');
 }
 
 
-// POST
+// save added file
+// POST /add
 const createContact = asyncHandler(async (req, res) => {
     // console.log(req.body);
     // console.log(req.user);
@@ -55,13 +56,15 @@ const createContact = asyncHandler(async (req, res) => {
     res.redirect('/main');
 });
 
-// GET
+// edit file
+// GET  /:id
 const getContact = asyncHandler(async (req, res) => {
     const contact = await Contact.findById(req.params.id);
     res.render('update', { contact: contact});
 
 });
 
+// change file
 // PUT
 const updateContact = asyncHandler(async (req, res) => {
     const id = req.params.id;
@@ -79,6 +82,7 @@ const updateContact = asyncHandler(async (req, res) => {
     res.redirect('/main');
 });
 
+// delete file
 // DEL
 const deleteContact = asyncHandler(async (req, res) => {
     const id = req.params.id;

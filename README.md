@@ -4,6 +4,10 @@
 cd sehoon/ver1
 nodemon app.js
 http://localhost:3000/
+mongoDB사용 -> 파일 유저정보 저장
+로그인, 파일 확인기능 구현
+
+
 
 ## 박제윤
 ver1 -> 로그인 등 기타 기능은 레이고 시각회 위해 필요한 정도로만 대충 구현하고 시각화에 주력해서 만드는 중
