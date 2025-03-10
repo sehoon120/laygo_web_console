@@ -5,28 +5,29 @@
       <div class="button-box">        
         <a href="/main" class="btn btn-light"><i class="fa-solid fa-list"></i>연락처 목록</a>
       </div>
-      <h2>연락처 수정</h2>          
-      <p>연락처 정보를 수정합니다.</p>
-      <form action="/main/<%= contact._id %>?_method=PUT" method="POST" id="add-user">
+      <h2>파일 수정</h2>          
+      <p>파일 정보를 수정합니다.</p>
+      <form action="/main/<%= file._id %>?_method=PUT" method="POST" id="add-user">
         <div class="user-info">
           <div class="col-12">
-            <label for="name" class="col-form-label">이름(Full Name)</label>
+            <label for="name" class="col-form-label">filename</label>
             <div>
-              <input type="text" class="form-control" name="name" id="name" value="<%= contact.name %>">
+              <input type="text" class="form-control" name="name" id="name" value="<%= file.filename %>">
             </div>
           </div>
           <div class="col-12">
-            <label for="mail" class="col-form-label">메일 주소(E-mail)</label>
+            <label for="type" class="col-form-label">filetype</label>
             <div>
-              <input type="text" class="form-control" name="mail" id="mail" value="<%= contact.mail %>">
+              <input type="text" class="form-control" name="type" id="type" value="<%= file.filetype %>">
             </div>
           </div>
           <div class="col-12">
-            <label for="phone" class="col-form-label">전화번호(Mobile)</label>
+            <label for="path" class="col-form-label">filepath</label>
             <div>
-              <input type="text" class="form-control" name="phone" id="phone" value="<%= contact.phone %>">
+              <input type="text" class="form-control" name="path" id="path" value="<%= file.filePath %>">
             </div>
           </div>
+
           <button type="submit">수정하기</button>
         </div>
       </form>   

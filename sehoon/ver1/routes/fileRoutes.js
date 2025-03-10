@@ -7,7 +7,9 @@ const {
     getContact,
     updateContact,
     deleteContact,
-    addContactForm
+    addContactForm,
+    editFile,
+    saveFile
 } = require('../controllers/fileController');
 
 router.route('/')
@@ -32,6 +34,10 @@ router.route('/:id')
     .get(getContact)
     .put(updateContact)
     .delete(deleteContact);
+
+router.route('/:id/edit')
+    .get(editFile)
+    .put(saveFile);
 
 
 // //특정 연락처 가져오기
