@@ -7,7 +7,7 @@ http://localhost:3000/
 mongoDB사용 -> 파일, 유저정보 저장
 로그인, 파일 확인기능 구현
 파일 편집 가능
-우측 layout display 추가 예정정
+우측 layout display 추가 예정
 
 
 
