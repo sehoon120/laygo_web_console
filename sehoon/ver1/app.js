@@ -32,7 +32,7 @@ app.use('/main', authenticateJWT);
 app.use('/main', require('./routes/fileRoutes'));
 
 
-app.use((req, res, next) => {       // 에러 페이지지
+app.use((req, res, next) => {       // 에러 페이지
     res.render('404');
     next();
 });

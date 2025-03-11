@@ -12,12 +12,13 @@
 
   <!-- Header -->
   <header class="border-shadow">
-    <div class="container ">
+    <div class="container">
       <nav>
         <a href="/main"><i class="fa-solid fa-drafting-compass"></i> Laygo</a>
       </nav>
-      <!-- 우측 상단 로그아웃 버튼 -->
-      <div class="login-box">
+      <!-- 우측 상단: 유저 정보와 로그아웃 버튼 -->
+      <div class="login-box d-flex align-items-center">
+        <span class="user-info me-2">User: <%= user.username %></span>
         <button id="logoutButton" class="btn btn-secondary">로그아웃</button>
       </div>
       <script>
@@ -28,8 +29,6 @@
           window.location.href = '/logout';
         });
       </script>
-      
-      
     </div>
   </header>
   <!-- /Header -->

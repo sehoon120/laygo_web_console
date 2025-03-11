@@ -33,6 +33,8 @@ const authenticateJWT =  asyncHandler(async(req, res, next) => {
     try {
         const user = await verifyAsync(token, jwtSecret);
         req.user = user;
+        // 템플릿 전역 변수로 사용자 정보 설정 (예: username)
+        res.locals.user = user;
         // console.log(user);
         next();
     } catch (error) {
