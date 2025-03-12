@@ -1,38 +1,33 @@
 <%- include('./include/_header') %>
 
-   
-  <!-- Main -->
-    <main id="site-main">
-      <div class="button-box">        
-        <a href="/main" class="btn btn-light"><i class="fa-solid fa-list"></i>파일 목록</a>
-      </div>
-      </div>
-      <h2>파일 추가</h2>          
-      <p>새로운 파일을 추가합니다.</p>
-      <form action="/main/add" method="POST" id="add-user">
-        <div class="user-info">
-          <div class="col-12">
-            <label for="filename" class="col-form-label">이름(File Name)</label>
-            <div>
-              <input type="text" class="form-control" name="filename" id="filename" placeholder="Generator">
-            </div>
-          </div>
-          <div class="col-12">
-            <label for="filetype" class="col-form-label">유형(File Type)</label>
-            <div>
-              <input type="text" class="form-control" name="filetype" id="filetype" placeholder="py">
-            </div>
-          </div>
-          <!-- <div class="col-12">
-            <label for="phone" class="col-form-label">전화번호(Mobile)</label>
-            <div>
-              <input type="text" class="form-control" name="phone" id="phone" placeholder="123-4567-8901">
-            </div>
-          </div> -->
-          <button type="submit">저장</button>
+<!-- Main -->
+<main id="site-main">
+  <div class="button-box">        
+    <a href="/main" class="btn btn-light">
+      <i class="fa-solid fa-list"></i>파일 목록
+    </a>
+  </div>
+  <h2>파일 추가</h2>          
+  <p>새로운 파일을 추가합니다.</p>
+  <!-- action URL에 currentPath를 쿼리 파라미터로 전달 -->
+  <form action="/main/add?path=<%= currentPath %>" method="POST" id="add-user">
+    <div class="user-info">
+      <div class="col-12">
+        <label for="filename" class="col-form-label">이름(File Name)</label>
+        <div>
+          <input type="text" class="form-control" name="filename" id="filename" placeholder="Generator">
         </div>
-      </form>   
-    </main>
-  <!-- /Main -->
+      </div>
+      <div class="col-12">
+        <label for="filetype" class="col-form-label">유형(File Type)</label>
+        <div>
+          <input type="text" class="form-control" name="filetype" id="filetype" placeholder="py">
+        </div>
+      </div>
+      <button type="submit">저장</button>
+    </div>
+  </form>   
+</main>
+<!-- /Main -->
 
-  <%- include('./include/_footer') %>
+<%- include('./include/_footer') %>

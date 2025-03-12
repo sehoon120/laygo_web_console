@@ -9,7 +9,9 @@ const {
     deleteContact,
     addContactForm,
     editFile,
-    saveFile
+    saveFile,
+    adddir,
+    createDir
 } = require('../controllers/fileController');
 
 router.route('/')
@@ -29,6 +31,9 @@ router.route('/add')
     .get(addContactForm)
     .post(createContact);
 
+// router.route('/add-directory')
+//     .get(adddir)
+//     .post(createDir);
 
 router.route('/:id')
     .get(getContact)

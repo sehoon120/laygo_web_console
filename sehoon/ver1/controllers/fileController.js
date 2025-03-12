@@ -3,58 +3,73 @@ const File = require('../models/fileModel');
 
 
 const getAllContacts = asyncHandler(async (req, res) => {
-    File.find({ user: req.user.username })
-        .sort({ updatedAt: -1 })  // updatedAt 필드를 기준으로 내림차순 정렬
-        .then(files => {
-            res.render('getallfiles', { files });
-        })
-        .catch(err => {
-            console.error(err);
-            res.status(500).send('파일 데이터를 불러오는 중 오류가 발생했습니다.');
-        });
+    const currentPath = req.query.path || '/';  //
+    
+    File.find({ 
+        user: req.user.username
+        , filePath: currentPath //
+    })
+    .sort({ updatedAt: -1 })  // updatedAt 필드를 기준으로 내림차순 정렬
+    .then(files => {
+        res.render('getallfiles', { files, currentPath });
+    })
+    .catch(err => {
+        console.error(err);
+        res.status(500).send('파일 데이터를 불러오는 중 오류가 발생했습니다.');
+    });
 });
 
 
 // add file
 // GET  /add
 const addContactForm = (req, res) => {
-    // console.log(req.user);
-    res.render('add');
+    const currentPath = req.query.path || '/';
+    res.render('add', { currentPath: currentPath });
 }
 
+// add file
+// GET  /add
+// const adddir = (req, res) => {
+//     // console.log(req.user);
+//     res.render('add-directory');
+// }
 
 // save added file
 // POST /add
 const createContact = asyncHandler(async (req, res) => {
-    // console.log(req.body);
-    // console.log(req.user);
-    // console.log(Object.getOwnPropertyNames(req));
-
-
     const {filename, filetype} = req.body;
     if (!filename || !filetype){
         return res.send('essential data is not written');
     }
-        const file = await File.create({
-        user: req.user.username, filename: filename, filetype: filetype, filePath: "test"
+    const currentPath = req.query.path || '/';  //
+    // console.log(currentPath)
+    const file = await File.create({
+        user: req.user.username, filename: filename, filetype: filetype, filePath: currentPath
     });
 
-    // const{name, mail, phone} = req.body;
-    // if (!name || !mail|| !phone){
-    //     return res.send('essential data is not written');
-    // }
-
-    // const contact = await Contact.create({
-    //     name, mail, phone
-    // });
-    res.redirect('/main');
+    res.redirect('/main?path=' + encodeURIComponent(currentPath));
 });
+
+// save added file
+// POST /add
+// const createDir = asyncHandler(async (req, res) => {
+//     const {filename, filetype} = req.body;
+//     if (!filename || !filetype){
+//         return res.send('essential data is not written');
+//     }
+//         const file = await File.create({
+//         user: req.user.username, filename: filename, filetype: filetype, filePath: "test"
+//     });
+
+//     res.redirect('/main');
+// });
 
 // change file
 // GET  /:id
 const getContact = asyncHandler(async (req, res) => {
     const file = await File.findById(req.params.id);
-    res.render('update', { file: file});
+    const currentPath = req.query.path || '/';
+    res.render('update', { file: file, currentPath: currentPath});
 
 });
 
@@ -63,7 +78,7 @@ const getContact = asyncHandler(async (req, res) => {
 const updateContact = asyncHandler(async (req, res) => {
     const id = req.params.id;
     const {name, type, path} = req.body;
-
+    const currentPath = req.query.path || '/';
     const file = await File.findById(id);
     if (!file) {
         throw new Error('File not found.');
@@ -73,7 +88,7 @@ const updateContact = asyncHandler(async (req, res) => {
     file.filetype = type;
     file.filePath = path;
     file.save();
-    res.redirect('/main');
+    res.redirect('/main?path=' + encodeURIComponent(currentPath));
 });
 
 // delete file
@@ -82,7 +97,8 @@ const deleteContact = asyncHandler(async (req, res) => {
     // console.log(req.params.id)
     const id = req.params.id;
     await File.findByIdAndDelete(id);
-    res.redirect('/main')
+    const currentPath = req.query.path || '/';
+    res.redirect('/main?path=' + encodeURIComponent(currentPath));
 
 });
 
@@ -91,8 +107,27 @@ const deleteContact = asyncHandler(async (req, res) => {
 const editFile = asyncHandler(async (req, res) => {
     const id = req.params.id;
     const file = await File.findById(id);
-    res.render('edit', {file: file});
+    const currentPath = req.query.path || '/';
+//~~
+    // 파일 타입이 디렉토리라면
+    if (file.filetype === 'dir') {
+        // 현재 경로를 쿼리 파라미터에서 가져오고, 없으면 기본값 '/' 사용
+        // let currentPath = req.query.path || '/';
+        // // console.log(currentPath)
+        // // currentPath가 '/'로 끝나지 않으면 추가
+        // if (!currentPath.endsWith('/')) {
+        //     currentPath += '/';
+        // }
+        // 새 경로: 현재 경로 + 디렉토리 이름 + '/'
+        const newPath = currentPath + file.filename + '/';
+        // 메인 페이지로 리다이렉트 시 새 경로를 쿼리 파라미터로 전달
+        return res.redirect('/main?path=' + encodeURIComponent(newPath));
+    }
+//~~
+    // 파일 타입이 디렉토리가 아니라면 수정 페이지로 렌더링
+    res.render('edit', { file: file, currentPath: currentPath });
 });
+
 
 
 // save file
@@ -123,5 +158,7 @@ module.exports = {
     addContactForm,
     editFile,
     saveFile
+    // , adddir,
+    // createDir
 };
 

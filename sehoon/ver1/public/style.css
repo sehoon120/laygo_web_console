@@ -53,9 +53,11 @@ header nav a {
   margin: 6em auto 0;
 }
 .button-box {
-  display:flex;
+  display: flex;
   justify-content: flex-end;
+  gap: 10px; /* 두 버튼 사이에 10px 간격 추가 */
 }
+
 .button-box > a {
   font-size: 1em;
   padding: .5em 1em;
@@ -170,3 +172,36 @@ hr {
   margin-top: 30px;
 }
 
+
+
+.back-button {
+  position: absolute;
+  top: 90px;
+  left: 20px;
+  font-size: 1.2em;
+  color: #333;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px; /* 클릭 가능한 영역을 확장 */
+  border-radius: 5px; /* 버튼에 둥근 모서리 추가 (옵션) */
+}
+
+.back-button i {
+  font-size: 2em; /* 아이콘 크기 */
+}
+
+
+
+.directory-nav a {
+  font-size: 1.5em; /* 아이콘 크기 */
+  color: #333; /* 기본 색상 */
+  text-decoration: none;
+  margin-right: 20px; /* 아이콘 간 간격 */
+  transition: color 0.3s ease; /* 색상 변경 시 부드러운 전환 효과 */
+}
+
+.directory-nav a:hover {
+  color: #007bff; /* 마우스 오버 시 파란색 */
+}
