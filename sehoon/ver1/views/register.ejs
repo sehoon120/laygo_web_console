@@ -12,8 +12,69 @@
       <input type="password" placeholder="비밀번호" name="password" id="password">
       <label for="password2"><b>비밀번호 확인</b></label>
       <input type="password" placeholder="비밀번호 확인" name="password2" id="password2">
+
+      <!-- 휴대폰 번호 입력 및 인증 버튼 -->
+      <label for="email"><b>메일 주소</b></label>
+      <div class="email-verification" style="display: flex; gap: 10px; align-items: center;">
+        <input type="text" placeholder="메일 주소" name="email" id="email" style="flex: 1;">
+        <button type="button" id="sendEmailButton" class="btn btn-primary verify-btn">인증</button>
+      </div>
+
+      <!-- 인증번호 입력 및 확인 버튼 -->
+      <label for="verificationCode"><b>인증번호</b></label>
+      <div class="code-confirmation" style="display: flex; gap: 10px; align-items: center;">
+        <input type="text" placeholder="인증번호 입력" name="verificationCode" id="verificationCode" style="flex: 1;">
+        <button type="button" id="verifyEmailButton" class="btn btn-secondary verify-btn">확인</button>
+      </div>
+
       <input type="submit" value="등록" class="register-btn">
     </form>    
+
+
+    <script>
+      // 인증 메일 전송 요청
+      document.getElementById('sendEmailButton').addEventListener('click', async () => {
+        const email = document.getElementById('email').value;
+        try {
+          const response = await fetch('/sendVerificationEmail', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+          });
+          const data = await response.json();
+          console.log('인증 메일 전송 결과:', data);
+          // 실제 운영에서는 이 코드를 사용자 세션이나 DB에 저장한 후 비교합니다.
+        } catch (err) {
+          console.error('인증 메일 전송 실패:', err);
+        }
+      });
+  
+      // 인증 코드 확인 요청
+      document.getElementById('verifyEmailButton').addEventListener('click', async () => {
+        const email = document.getElementById('email').value;
+        const code = document.getElementById('verificationCode').value;
+        try {
+          const response = await fetch('/sendVerificationEmail', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, code })
+          });
+          
+          // 응답을 텍스트로 받아서 확인
+          const text = await response.text();
+          console.log('원시 응답:', text);
+          
+          // JSON 파싱 시도
+          const data = JSON.parse(text);
+          console.log('인증 코드 확인 결과:', data);
+        } catch (err) {
+          console.error('인증 코드 확인 실패:', err);
+        }
+      });
+
+    </script>
+
+
   </main>
   <!-- /Main -->
 

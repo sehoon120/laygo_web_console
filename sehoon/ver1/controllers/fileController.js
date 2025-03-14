@@ -75,21 +75,63 @@ const getContact = asyncHandler(async (req, res) => {
 
 // change file name
 // PUT
+// const updateContact = asyncHandler(async (req, res) => {
+//     const id = req.params.id;
+//     const {name, type, path} = req.body;
+//     const currentPath = req.query.path || '/';
+//     const file = await File.findById(id);
+//     if (!file) {
+//         throw new Error('File not found.');
+//     }
+
+//     file.filename = name;
+//     file.filetype = type;
+//     file.filePath = path;
+//     file.save();
+//     res.redirect('/main?path=' + encodeURIComponent(currentPath));
+// });
+
+
+// change file name
+// PUT
 const updateContact = asyncHandler(async (req, res) => {
     const id = req.params.id;
-    const {name, type, path} = req.body;
+    const { name, type, path } = req.body;
     const currentPath = req.query.path || '/';
     const file = await File.findById(id);
     if (!file) {
         throw new Error('File not found.');
     }
 
+    // 디렉토리일 경우, 하위 파일 및 디렉토리 경로 업데이트 (현재 사용자와 관련된 파일만)
+    if (file.filetype === 'dir') {
+        // 기존 디렉토리의 전체 경로 (예: '/4/train/test_dir/')
+        const oldDirFullPath = file.filePath + file.filename + '/';
+        // 새 이름으로 변경 후 전체 경로 (예: '/4/train/abcd/')
+        const newDirFullPath = file.filePath + name + '/';
+
+        // 현재 로그인한 사용자(req.user.username)에 해당하는 하위 파일/디렉토리만 업데이트
+        const children = await File.find({
+            filePath: { $regex: '^' + oldDirFullPath },
+            user: req.user.username
+        });
+        for (let child of children) {
+            child.filePath = child.filePath.replace(oldDirFullPath, newDirFullPath);
+            await child.save();
+        }
+    }
+
+    // 현재 파일 또는 디렉토리 업데이트
     file.filename = name;
     file.filetype = type;
     file.filePath = path;
-    file.save();
+    await file.save();
     res.redirect('/main?path=' + encodeURIComponent(currentPath));
 });
+
+
+
+
 
 // delete file
 // DEL

@@ -1,13 +1,15 @@
 <%- include('./include/_header') %>
 
 <!-- 파일 목록으로 돌아가기 버튼 (왼쪽 상단) -->
-<a href="/main?path=<%= encodeURIComponent(currentPath) %>" class="back-button">
-  <i class="fas fa-arrow-left"></i> 파일 목록
-</a>
+
 
 <!-- Main -->
 <main id="site-main" class="container my-4">
+  <a href="/main?path=<%= encodeURIComponent(currentPath) %>" class="back-button">
+    <i class="fas fa-arrow-left"></i> 파일 목록
+  </a>
   <div class="row">
+    
     <!-- 왼쪽 영역: 글 작성 -->
     <div class="col-md-6">
       <h2><%= file.filename %></h2>
