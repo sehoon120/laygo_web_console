@@ -4,12 +4,16 @@
 cd sehoon/ver1
 nodemon app.js
 http://localhost:3000/
-mongoDB사용 -> 파일, 유저정보 저장
-회원가입, 로그인, 메일 인증 
-파일 목록 확인, 경로별 나열
-파일 편집, 삭제 가능
 
-우측 화면에에 layout display 추가 예정
+- mongoDB사용 -> 파일, 유저정보 저장
+- 회원가입, 로그인, 메일 인증 
+- 파일 목록 확인, 경로별 나열
+- 파일 편집, 삭제 가능
+- 파일 업로드 가능
+
+- 파일 export 추가 예정
+
+- 우측 화면에에 layout display 추가 예정
 
 
 

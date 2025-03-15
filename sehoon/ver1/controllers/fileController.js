@@ -1,5 +1,10 @@
 const asyncHandler = require('express-async-handler');
 const File = require('../models/fileModel');
+const multer = require('multer');
+const fs = require('fs');
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 
 const getAllContacts = asyncHandler(async (req, res) => {
@@ -27,42 +32,52 @@ const addContactForm = (req, res) => {
     res.render('add', { currentPath: currentPath });
 }
 
-// add file
-// GET  /add
-// const adddir = (req, res) => {
-//     // console.log(req.user);
-//     res.render('add-directory');
-// }
-
 // save added file
 // POST /add
-const createContact = asyncHandler(async (req, res) => {
-    const {filename, filetype} = req.body;
-    if (!filename || !filetype){
-        return res.send('essential data is not written');
-    }
-    const currentPath = req.query.path || '/';  //
-    // console.log(currentPath)
-    const file = await File.create({
-        user: req.user.username, filename: filename, filetype: filetype, filePath: currentPath
-    });
-
-    res.redirect('/main?path=' + encodeURIComponent(currentPath));
-});
-
-// save added file
-// POST /add
-// const createDir = asyncHandler(async (req, res) => {
+// const createContact = asyncHandler(async (req, res) => {
 //     const {filename, filetype} = req.body;
 //     if (!filename || !filetype){
 //         return res.send('essential data is not written');
 //     }
-//         const file = await File.create({
-//         user: req.user.username, filename: filename, filetype: filetype, filePath: "test"
+//     const currentPath = req.query.path || '/';  //
+//     // console.log(currentPath)
+//     const file = await File.create({
+//         user: req.user.username, filename: filename, filetype: filetype, filePath: currentPath
 //     });
 
-//     res.redirect('/main');
+//     res.redirect('/main?path=' + encodeURIComponent(currentPath));
 // });
+
+
+const createContact = asyncHandler(async (req, res) => {
+    const { filename, filetype } = req.body;
+    console.log(req.body);
+    if (!filename || !filetype) {
+        return res.send('essential data is not written');
+    }
+    const currentPath = req.query.path || '/';
+    // 기본 파일 데이터를 구성합니다.
+    let fileData = {
+        user: req.user.username,
+        filename: filename,
+        filetype: filetype,
+        filePath: currentPath
+    };
+    // 파일 업로드가 있는 경우 파일 내용을 읽어옵니다.
+    if (req.file) {
+        // 메모리 스토리지를 사용하는 경우 req.file.buffer가 존재합니다.
+        if (req.file.buffer) {
+            fileData.content = req.file.buffer.toString('utf8');
+        }
+        // 디스크 스토리지를 사용하는 경우 파일 경로를 통해 읽어옵니다.
+        else if (req.file.path) {
+            fileData.content = fs.readFileSync(req.file.path, 'utf8');
+        }
+    }
+    const file = await File.create(fileData);
+    res.redirect('/main?path=' + encodeURIComponent(currentPath));
+});
+
 
 // change file
 // GET  /:id

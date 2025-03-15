@@ -1,5 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const {
     getAllContacts, 
@@ -29,7 +33,7 @@ router.route('/')
 
 router.route('/add')
     .get(addContactForm)
-    .post(createContact);
+    .post(upload.single('uploadFile'), createContact);
 
 // router.route('/add-directory')
 //     .get(adddir)
