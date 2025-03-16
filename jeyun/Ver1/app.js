@@ -3,6 +3,9 @@ const express = require('express');
 const app = express();
 const session = require('express-session');
 
+const yaml = require('js-yaml');
+const fs = require('fs');
+
 const mysql = require('mysql2');
 const db_info = {
     host:   "localhost",
@@ -25,6 +28,15 @@ app.use(session({
         maxAge: 60*60*1000
     }
 }))
+
+
+try {
+   const doc = yaml.load(fs.readFileSync('./yaml/laygo2_tech.yaml', 'utf8')); 
+   console.info(doc);
+} catch (e) {
+   console.log(e);
+}
+
 
 //ejs로 views 폴더에 있는 내용 보여주기
 app.set("view engine", "ejs");

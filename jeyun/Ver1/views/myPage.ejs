@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <title>mypage</title>
 </head>
-<body>
+<!-- <body>
+    코드 입력 관련 UI 부분. 일단 그래픽 그리는 부분 하려고 주석처리
     <h1>MyPage</h1>
     <button id="logout">로그아웃</button>
     <button id="signout">회원탈퇴</button>
@@ -26,5 +27,18 @@
 <form method="POST">
     <textarea name="content" style="width:50%; height:1080px;"></textarea>
     <button type="submit" value="Generate"></button>
-</form>
+</form> -->
+<body>
+    <canvas id="canvas" width="1920" height="1080"></canvas>
+    <script type="text/javascript">
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        ctx.translate(960, 540);
+        ctx.beginPath();
+        ctx.fillStyle ="rgb(255,0,0)";
+        ctx.fillRect(0, 0, 30, 30);
+    </script>
+</body>
+
 </html>
