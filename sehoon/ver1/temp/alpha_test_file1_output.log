@@ -1,0 +1,11 @@
+[INFO] 실행 중: /mnt/c/GraduationProject/laygo_web_console/sehoon/temp_code/alpha_test_file1_temp.py
+[DEBUG] Which python: /home/happy/anaconda3/envs/Laygo/bin/python3.7
+[DEBUG] Python version: Python 3.7.16
+[DEBUG] Laygo2_tech import test:
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'laygo2_tech'
+Traceback (most recent call last):
+  File "/mnt/c/GraduationProject/laygo_web_console/sehoon/temp_code/alpha_test_file1_temp.py", line 3, in <module>
+    import laygo2_tech as tech
+ModuleNotFoundError: No module named 'laygo2_tech'

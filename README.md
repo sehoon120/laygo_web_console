@@ -13,8 +13,17 @@ http://localhost:3000/
 
 - 파일 export 추가 예정
 
-- 우측 화면에에 layout display 추가 예정
+- 우측 화면에 layout display 추가 예정
 
+- 파일 실행기능 제작중 py -> yaml
+  ㄴ 파일 실행은 가능, yaml 생성 테스트중, bag 모듈 사용 오류
+
+
+Nifty github 임의 변경점:
+    \bag_workspace_gpdk045\gpdk045\workspace_setup\.cshrc_bag       변경
+        setenv BAG_PYTHON "/home/happy/anaconda3/envs/Laygo/bin/python3.7"   # "/TOOL/Anaconda/current/bin/python3.7"
+
+    \bag_workspace_gpdk045\start_bag_test.sh                        파일 추가
 
 
 ## 박제윤

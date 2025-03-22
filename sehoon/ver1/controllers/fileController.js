@@ -6,6 +6,11 @@ const fs = require('fs');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+const { exec } = require('child_process');
+const path = require('path');
+const os = require('os');
+
+// ==================================================
 
 const getAllContacts = asyncHandler(async (req, res) => {
     const currentPath = req.query.path || '/';  //
@@ -24,6 +29,7 @@ const getAllContacts = asyncHandler(async (req, res) => {
     });
 });
 
+// ==================================================
 
 // add file
 // GET  /add
@@ -78,6 +84,7 @@ const createContact = asyncHandler(async (req, res) => {
     res.redirect('/main?path=' + encodeURIComponent(currentPath));
 });
 
+// ==================================================
 
 // change file
 // GET  /:id
@@ -159,6 +166,8 @@ const deleteContact = asyncHandler(async (req, res) => {
 
 });
 
+// ==================================================
+
 // edit file
 // GET
 const editFile = asyncHandler(async (req, res) => {
@@ -185,26 +194,73 @@ const editFile = asyncHandler(async (req, res) => {
     res.render('edit', { file: file, currentPath: currentPath });
 });
 
+// Save & Generate: PUT /main/:id/edit?_method=PUT&path=...
+// const BAG_WORKSPACE_PATH = '/mnt/c/GraduationProject/bag_workspace_gpdk045';
+// const SCRIPT_PATH = path.join(BAG_WORKSPACE_PATH, 'start_bag.sh');
 
-
-// save file
-// PUT
 const saveFile = asyncHandler(async (req, res) => {
     const id = req.params.id;
     const { content } = req.body;
-
+  
     const file = await File.findById(id);
     if (!file) {
-        return res.status(404).json({ error: 'File not found.' });
+      return res.status(404).json({ error: 'File not found.' });
     }
-
+  
+    // 1. 파일 내용 저장
     file.content = content;
     await file.save();
-    res.json({ success: true });
-});
+  
+    // 2. filetype이 py일 때 실행
+    if (file.filetype === 'py') {
+      const username = req.user.username // || 'alpha'; // 유저명 없으면 fallback
+      const filename = file.filename.replace(/\.[^/.]+$/, ""); // 확장자 제거
+  
+      const tempDir = path.join(__dirname, '../../temp_code');
+      const tempFileWin = path.join(tempDir, `${username}_${filename}_temp.py`);
+      const tempFileWSL = `/mnt/${tempFileWin[0].toLowerCase()}/${tempFileWin.slice(3).replace(/\\/g, '/')}`;
+  
+      // temp 디렉토리 없으면 생성
+      if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+  
+      // 파이썬 코드 파일로 저장
+      fs.writeFileSync(tempFileWin, content, 'utf8');
+  
+      // WSL 내 bash에서 start_bag.sh 실행
+      const command = `wsl bash -c "bash /mnt/c/GraduationProject/bag_workspace_gpdk045/start_bag_test.sh ${username} ${filename} ${tempFileWSL}"`;
+  
+      exec(command, { shell: true }, (error, stdout, stderr) => {
+        if (error) {
+          console.error('실행 에러:', error);
+          return res.status(500).json({ success: false, error: stderr });
+        }
+        return res.json({ success: true, output: stdout });
+      });
+    } else {
+      res.json({ success: true });
+    }
+  });
+  
+  module.exports = {
+    saveFile,
+  };
+// save file
+// PUT
+// const saveFile = asyncHandler(async (req, res) => {
+//     const id = req.params.id;
+//     const { content } = req.body;
 
+//     const file = await File.findById(id);
+//     if (!file) {
+//         return res.status(404).json({ error: 'File not found.' });
+//     }
 
+//     file.content = content;
+//     await file.save();
+//     res.json({ success: true });
+// });
 
+// ==================================================
 
 module.exports = {
     getAllContacts, 
@@ -215,7 +271,8 @@ module.exports = {
     addContactForm,
     editFile,
     saveFile
-    // , adddir,
+    // ,
+    // adddir,
     // createDir
 };
 

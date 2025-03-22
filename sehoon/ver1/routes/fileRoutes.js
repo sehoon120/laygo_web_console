@@ -13,23 +13,14 @@ const {
     deleteContact,
     addContactForm,
     editFile,
-    saveFile,
-    adddir,
-    createDir
+    saveFile
+    // ,
+    // adddir,
+    // createDir
 } = require('../controllers/fileController');
 
 router.route('/')
     .get(getAllContacts);
-
-// // 연락처 가져오기
-// app.get('/contacts', (req, res) => {
-//     res.send('Contacts Page');
-// });
-
-// //새 연락처 추가
-// app.post('/contacts', (req, res) => {
-//     res.send('Create Contacts');
-// });
 
 router.route('/add')
     .get(addContactForm)
@@ -47,22 +38,6 @@ router.route('/:id')
 router.route('/:id/edit')
     .get(editFile)
     .put(saveFile);
-
-
-// //특정 연락처 가져오기
-// app.get('/contacts/:id', (req, res) => {
-//     res.send(`View Contact for ID : ${req.params.id}`);
-// });
-
-// //연락처 수정
-// app.put('/contacts/:id', (req, res) => {
-//     res.send(`Update Contact for ID : ${req.params.id}`);
-// });
-
-// //연락처 삭제
-// app.delete('/contacts/:id', (req, res) => {
-//     res.send(`Delete Contact for ID : ${req.params.id}`);
-// });
 
 
 module.exports = router;
