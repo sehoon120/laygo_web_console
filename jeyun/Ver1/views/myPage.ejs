@@ -29,16 +29,51 @@
     <button type="submit" value="Generate"></button>
 </form> -->
 <body>
+    <% if(typeof drawObjectDoc == 'undefined') {%>
+        <script> alert("No json")</script>
+    <%} %>
+
+
     <canvas id="canvas" width="1920" height="1080"></canvas>
     <script type="text/javascript">
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-
         ctx.translate(960, 540);
         ctx.beginPath();
-        ctx.fillStyle ="rgb(255,0,0)";
-        ctx.fillRect(0, 0, 30, 30);
     </script>
+
+    
+    <% function printRect(parent_obj) {
+        for(child_obj_key in parent_obj){
+            child_obj = parent_obj[child_obj_key]
+            if(typeof child_obj['layer'] === 'undefined'){
+                console.info(child_obj)
+                printRect(child_obj)
+            }
+            else{ 
+                console.info(child_obj['layer'][0])            
+                if(child_obj['layer'][0] == 'prBoundary'){ %>     
+                    <script>ctx.fillStyle ="rgba(0,255,0, 1)";</script>
+                <% }else{ %>     
+                    <script>ctx.fillStyle ="rgba(255,0,0, 0.5)";</script>
+                <% } %>
+                <script>
+                    const originX = "<%= child_obj['xy'][0][0] %>";
+                    const originY = "<%= child_obj['xy'][0][1] %>";
+                    const width = "<%= child_obj['xy'][1][0]-child_obj['xy'][0][0]%>";
+                    const height = "<%= child_obj['xy'][1][1]-child_obj['xy'][0][1] %>";
+                    ctx.fillRect(originX, originY, width, height);
+                    
+                </script>
+            <% }
+        }
+    }
+    const pmos = drawObjectDoc['templates']['mos']['pmos']
+    //console.info(pmos)
+    const pmos_rects = drawObjectDoc['templates']['mos']['pmos']['rects']
+    //console.info(typeof pmos_rects['layer'])
+    printRect(pmos) %>
+
 </body>
 
 </html>

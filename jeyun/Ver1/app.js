@@ -5,6 +5,7 @@ const session = require('express-session');
 
 const yaml = require('js-yaml');
 const fs = require('fs');
+var doc;
 
 const mysql = require('mysql2');
 const db_info = {
@@ -31,7 +32,7 @@ app.use(session({
 
 
 try {
-   const doc = yaml.load(fs.readFileSync('./yaml/laygo2_tech.yaml', 'utf8')); 
+   doc = yaml.load(fs.readFileSync('./yaml/test1_pmos.yaml', 'utf8')); 
    console.info(doc);
 } catch (e) {
    console.log(e);
@@ -94,7 +95,7 @@ app.post("/signup", (req, res) =>{
 })
 
 app.get("/mypage", (req, res) =>{
-    res.render("myPage")
+    res.render("myPage", {drawObjectDoc: doc})
 })
 
 //History의 foreign key constraint 수정: history는 user가 탈퇴해도 남아있어야 함.
