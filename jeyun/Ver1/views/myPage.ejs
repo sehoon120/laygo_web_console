@@ -34,12 +34,18 @@
     <%} %>
 
 
-    <canvas id="canvas" width="1920" height="1080"></canvas>
+    <canvas id="canvas" width="3840" height="2160"></canvas>
     <script type="text/javascript">
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
+        var originX = 0;
+        var originY = 0;
+        var width = 0;
+        var height = 0;
         ctx.translate(960, 540);
         ctx.beginPath();
+        //ctx.fillStyle ="rgba(0,0,255, 1)";
+        //ctx.fillRect(0, 0, 100, 100);
     </script>
 
     
@@ -50,22 +56,69 @@
                 console.info(child_obj)
                 printRect(child_obj)
             }
-            else{ 
-                console.info(child_obj['layer'][0])            
-                if(child_obj['layer'][0] == 'prBoundary'){ %>     
-                    <script>ctx.fillStyle ="rgba(0,255,0, 1)";</script>
-                <% }else{ %>     
-                    <script>ctx.fillStyle ="rgba(255,0,0, 0.5)";</script>
-                <% } %>
+            else{ %>
                 <script>
-                    const originX = "<%= child_obj['xy'][0][0] %>";
-                    const originY = "<%= child_obj['xy'][0][1] %>";
-                    const width = "<%= child_obj['xy'][1][0]-child_obj['xy'][0][0]%>";
-                    const height = "<%= child_obj['xy'][1][1]-child_obj['xy'][0][1] %>";
-                    ctx.fillRect(originX, originY, width, height);
-                    
+                    originX = "<%= child_obj['xy'][0][0] %>"*5;
+                    originY = "<%= child_obj['xy'][0][1] %>"*5;
+                    width = "<%= child_obj['xy'][1][0]-child_obj['xy'][0][0]%>"*5;
+                    height = "<%= child_obj['xy'][1][1]-child_obj['xy'][0][1] %>"*5;
                 </script>
-            <% }
+                <%
+                console.info(child_obj['layer'][0])
+                switch(child_obj['layer'][0]) {
+                    case 'prBoundary':
+                        console.log('pb 감지')%> 
+                        <script>
+                        ctx.fillStyle ="rgba(255 ,255,0, 0.5)";
+                        ctx.fillRect(originX, originY, width, height);
+                        </script>
+                        <% break;
+                    case 'nwell':
+                        console.log('nw 감지')%> 
+                        <script>
+                        ctx.fillStyle ="rgba(0,255,0, 0.5)";
+                        ctx.fillRect(originX, originY, width, height);
+                        </script>
+                        <% break;
+                    case 'pimplant':
+                        console.log('pi 감지')%> 
+                        <script>
+                        ctx.fillStyle ="rgba(0, 0, 255, 0.5)";
+                        ctx.fillRect(originX, originY, width, height);
+                        </script>
+                        <% break;
+                    case 'diffusion':
+                        console.log('diff 감지')%> 
+                        <script>
+                        ctx.fillStyle ="rgba(0,255,255, 0.5)";
+                        ctx.fillRect(originX, originY, width, height);
+                        </script>
+                        <% break;
+                    case 'poly':
+                        console.log('po 감지')%> 
+                        <script>
+                        ctx.fillStyle ="rgba(255,255,0, 1)";
+                        ctx.fillRect(originX, originY, width, height);
+                        </script>
+                        <% break;
+                    case 'metal1':
+                        console.log('m1 감지')%> 
+                        <script>
+                        ctx.fillStyle ="rgba(255,0,255, 1)";
+                        ctx.fillRect(originX, originY, width, height);
+                        </script>
+                        <% break;
+                    case 'metal2':
+                        console.log('m2 감지')%> 
+                        <script>
+                        ctx.fillStyle ="rgba(0,255,0, 0.5)";
+                        ctx.fillRect(originX, originY, width, height);
+                        </script>
+                        <% break;
+                    default:
+                        console.log('Do nothing')
+                }            
+            }
         }
     }
     const pmos = drawObjectDoc['templates']['mos']['pmos']
