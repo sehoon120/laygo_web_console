@@ -2,18 +2,7 @@
 [DEBUG] Which python: /home/happy/anaconda3/envs/Laygo/bin/python3.7
 [DEBUG] Python version: Python 3.7.16
 [DEBUG] Laygo2_tech import test:
-Traceback (most recent call last):
-  File "<string>", line 1, in <module>
-  File "/mnt/c/GraduationProject/bag_workspace_gpdk045/laygo2_tech/__init__.py", line 33, in <module>
-    from .core import *
-  File "/mnt/c/GraduationProject/bag_workspace_gpdk045/laygo2_tech/core.py", line 27, in <module>
-    from laygo2.object.technology import NiftyTechnology
-ModuleNotFoundError: No module named 'laygo2.object'
-Traceback (most recent call last):
-  File "/mnt/c/GraduationProject/laygo_web_console/sehoon/temp_code/alpha_test_file1_temp.py", line 3, in <module>
-    import laygo2_tech as tech
-  File "/mnt/c/GraduationProject/bag_workspace_gpdk045/laygo2_tech/__init__.py", line 33, in <module>
-    from .core import *
-  File "/mnt/c/GraduationProject/bag_workspace_gpdk045/laygo2_tech/core.py", line 27, in <module>
-    from laygo2.object.technology import NiftyTechnology
-ModuleNotFoundError: No module named 'laygo2.object'
+laygo2_tech import OK
+ 
+ 
+ 

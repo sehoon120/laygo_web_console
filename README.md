@@ -6,7 +6,7 @@ nodemon app.js
 http://localhost:3000/
 
 환경변수 설정
-UBUNTU Terminal
+UBUNTU Terminal     .cshrc_bag
   cd /mnt/c/GraduationProject/bag_workspace_gpdk045
   export BAG_WORK_DIR=$(pwd)
   export BAG_FRAMEWORK="$BAG_WORK_DIR/BAG_framework"
@@ -17,20 +17,22 @@ UBUNTU Terminal
 - 파일 목록 확인, 경로별 나열
 - 파일 편집, 삭제 가능
 - 파일 업로드 가능
+- 파일 실행가능 -> py to yaml
 
 - 파일 export 추가 예정
-
 - 우측 화면에 layout display 추가 예정
-
-- 파일 실행기능 제작중 py -> yaml
-  ㄴ 파일 실행은 가능, yaml 생성 테스트중, bag 모듈 사용 오류
-
+- 생성 파일 경로별 저장, yaml 인식 추가 예정
+- 실행 후 or 접속 종료 후 temp 파일 정리 기능 추가 예정
 
 Nifty github 임의 변경점:
     \bag_workspace_gpdk045\gpdk045\workspace_setup\.cshrc_bag       변경
         setenv BAG_PYTHON "/home/happy/anaconda3/envs/Laygo/bin/python3.7"   # "/TOOL/Anaconda/current/bin/python3.7"
 
     \bag_workspace_gpdk045\start_bag_test.sh                        파일 추가
+
+    \bag_workspace_gpdk045\gpdk045\laygo2_tech\core.py              경로 설정 추가
+
+    \bag_workspace_gpdk045\gpdk045\laygo2_tech\flex.py              경로 설정 추가
 
 
 ## 박제윤

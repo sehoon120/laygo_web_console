@@ -1,7 +1,7 @@
 import numpy as np
 import laygo2
 import laygo2_tech as tech
-
+import os
 
 # Design Variables
 cell_type = 'xor'
@@ -13,8 +13,8 @@ cellname = cell_type+'_'+str(nf)+'x'
 
 # Templates
 templates = tech.load_templates()
-export_path = '/WORK_jupiter/shchon/training/bag_workspace_gpdk045/'
-tlib = laygo2.interface.yaml.import_template(filename = export_path+'logic_generated_templates.yaml')
+
+export_path= "/mnt/c/GraduationProject/laygo_web_console/sehoon/temp_yaml/"
 
 tpmos_name = 'pmos'
 tnmos_name = 'nmos'
@@ -161,11 +161,14 @@ pout0 = dsn.pin(name='O',   grid=r12, mn=rout0)
 pvss0 = dsn.pin(name='VSS', grid=r12, mn=rvss0[1])
 pvdd0 = dsn.pin(name='VDD', grid=r12, mn=rvdd0[1])
 
-export_path = '/WORK_jupiter/shchon/training/bag_workspace_gpdk045/'
+
+
+
+
 # BAG Export
 #laygo2.interface.bag.export(lib, #filename=export_path+'logic_generated/'+libname+'_'+cellname+'.il', cellname=None, scale=1e-3, reset_library=False, tech_library=tech.name) 
 #Expoet to Template Database
 nat_temp = dsn.export_to_template()
-laygo2.interface.yaml.export_template(nat_temp, filename = export_path+libname+'_templates.yaml', mode='append')
-
+#laygo2.interface.yaml.export_template(nat_temp, filename = export_path+libname+'_templates.yaml', mode='append')
+laygo2.interface.yaml.export_template(nat_temp, filename = "/mnt/c/GraduationProject/laygo_web_console/sehoon/temp_yaml/logic_generated_templates.yaml", mode='append')
 
