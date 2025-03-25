@@ -163,7 +163,7 @@ pvdd0 = dsn.pin(name='VDD', grid=r12, mn=rvdd0[1])
 
 export_path = '/WORK_jupiter/shchon/training/bag_workspace_gpdk045/'
 # BAG Export
-#laygo2.interface.bag.export(lib, filename=export_path+'logic_generated/'+libname+'_'+cellname+'.il', cellname=None, scale=1e-3, reset_library=False, tech_library=tech.name) 
+#laygo2.interface.bag.export(lib, #filename=export_path+'logic_generated/'+libname+'_'+cellname+'.il', cellname=None, scale=1e-3, reset_library=False, tech_library=tech.name) 
 #Expoet to Template Database
 nat_temp = dsn.export_to_template()
 laygo2.interface.yaml.export_template(nat_temp, filename = export_path+libname+'_templates.yaml', mode='append')

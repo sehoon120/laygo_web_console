@@ -4,8 +4,16 @@
 [DEBUG] Laygo2_tech import test:
 Traceback (most recent call last):
   File "<string>", line 1, in <module>
-ModuleNotFoundError: No module named 'laygo2_tech'
+  File "/mnt/c/GraduationProject/bag_workspace_gpdk045/laygo2_tech/__init__.py", line 33, in <module>
+    from .core import *
+  File "/mnt/c/GraduationProject/bag_workspace_gpdk045/laygo2_tech/core.py", line 27, in <module>
+    from laygo2.object.technology import NiftyTechnology
+ModuleNotFoundError: No module named 'laygo2.object'
 Traceback (most recent call last):
   File "/mnt/c/GraduationProject/laygo_web_console/sehoon/temp_code/alpha_test_file1_temp.py", line 3, in <module>
     import laygo2_tech as tech
-ModuleNotFoundError: No module named 'laygo2_tech'
+  File "/mnt/c/GraduationProject/bag_workspace_gpdk045/laygo2_tech/__init__.py", line 33, in <module>
+    from .core import *
+  File "/mnt/c/GraduationProject/bag_workspace_gpdk045/laygo2_tech/core.py", line 27, in <module>
+    from laygo2.object.technology import NiftyTechnology
+ModuleNotFoundError: No module named 'laygo2.object'

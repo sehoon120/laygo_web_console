@@ -5,6 +5,13 @@ cd sehoon/ver1
 nodemon app.js
 http://localhost:3000/
 
+환경변수 설정
+UBUNTU Terminal
+  cd /mnt/c/GraduationProject/bag_workspace_gpdk045
+  export BAG_WORK_DIR=$(pwd)
+  export BAG_FRAMEWORK="$BAG_WORK_DIR/BAG_framework"
+  export BAG_PYTHON="/home/happy/anaconda3/envs/Laygo/bin/python3.7"
+
 - mongoDB사용 -> 파일, 유저정보 저장
 - 회원가입, 로그인, 메일 인증 
 - 파일 목록 확인, 경로별 나열
