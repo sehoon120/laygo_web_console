@@ -33,5 +33,5 @@ Nifty github 임의 변경점:
 - Yaml file 변환 -> npm에서 js-yaml 패키지 인스톨 필요
 
 - 현재 구현 수준: PMOS draw 성공. 하위 인스턴스 호출 기능 아직 없어 inv 구현은 아직 불가.
-- Zoom in/out 구현 필요 -> https://stackoverflow.com/questions/5189968/zoom-canvas-to-mouse-cursor/5526721#5526721 보고 작성 중
+- Zoom in/out 구현 완료 -> https://stackoverflow.com/questions/5189968/zoom-canvas-to-mouse-cursor/5526721#5526721 보고 작성함
 - Layer별 끄기/켜기 구현 필요
