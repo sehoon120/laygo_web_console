@@ -34,4 +34,4 @@ Nifty github 임의 변경점:
 
 - 현재 구현 수준: PMOS draw 성공. 하위 인스턴스 호출 기능 아직 없어 inv 구현은 아직 불가.
 - Zoom in/out 구현 완료 -> https://stackoverflow.com/questions/5189968/zoom-canvas-to-mouse-cursor/5526721#5526721 보고 작성함
-- Layer별 끄기/켜기 구현 필요
+- Layer별 끄기/켜기 구현중. 버튼 클릭을 통해 각 레이어별 켜기/끄기 목표. m1, m2 layer서 성공.

@@ -95,7 +95,7 @@ app.post("/signup", (req, res) =>{
 })
 
 app.get("/mypage", (req, res) =>{
-    res.render("mypage_temp", {drawObjectDoc: doc})
+    res.render("myPage", {drawObjectDoc: doc})
 })
 
 //History의 foreign key constraint 수정: history는 user가 탈퇴해도 남아있어야 함.
