@@ -249,9 +249,19 @@
 
     <button id="M1">M1</button>
     <button id="M2">M2</button>
+    <button id="pb">prBoundary</button>
+    <button id="nw">nwell</button>
+    <button id="pi">pimplant</button>
+    <button id="di">diffusion</button>
+    <button id="po">poly</button>
     <script>
         const m1Button = document.getElementById("M1");
         const m2Button = document.getElementById("M2");
+        const pbButton = document.getElementById("pb");
+        const nwButton = document.getElementById("nw");
+        const piButton = document.getElementById("pi");
+        const diButton = document.getElementById("di");
+        const poButton = document.getElementById("po");
 
         m1Button.addEventListener('click', () => {
             rectList.forEach(rect => {
@@ -264,6 +274,46 @@
         m2Button.addEventListener('click', () => {
             rectList.forEach(rect => {
                 if(rect[5] == 'metal2'){
+                    rect[6] = !rect[6];
+                }
+                redraw();
+            });
+        });
+        pbButton.addEventListener('click', () => {
+            rectList.forEach(rect => {
+                if(rect[5] == 'prBoundary'){
+                    rect[6] = !rect[6];
+                }
+                redraw();
+            });
+        });
+        nwButton.addEventListener('click', () => {
+            rectList.forEach(rect => {
+                if(rect[5] == 'nwell'){
+                    rect[6] = !rect[6];
+                }
+                redraw();
+            });
+        });
+        piButton.addEventListener('click', () => {
+            rectList.forEach(rect => {
+                if(rect[5] == 'pimplant'){
+                    rect[6] = !rect[6];
+                }
+                redraw();
+            });
+        });
+        diButton.addEventListener('click', () => {
+            rectList.forEach(rect => {
+                if(rect[5] == 'diffusion'){
+                    rect[6] = !rect[6];
+                }
+                redraw();
+            });
+        });
+        poButton.addEventListener('click', () => {
+            rectList.forEach(rect => {
+                if(rect[5] == 'poly'){
                     rect[6] = !rect[6];
                 }
                 redraw();
