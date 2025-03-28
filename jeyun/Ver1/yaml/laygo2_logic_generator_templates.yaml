@@ -1,0 +1,85 @@
+laygo2_logic_generator:
+  bcap_4x:
+    bbox:
+    - - 0
+      - 0
+    - - 1080
+      - 1960
+    cellname: bcap_4x
+    libname: laygo2_logic_generator
+    pins:
+      I:
+        layer:
+        - M3
+        - pin
+        name: I
+        netname: I
+        xy:
+        - - 325
+          - 750
+        - - 395
+          - 1210
+      VDD:
+        layer:
+        - M2
+        - pin
+        name: VDD
+        netname: VDD
+        xy:
+        - - 0
+          - 1855
+        - - 1080
+          - 2065
+      VSS:
+        layer:
+        - M2
+        - pin
+        name: VSS
+        netname: VSS
+        xy:
+        - - 0
+          - -105
+        - - 1080
+          - 105
+  bcap_8x:
+    bbox:
+    - - 0
+      - 0
+    - - 1800
+      - 1960
+    cellname: bcap_8x
+    libname: laygo2_logic_generator
+    pins:
+      I:
+        layer:
+        - M3
+        - pin
+        name: I
+        netname: I
+        xy:
+        - - 325
+          - 750
+        - - 395
+          - 1210
+      VDD:
+        layer:
+        - M2
+        - pin
+        name: VDD
+        netname: VDD
+        xy:
+        - - 0
+          - 1855
+        - - 1080
+          - 2065
+      VSS:
+        layer:
+        - M2
+        - pin
+        name: VSS
+        netname: VSS
+        xy:
+        - - 0
+          - -105
+        - - 1800
+          - 105
