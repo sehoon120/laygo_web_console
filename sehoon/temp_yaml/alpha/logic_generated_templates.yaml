@@ -1,4 +1,10 @@
 logic_generated:
+  dummy:
+    bbox:
+    - [0, 0]
+    - [0, 0]
+    cellname: dummy
+    libname: logic_generated
   xor_2x:
     bbox:
     - [0, 0]
@@ -148,68 +154,3 @@ logic_generated:
         - [1230, -120]
         - [1230, 120]
     subblocks: {}
-templates:
-  mos:
-    common:
-      pins: &id001
-        D:
-          layer: [text, drawing]
-          xy:
-          - [20, 0]
-          - [40, 80]
-        G:
-          layer: [text, drawing]
-          xy:
-          - [12, 85]
-          - [18, 95]
-        S:
-          layer: [text, drawing]
-          xy:
-          - [-10, 0]
-          - [10, 80]
-      unit_size: &id002 [30, 100]
-    pmos:
-      pins: *id001
-      rects:
-        diff:
-          layer: [diffusion, drawing]
-          xy:
-          - [-10, 25]
-          - [40, 75]
-        impl:
-          layer: [pimplant, drawing]
-          xy:
-          - [-15, 20]
-          - [45, 80]
-        metal1_d:
-          layer: [metal1, drawing]
-          xy:
-          - [23, 23]
-          - [37, 77]
-        metal1_g:
-          idx_end: -1
-          layer: [metal1, drawing]
-          xy:
-          - [12, 85]
-          - [48, 95]
-        metal1_s:
-          layer: [metal2, drawing]
-          xy:
-          - [-7, 23]
-          - [7, 77]
-        poly:
-          layer: [poly, drawing]
-          xy:
-          - [12, 5]
-          - [18, 95]
-        prBoundary:
-          layer: [prBoundary, drawing]
-          xy:
-          - [0, 0]
-          - [30, 100]
-        well:
-          layer: [nwell, drawing]
-          xy:
-          - [-20, 0]
-          - [50, 100]
-      unit_size: *id002

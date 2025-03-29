@@ -18,10 +18,10 @@ UBUNTU Terminal     .cshrc_bag
 - 파일 편집, 삭제 가능
 - 파일 업로드 가능
 - 파일 실행가능 -> py to yaml
+- 생성 파일 경로별 저장, 유저별 yaml 인식
 
 - 파일 export 추가 예정
 - 우측 화면에 layout display 추가 예정
-- 생성 파일 경로별 저장, yaml 인식 추가 예정
 - 실행 후 or 접속 종료 후 temp 파일 정리 기능 추가 예정
 
 Nifty github 임의 변경점:
