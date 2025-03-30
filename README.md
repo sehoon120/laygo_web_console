@@ -19,10 +19,12 @@ UBUNTU Terminal     .cshrc_bag
 - 파일 업로드 가능
 - 파일 실행가능 -> py to yaml
 - 생성 파일 경로별 저장, 유저별 yaml 인식
+- 실행 후 temp, log 파일 정리
+- OUTPUT TERMINAL추가
 
 - 파일 export 추가 예정
 - 우측 화면에 layout display 추가 예정
-- 실행 후 or 접속 종료 후 temp 파일 정리 기능 추가 예정
+
 
 Nifty github 임의 변경점:
     \bag_workspace_gpdk045\gpdk045\workspace_setup\.cshrc_bag       변경

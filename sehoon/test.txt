@@ -1,0 +1,128 @@
+const saveFile = asyncHandler(async (req, res) => {
+    const id = req.params.id;
+    const { content } = req.body;
+    
+    const userDir = path.join(tempYamlDir, req.user.username);
+
+    const file = await File.findById(id);
+    if (!file) {
+      return res.status(404).json({ error: 'File not found.' });
+    }
+  
+    // 1. 파일 내용 저장
+    file.content = content;
+    await file.save();
+  
+    // 2. filetype이 py일 때 실행
+    if (file.filetype === 'py') {
+      const username = req.user.username // || 'alpha'; // 유저명 없으면 fallback
+      const filename = file.filename.replace(/\.[^/.]+$/, ""); // 확장자 제거
+  
+      const tempDir = path.join(__dirname, '../../temp_code');
+      const tempFileWin = path.join(tempDir, `${username}_${filename}_temp.py`);
+      const tempFileWSL = `/mnt/${tempFileWin[0].toLowerCase()}/${tempFileWin.slice(3).replace(/\\/g, '/')}`;
+      // temp 디렉토리 없으면 생성
+      if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+  
+      const tempDir_y = path.join(__dirname, '../../temp_yaml');
+      // temp_yaml 디렉토리 없으면 생성
+      if (!fs.existsSync(tempDir_y)) fs.mkdirSync(tempDir_y, { recursive: true });
+
+      const tempDir_y_u = path.join(__dirname, '../../temp_yaml', username);
+      // temp_yaml_username 디렉토리 없으면 생성
+      if (!fs.existsSync(tempDir_y_u)) fs.mkdirSync(tempDir_y_u, { recursive: true });
+
+      // 파이썬 코드 파일로 저장
+      fs.writeFileSync(tempFileWin, content, 'utf8');
+  
+      // WSL 내 bash에서 start_bag.sh 실행
+      const command = `wsl bash -c "bash /mnt/c/GraduationProject/bag_workspace_gpdk045/start_bag_test.sh ${username} ${filename} ${tempFileWSL}"`;
+  
+      exec(command, { shell: true }, (error, stdout, stderr) => {
+        fs.unlink(tempFileWin, (unlinkErr) => {
+            if (unlinkErr) {
+              console.error("임시 파일 삭제 실패:", unlinkErr);
+            } 
+            // else {
+            //   console.log("임시 파일 삭제 완료");
+            // }
+        });
+
+
+        fs.readdir(tempDir_y_u, (err, files) => {
+          if (err) {
+            console.error('temp_yaml 폴더 읽기 에러:', err);
+            return;
+          }
+        
+          files.forEach(yamlFile => {
+            // YAML 파일만 처리 (확장자가 .yaml 혹은 .yml 인 파일)
+            if (yamlFile.endsWith('.yaml') || yamlFile.endsWith('.yml')) {
+              const filePath = path.join(tempDir_y_u, yamlFile);
+              fs.readFile(filePath, 'utf8', async (err, data) => {
+                if (err) {
+                  console.error(`파일 ${yamlFile} 읽기 에러:`, err);
+                  return;
+                }
+                try {
+                  // 확장자 제거 (예: logic_generated_templates.yaml -> logic_generated_templates)
+                  const filenameWithoutExt = yamlFile.replace(/\.[^/.]+$/, "");
+                  // 파일의 고유 식별자를 user, filename, filetype, filePath 조합으로 가정
+                  const fileQuery = {
+                    user: username,
+                    filename: filenameWithoutExt,
+                    filetype: 'yaml',
+                    filePath: req.query.path || '/'
+                  };
+        
+                  let fileData = {
+                    user: username,
+                    filename: filenameWithoutExt,
+                    content: data,
+                    filetype: 'yaml',
+                    filePath: req.query.path || '/'
+                  };
+        
+                  // 기존에 파일이 있는지 검색
+                  const existingFile = await File.findOne(fileQuery);
+        
+                  if (existingFile) {
+                    // 파일이 이미 있다면 내용 업데이트
+                    existingFile.content = data;
+                    await existingFile.save();
+                    // console.log(`${filenameWithoutExt} 데이터베이스 업데이트 완료`);
+                  } else {
+                    // 없으면 새로 생성
+                    await File.create(fileData);
+                    // console.log(`${filenameWithoutExt} 데이터베이스 저장 완료`);
+                  }
+        
+                  // 저장 후 파일 삭제 (원하지 않으면 이 부분은 제거)
+                  // fs.unlink(filePath, unlinkErr => {
+                  //   if (unlinkErr) {
+                  //     console.error(`${yamlFile} 삭제 에러:`, unlinkErr);
+                  //   } else {
+                  //     console.log(`${yamlFile} 파일 삭제 완료`);
+                  //   }
+                  // });
+                } catch (dbErr) {
+                  console.error('DB 저장 에러:', dbErr);
+                }
+              });
+            }
+          });
+        });
+
+
+
+
+        if (error) {
+          console.error('실행 에러:', error);
+          return res.status(500).json({ success: false, error: stderr });
+        }
+        return res.json({ success: true, output: stdout });
+      });
+    } else {
+      res.json({ success: true });
+    }
+});
