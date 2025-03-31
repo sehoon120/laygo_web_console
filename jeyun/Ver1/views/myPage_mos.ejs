@@ -8,6 +8,32 @@
 		canvas { display:block; margin:1em auto; background:#fff; border:1px solid #ccc }
 	</style>
 </head>
+
+
+<!-- <body>
+    코드 입력 관련 UI 부분. 일단 그래픽 그리는 부분 하려고 주석처리
+    <h1>MyPage</h1>
+    <button id="logout">로그아웃</button>
+    <button id="signout">회원탈퇴</button>
+    <script>
+        const logoutButton = document.getElementById("logout");
+        const signoutButton = document.getElementById("signout");
+
+
+        logoutButton.addEventListener('click', () => {
+            window.location = 'http://localhost:3000/mypage/logout';
+        });
+        signoutButton.addEventListener('click', () => {
+            window.location = 'http://localhost:3000/mypage/signout';
+        });
+
+        
+    </script>
+</body>
+<form method="POST">
+    <textarea name="content" style="width:50%; height:1080px;"></textarea>
+    <button type="submit" value="Generate"></button>
+</form> -->
 <body>
     <% if(typeof drawObjectDoc == 'undefined') {%>
         <script> alert("No json")</script>
@@ -105,43 +131,43 @@
                     case 'prBoundary':
                         console.log('pb 감지')%> 
                         <script>
-                            rectList.push([originX, originY, width, height, "rgba(255 ,255,0, 0.5)"]);
+                            rectList.push([originX, originY, width, height, "rgba(255 ,255,0, 0.5)", 'prBoundary', true]);
                         </script>
                         <% break;
                     case 'nwell':
                         console.log('nw 감지')%> 
                         <script>
-                            rectList.push([originX, originY, width, height, "rgba(0,255,0, 0.5)"]);
+                            rectList.push([originX, originY, width, height, "rgba(0,255,0, 0.5)", 'nwell', true]);
                         </script>
                         <% break;
                     case 'pimplant':
                         console.log('pi 감지')%> 
                         <script>
-                            rectList.push([originX, originY, width, height, "rgba(0, 0, 255, 0.5)"]);
+                            rectList.push([originX, originY, width, height, "rgba(0, 0, 255, 0.5)", 'pimplant', true]);
                         </script>
                         <% break;
                     case 'diffusion':
                         console.log('diff 감지')%> 
                         <script>
-                            rectList.push([originX, originY, width, height, "rgba(0,255,255, 0.5)"]);
+                            rectList.push([originX, originY, width, height, "rgba(0,255,255, 0.5)", 'diffusion', true]);
                         </script>
                         <% break;
                     case 'poly':
                         console.log('po 감지')%> 
                         <script>
-                            rectList.push([originX, originY, width, height, "rgba(255,255,0, 1)"]);
+                            rectList.push([originX, originY, width, height, "rgba(255,255,0, 1)", 'poly', true]);
                         </script>
                         <% break;
                     case 'metal1':
                         console.log('m1 감지')%> 
                         <script>
-                            rectList.push([originX, originY, width, height, "rgba(255,0,255, 1)"]);
+                            rectList.push([originX, originY, width, height, "rgba(255,0,255, 1)", 'metal1', true]);
                         </script>
                         <% break;
                     case 'metal2':
                         console.log('m2 감지')%> 
                         <script>
-                            rectList.push([originX, originY, width, height, "rgba(0,255,0, 1)"]);
+                            rectList.push([originX, originY, width, height, "rgba(0,255,0, 1)", 'metal2', true]);
                         </script>
                         <% break;
                     default:
@@ -160,8 +186,10 @@
 			ctx.clearRect(0,0,canvas.width,canvas.height);
 			ctx.restore();
             rectList.forEach(rect => {
-                ctx.fillStyle = rect[4];
-                ctx.fillRect(rect[0], rect[1], rect[2], rect[3]);
+                if(rect[6]){
+                    ctx.fillStyle = rect[4];
+                    ctx.fillRect(rect[0], rect[1], rect[2], rect[3]);
+                }
             });
         }
         redraw();
@@ -219,36 +247,81 @@
         canvas.addEventListener('mousewheel',handleScroll,false); 
     </script>
 
+    <button id="M1">M1</button>
+    <button id="M2">M2</button>
+    <button id="pb">prBoundary</button>
+    <button id="nw">nwell</button>
+    <button id="pi">pimplant</button>
+    <button id="di">diffusion</button>
+    <button id="po">poly</button>
+    <script>
+        const m1Button = document.getElementById("M1");
+        const m2Button = document.getElementById("M2");
+        const pbButton = document.getElementById("pb");
+        const nwButton = document.getElementById("nw");
+        const piButton = document.getElementById("pi");
+        const diButton = document.getElementById("di");
+        const poButton = document.getElementById("po");
 
+        m1Button.addEventListener('click', () => {
+            rectList.forEach(rect => {
+                if(rect[5] == 'metal1'){
+                    rect[6] = !rect[6];
+                }
+                redraw();
+            });
+        });
+        m2Button.addEventListener('click', () => {
+            rectList.forEach(rect => {
+                if(rect[5] == 'metal2'){
+                    rect[6] = !rect[6];
+                }
+                redraw();
+            });
+        });
+        pbButton.addEventListener('click', () => {
+            rectList.forEach(rect => {
+                if(rect[5] == 'prBoundary'){
+                    rect[6] = !rect[6];
+                }
+                redraw();
+            });
+        });
+        nwButton.addEventListener('click', () => {
+            rectList.forEach(rect => {
+                if(rect[5] == 'nwell'){
+                    rect[6] = !rect[6];
+                }
+                redraw();
+            });
+        });
+        piButton.addEventListener('click', () => {
+            rectList.forEach(rect => {
+                if(rect[5] == 'pimplant'){
+                    rect[6] = !rect[6];
+                }
+                redraw();
+            });
+        });
+        diButton.addEventListener('click', () => {
+            rectList.forEach(rect => {
+                if(rect[5] == 'diffusion'){
+                    rect[6] = !rect[6];
+                }
+                redraw();
+            });
+        });
+        poButton.addEventListener('click', () => {
+            rectList.forEach(rect => {
+                if(rect[5] == 'poly'){
+                    rect[6] = !rect[6];
+                }
+                redraw();
+            });
+        });
+    </script>
     
 
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

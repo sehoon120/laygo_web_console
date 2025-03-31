@@ -32,7 +32,7 @@ app.use(session({
 
 
 try {
-   doc = yaml.load(fs.readFileSync('./yaml/test1_pmos.yaml', 'utf8')); 
+   doc = yaml.load(fs.readFileSync('./yaml/logic_generated_templates.yaml', 'utf8')); 
    console.info(doc);
 } catch (e) {
    console.log(e);
