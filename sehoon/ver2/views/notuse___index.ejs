@@ -1,0 +1,50 @@
+<%- include('./include/_header') %>
+
+  <!-- Main -->
+  <main id="site-main">
+    <div class="button-box">
+      <a href="/main/add" class="btn btn-light"><i class="fa-solid fa-folder-plus"></i>Dir 추가</a>
+    </div>
+    
+    <div class="button-box">
+      <a href="/main/add" class="btn btn-light"><i class="fa-solid fa-user-plus"></i>파일 추가</a>
+    </div>
+
+    
+  
+    <table class="table">
+      <thead>
+        <tr>
+          <th>이름</th>
+          <th>메일 주소</th>
+          <th>전화번호</th>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% contacts.forEach( contact => { %>
+
+        <tr>
+          <td><%= contact.name %></td>
+          <td><%= contact.mail %></td>
+          <td><%= contact.phone %></td>
+          <td>
+            <a href="/main/<%= contact._id %>" class="btn update" title="수정">
+              <i class="fas fa-pencil-alt"></i>
+            </a>
+            <form action="/main/<%= contact._id %>?_method=DELETE" method="POST" style="display: inline">
+              <input type="submit" class="btn-delete" title="삭제" value="X">
+            </form>
+            <!-- <a href="#" class="btn delete" title="삭제">
+              <i class="fas fa-times"></i>
+            </a>                 -->
+          </td>
+        </tr>
+
+        <% }) %>
+      </tbody>
+    </table>
+  </main>
+  <!-- /Main -->
+  
+<%- include('./include/_footer') %>
