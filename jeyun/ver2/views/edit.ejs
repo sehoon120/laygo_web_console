@@ -1,0 +1,123 @@
+<%- include('./include/_header') %>
+
+<!-- 파일 목록으로 돌아가기 버튼 (왼쪽 상단) -->
+
+
+<!-- Main -->
+<main id="site-main" class="container my-4">
+  <a href="/main?path=<%= encodeURIComponent(currentPath) %>" class="back-button">
+    <i class="fas fa-arrow-left"></i> 파일 목록
+  </a>
+  <div class="row">
+    
+    <!-- 왼쪽 영역: 글 작성 -->
+    <div class="col-md-6">
+      <h2><%= file.filename %></h2>
+      <form id="editForm" action="/main/<%= file._id %>/edit?_method=PUT&path=<%= encodeURIComponent(currentPath) %>" method="POST">
+        <div class="mb-3">
+          <!-- textarea에 기본 file.content 값 채워넣기 -->
+          <textarea name="content" class="form-control" rows="20" placeholder="Write your code here"><%= file.content %></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Save & Generate</button>
+      </form>
+      <!-- 저장 결과 메시지 출력 영역 -->
+      <div id="message" class="mt-3"></div>
+    </div>
+    <!-- 오른쪽 영역: 이미지 표시 -->
+    <div class="col-md-6">
+      <h2>Layout</h2>
+      <div class="text-center">
+        <img src="/images/your-image.jpg" alt="상응하는 이미지" class="img-fluid">
+      </div>
+    </div>
+  </div>
+
+  <!-- 터미널 영역: 로그 파일 내용을 표시 (검은 배경, 모노스페이스 폰트) -->
+  <div id="terminal" style="background-color: black; color: lime; font-family: monospace; padding: 10px; height: 300px; overflow-y: auto; margin-top: 20px;">
+  <!-- 로그 내용이 여기에 표시됩니다 -->
+  </div>
+
+</main>
+<!-- /Main -->
+
+<script>
+  document.getElementById("editForm").addEventListener("submit", async function(e) {
+    e.preventDefault(); // 기본 폼 제출 막기
+
+    const form = e.target;
+    const formData = new FormData(form);
+    // URL 인코딩 형태로 변환
+    const data = new URLSearchParams();
+    for (const pair of formData) {
+      data.append(pair[0], pair[1]);
+    }
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: data
+      });
+
+      const result = await response.json();
+      let messageDiv = document.getElementById("message");
+
+      if (response.ok && result.success) {
+        messageDiv.innerText = "저장되었습니다.";
+      } else {
+        messageDiv.innerText = "저장에 실패했습니다.";
+      }
+      // 메시지를 표시한 후 2초 뒤에 fade-out 처리
+      messageDiv.style.opacity = 1; // opacity 초기값 설정
+      setTimeout(() => {
+        messageDiv.style.transition = "opacity 0.5s ease-out";
+        messageDiv.style.opacity = 0;
+      }, 1000);
+
+    } catch (error) {
+      let messageDiv = document.getElementById("message");
+      messageDiv.innerText = "오류가 발생했습니다.";
+      messageDiv.style.opacity = 1;
+      setTimeout(() => {
+        messageDiv.style.transition = "opacity 0.5s ease-out";
+        messageDiv.style.opacity = 0;
+      }, 2000);
+      console.error(error);
+    }
+  });
+
+
+  // 터미널 영역에 로그 파일 내용을 주기적으로 폴링해서 표시하는 함수
+  setInterval(async () => {
+    try {
+      const fileId = "<%= file._id %>";
+      const response = await fetch(`/main/${fileId}/edit/logs`, {
+        credentials: 'include'
+      });
+      // 응답 상태 코드 확인
+      if (!response.ok) {
+        console.error("로그 파일 요청 실패:", response.status);
+      }
+      // 응답 텍스트를 확인
+      const text = await response.text();
+      console.log("응답 텍스트:", text);
+      // 만약 텍스트가 JSON 형식이면 파싱
+      try {
+        const result = JSON.parse(text);
+        document.getElementById("terminal").innerText = result.log;
+      } catch (parseError) {
+        console.error("JSON 파싱 에러:", parseError);
+      }
+    } catch (error) {
+      console.error("로그 파일을 불러오는 중 에러 발생:", error);
+    }
+  }, 2000);
+
+
+
+
+</script>
+
+<%- include('./include/_footer') %>
