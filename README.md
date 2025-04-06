@@ -21,9 +21,9 @@ UBUNTU Terminal     .cshrc_bag
 - 생성 파일 경로별 저장, 유저별 yaml 인식
 - 실행 후 temp, log 파일 정리
 - OUTPUT TERMINAL추가
+- 우측 화면에 layout display 추가 완료 -> ver2
 
 - 파일 export 추가 예정
-- 우측 화면에 layout display 추가 예정
 - 로그, temp파일 안남도록 변경 예정
 
 
