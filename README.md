@@ -24,6 +24,7 @@ UBUNTU Terminal     .cshrc_bag
 
 - 파일 export 추가 예정
 - 우측 화면에 layout display 추가 예정
+- 로그, temp파일 안남도록 변경 예정
 
 
 Nifty github 임의 변경점:

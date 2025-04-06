@@ -11,6 +11,7 @@ const path = require('path');
 const os = require('os');
 
 const tempYamlDir = path.join(__dirname, '../../temp_yaml');
+const yaml = require('js-yaml');
 const { spawn } = require('child_process');
 
 // ==================================================
@@ -177,24 +178,17 @@ const editFile = asyncHandler(async (req, res) => {
     const id = req.params.id;
     const file = await File.findById(id);
     const currentPath = req.query.path || '/';
-//~~
+    const userDir = path.join(tempYamlDir, req.user.username);
+
     // 파일 타입이 디렉토리라면
     if (file.filetype === 'dir') {
-        // 현재 경로를 쿼리 파라미터에서 가져오고, 없으면 기본값 '/' 사용
-        // let currentPath = req.query.path || '/';
-        // // console.log(currentPath)
-        // // currentPath가 '/'로 끝나지 않으면 추가
-        // if (!currentPath.endsWith('/')) {
-        //     currentPath += '/';
-        // }
-        // 새 경로: 현재 경로 + 디렉토리 이름 + '/'
         const newPath = currentPath + file.filename + '/';
         // 메인 페이지로 리다이렉트 시 새 경로를 쿼리 파라미터로 전달
         return res.redirect('/main?path=' + encodeURIComponent(newPath));
     }
-//~~
+
     // 파일 타입이 디렉토리가 아니라면 수정 페이지로 렌더링
-    res.render('edit', { file: file, currentPath: currentPath });
+    res.render('edit', { file: file, currentPath: currentPath, drawObjectDoc: {}, cellname: 'dummyCell' });
 });
 
 // Save & Generate: PUT /main/:id/edit?_method=PUT&path=...
@@ -234,6 +228,10 @@ const saveFile = asyncHandler(async (req, res) => {
     const tempDir_y_u = path.join(__dirname, '../../temp_yaml', username);
     // temp_yaml_username 디렉토리 없으면 생성
     if (!fs.existsSync(tempDir_y_u)) fs.mkdirSync(tempDir_y_u, { recursive: true });
+
+    const yaml_name = req.body.yamlFile ? `${req.body.yamlFile}_templates.yaml` : 'logic_generated_templates.yaml';
+    const lib = req.body.yamlFile ? req.body.yamlFile : 'logic_generated';
+    const tempDir_y_u_yaml = path.join(tempDir_y_u, yaml_name);
 
     // 파이썬 코드 파일로 저장
     fs.writeFileSync(tempFileWin, content, 'utf8');
@@ -323,7 +321,14 @@ const saveFile = asyncHandler(async (req, res) => {
         console.error('실행 에러:', error);
         return res.status(500).json({ success: false, error: stderr });
       }
-      return res.json({ success: true, output: stdout });
+      let doc;
+      try {
+        doc = yaml.load(fs.readFileSync(tempDir_y_u_yaml, 'utf8')); 
+        // console.info(doc);
+     } catch (e) {
+        console.error(e);
+     }
+      return res.json({ success: true, output: stdout, drawObjectDoc: doc, cellname: req.body.cellname, libname: lib });
     });
   } else {
     res.json({ success: true });
