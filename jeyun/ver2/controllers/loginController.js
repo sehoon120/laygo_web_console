@@ -57,6 +57,7 @@ const registerUser = asyncHandler(async(req, res) => {
 
 
 const sendVerificationEmail = async (req, res) => {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     const { email } = req.body;
     // 6자리 인증 코드 생성
     const code = Math.floor(100000 + Math.random() * 900000);
