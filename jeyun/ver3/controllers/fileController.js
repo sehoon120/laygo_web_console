@@ -218,6 +218,9 @@ const saveFile = asyncHandler(async (req, res) => {
     const tempDir = path.join(__dirname, '../../temp_code');
     const tempFileWin = path.join(tempDir, `${username}_${filename}_temp.py`);
     const tempFileWSL = `/mnt/${tempFileWin[0].toLowerCase()}/${tempFileWin.slice(3).replace(/\\/g, '/')}`;
+    //Added by me
+    const runDirWin = path.join(__dirname, '..');
+    const runDirWsl = `/mnt/${runDirWin[0].toLowerCase()}/${runDirWin.slice(3).replace(/\\/g, '/')}`;
     // temp 디렉토리 없으면 생성
     if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
 
@@ -237,19 +240,17 @@ const saveFile = asyncHandler(async (req, res) => {
     fs.writeFileSync(tempFileWin, content, 'utf8');
 
     // WSL 내 bash에서 start_bag.sh 실행
-    //const command = `wsl csh -c "cd /mnt/c/For_english_only_directories/LaygoWebConsole/bag_workspace_gpdk045; source .cshrc; bash /mnt/c/For_english_only_directories/LaygoWebConsole/bag_workspace_gpdk045/start_bag.sh ${username} ${filename} ${tempFileWSL}"`;
-    const command = `wsl csh -c "cd /mnt/c/For_english_only_directories/LaygoWebConsole/bag_workspace_gpdk045; source .cshrc; bash /mnt/c/For_english_only_directories/LaygoWebConsole/bag_workspace_gpdk045/start_bag.sh"`;
-    console.log("edfasdfa");
+    const command = `wsl csh -c "cd /mnt/c/For_english_only_directories/LaygoWebConsole/bag_workspace_gpdk045; source .cshrc_bag; bash /mnt/c/For_english_only_directories/LaygoWebConsole/bag_workspace_gpdk045/start_bag_test.sh ${username} ${filename} ${tempFileWSL} ${runDirWsl}"`;
+    
     exec(command, { shell: true }, (error, stdout, stderr) => {
       fs.unlink(tempFileWin, (unlinkErr) => {
           if (unlinkErr) {
             console.error("임시 파일 삭제 실패:", unlinkErr);
           } 
-          // else {
-          //   console.log("임시 파일 삭제 완료");
-          // }
+          else {
+             console.log("임시 파일 삭제 완료");
+          }
       });
-      
       fs.readdir(tempDir_y_u, (err, files) => {
         if (err) {
           console.error('temp_yaml 폴더 읽기 에러:', err);

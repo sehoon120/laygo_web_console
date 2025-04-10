@@ -1,0 +1,69 @@
+[INFO] 실행 중: /mnt/c/For_english_only_directories/LaygoWebConsole/laygo_web_console/jeyun/temp_code/jeyunp_test_temp.py
+[DEBUG] 현재실행경로: 
+/mnt/c/For_english_only_directories/LaygoWebConsole/bag_workspace_gpdk045
+Load templates
+Load grids
+--------------------
+Creating inv_2x
+Create instances
+Create wires
+=========== SUPPLY RAIL GENERATION START ===========
+
+The number of rails of your design is 1.
+The number of pins of your design is 2.
+
+Name of Iterated net:
+0. "VSS"
+1. "VDD"
+
+============ SUPPLY RAIL GENERATION END ============
+Export design
+
+--------------------
+Creating inv_4x
+Create instances
+Create wires
+=========== SUPPLY RAIL GENERATION START ===========
+
+The number of rails of your design is 1.
+The number of pins of your design is 2.
+
+Name of Iterated net:
+0. "VSS"
+1. "VDD"
+
+============ SUPPLY RAIL GENERATION END ============
+Export design
+
+--------------------
+Creating inv_6x
+Create instances
+Create wires
+=========== SUPPLY RAIL GENERATION START ===========
+
+The number of rails of your design is 1.
+The number of pins of your design is 2.
+
+Name of Iterated net:
+0. "VSS"
+1. "VDD"
+
+============ SUPPLY RAIL GENERATION END ============
+Export design
+
+--------------------
+Creating inv_8x
+Create instances
+Create wires
+=========== SUPPLY RAIL GENERATION START ===========
+
+The number of rails of your design is 1.
+The number of pins of your design is 2.
+
+Name of Iterated net:
+0. "VSS"
+1. "VDD"
+
+============ SUPPLY RAIL GENERATION END ============
+Export design
+

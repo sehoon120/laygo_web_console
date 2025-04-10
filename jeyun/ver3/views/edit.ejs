@@ -55,6 +55,8 @@
           <!-- 기존 이미지 대신 캔버스 추가 -->
           <canvas id="canvas" width="770" height="1080" style="border:1px solid #ccc; background:#fff;"></canvas>
         </div>
+        <!-- pin on/off 버튼-->
+        <button id="pins" type="button" class="btn btn-primary">Pin</button>
       </div>
 
     </div>
@@ -141,7 +143,7 @@
         }
       }
       trackTransforms(ctx);
-      ctx.translate(960, 540);
+      ctx.translate(385, 540);
       ctx.beginPath();
     
       // 전역 함수 buildMap 등록 (window.buildMap)
@@ -260,6 +262,15 @@
       }
       canvas.addEventListener('DOMMouseScroll', handleScroll, false);
       canvas.addEventListener('mousewheel', handleScroll, false);
+
+      document.getElementById("pins").addEventListener('click', () => {
+            rectList.forEach(rect => {
+                if(rect[7] == 'pin'){
+                    rect[6] = !rect[6];
+                }
+                redraw();
+            });
+        });
     
       // 폼 제출 이벤트 핸들러 (AJAX)
       document.getElementById("editForm").addEventListener("submit", async function (e) {

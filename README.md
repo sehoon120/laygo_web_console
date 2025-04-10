@@ -48,3 +48,5 @@ Nifty github 임의 변경점:
 - Zoom in/out 구현 완료 -> https://stackoverflow.com/questions/5189968/zoom-canvas-to-mouse-cursor/5526721#5526721 보고 작성함
 - Layer별 끄기/켜기 구현 완료. 버튼 클릭을 통해 켜기/끄기 가능
 - Grid 설정: canvas에서 grid를 직접 지원하지는 않아 확대/축소 시 문제가 있음. 일단 제외.
+
+- 2025/4/9~ Design.export_to_template 쪽 손보는 중;(templete.py line 1564) mos bbox 출력 목표
