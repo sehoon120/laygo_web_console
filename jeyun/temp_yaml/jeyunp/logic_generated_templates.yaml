@@ -59,7 +59,29 @@ logic_generated:
         xy:
         - [0, -120]
         - [820, 120]
-    subblocks: {}
+    subblocks:
+      MN0:
+        cellname: myvcell_MN0
+        libname: gpdk045_microtemplates_dense
+        name: MN0
+        pins:
+          D: {netname: null, termName: D}
+          G: {netname: null, termName: G}
+          RAIL: {netname: null, termName: RAIL}
+        size: [820, 1000]
+        transform: R0
+        xy: [0, 0]
+      MP0:
+        cellname: myvcell_MP0
+        libname: gpdk045_microtemplates_dense
+        name: MP0
+        pins:
+          D: {netname: null, termName: D}
+          G: {netname: null, termName: G}
+          RAIL: {netname: null, termName: RAIL}
+        size: [820, 1000]
+        transform: MX
+        xy: [0, 2000]
   inv_4x:
     bbox:
     - [0, 0]
@@ -114,7 +136,29 @@ logic_generated:
         xy:
         - [0, -120]
         - [1230, 120]
-    subblocks: {}
+    subblocks:
+      MN0:
+        cellname: myvcell_MN0
+        libname: gpdk045_microtemplates_dense
+        name: MN0
+        pins:
+          D: {netname: null, termName: D}
+          G: {netname: null, termName: G}
+          RAIL: {netname: null, termName: RAIL}
+        size: [1230, 1000]
+        transform: R0
+        xy: [0, 0]
+      MP0:
+        cellname: myvcell_MP0
+        libname: gpdk045_microtemplates_dense
+        name: MP0
+        pins:
+          D: {netname: null, termName: D}
+          G: {netname: null, termName: G}
+          RAIL: {netname: null, termName: RAIL}
+        size: [1230, 1000]
+        transform: MX
+        xy: [0, 2000]
   inv_6x:
     bbox:
     - [0, 0]
@@ -169,7 +213,29 @@ logic_generated:
         xy:
         - [0, -120]
         - [1640, 120]
-    subblocks: {}
+    subblocks:
+      MN0:
+        cellname: myvcell_MN0
+        libname: gpdk045_microtemplates_dense
+        name: MN0
+        pins:
+          D: {netname: null, termName: D}
+          G: {netname: null, termName: G}
+          RAIL: {netname: null, termName: RAIL}
+        size: [1640, 1000]
+        transform: R0
+        xy: [0, 0]
+      MP0:
+        cellname: myvcell_MP0
+        libname: gpdk045_microtemplates_dense
+        name: MP0
+        pins:
+          D: {netname: null, termName: D}
+          G: {netname: null, termName: G}
+          RAIL: {netname: null, termName: RAIL}
+        size: [1640, 1000]
+        transform: MX
+        xy: [0, 2000]
   inv_8x:
     bbox:
     - [0, 0]
@@ -224,4 +290,26 @@ logic_generated:
         xy:
         - [0, -120]
         - [2050, 120]
-    subblocks: {}
+    subblocks:
+      MN0:
+        cellname: myvcell_MN0
+        libname: gpdk045_microtemplates_dense
+        name: MN0
+        pins:
+          D: {netname: null, termName: D}
+          G: {netname: null, termName: G}
+          RAIL: {netname: null, termName: RAIL}
+        size: [2050, 1000]
+        transform: R0
+        xy: [0, 0]
+      MP0:
+        cellname: myvcell_MP0
+        libname: gpdk045_microtemplates_dense
+        name: MP0
+        pins:
+          D: {netname: null, termName: D}
+          G: {netname: null, termName: G}
+          RAIL: {netname: null, termName: RAIL}
+        size: [2050, 1000]
+        transform: MX
+        xy: [0, 2000]

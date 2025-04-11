@@ -49,4 +49,4 @@ Nifty github 임의 변경점:
 - Layer별 끄기/켜기 구현 완료. 버튼 클릭을 통해 켜기/끄기 가능
 - Grid 설정: canvas에서 grid를 직접 지원하지는 않아 확대/축소 시 문제가 있음. 일단 제외.
 
-- 2025/4/9~ Design.export_to_template 쪽 손보는 중;(templete.py line 1564) mos bbox 출력 목표
+- 2025/4/9~ Design.export_to_template 쪽 손보는 중;(templete.py) mos bbox 출력 목표; Design.virtual_instance 밑에 mos들 존재 / template.export_to_dict도 수정(template core.py)
