@@ -1,128 +1,382 @@
-const saveFile = asyncHandler(async (req, res) => {
-    const id = req.params.id;
-    const { content } = req.body;
-    
-    const userDir = path.join(tempYamlDir, req.user.username);
+<% /* eslint-disable */ %>
 
-    const file = await File.findById(id);
-    if (!file) {
-      return res.status(404).json({ error: 'File not found.' });
-    }
-  
-    // 1. 파일 내용 저장
-    file.content = content;
-    await file.save();
-  
-    // 2. filetype이 py일 때 실행
-    if (file.filetype === 'py') {
-      const username = req.user.username // || 'alpha'; // 유저명 없으면 fallback
-      const filename = file.filename.replace(/\.[^/.]+$/, ""); // 확장자 제거
-  
-      const tempDir = path.join(__dirname, '../../temp_code');
-      const tempFileWin = path.join(tempDir, `${username}_${filename}_temp.py`);
-      const tempFileWSL = `/mnt/${tempFileWin[0].toLowerCase()}/${tempFileWin.slice(3).replace(/\\/g, '/')}`;
-      // temp 디렉토리 없으면 생성
-      if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
-  
-      const tempDir_y = path.join(__dirname, '../../temp_yaml');
-      // temp_yaml 디렉토리 없으면 생성
-      if (!fs.existsSync(tempDir_y)) fs.mkdirSync(tempDir_y, { recursive: true });
+  <%- include('./include/_header') %>
 
-      const tempDir_y_u = path.join(__dirname, '../../temp_yaml', username);
-      // temp_yaml_username 디렉토리 없으면 생성
-      if (!fs.existsSync(tempDir_y_u)) fs.mkdirSync(tempDir_y_u, { recursive: true });
+    <!-- 파일 목록으로 돌아가기 버튼 (왼쪽 상단) -->
 
-      // 파이썬 코드 파일로 저장
-      fs.writeFileSync(tempFileWin, content, 'utf8');
-  
-      // WSL 내 bash에서 start_bag.sh 실행
-      const command = `wsl bash -c "bash /mnt/c/GraduationProject/bag_workspace_gpdk045/start_bag_test.sh ${username} ${filename} ${tempFileWSL}"`;
-  
-      exec(command, { shell: true }, (error, stdout, stderr) => {
-        fs.unlink(tempFileWin, (unlinkErr) => {
-            if (unlinkErr) {
-              console.error("임시 파일 삭제 실패:", unlinkErr);
-            } 
-            // else {
-            //   console.log("임시 파일 삭제 완료");
-            // }
-        });
+    <!-- ==================================================================================================== -->
+
+    <!-- Main -->
+    <main id="site-main" class="container my-4">
+      <a href="/main?path=<%= encodeURIComponent(currentPath) %>" class="back-button">
+        <i class="fas fa-arrow-left"></i> 파일 목록
+      </a>
+      <div class="row">
+
+        <!-- 왼쪽 영역: 글 작성 -->
+        <div class="col-md-6">
+          <h2>
+            <%= file.filename %>
+          </h2>
+          <form id="editForm"
+            action="/main/<%= file._id %>/edit?_method=PUT&path=<%= encodeURIComponent(currentPath) %>" method="POST">
+            <div class="mb-3">
+              <!-- textarea에 기본 file.content 값 채워넣기 -->
+              <textarea name="content" class="form-control" rows="48"
+                placeholder="Write your code here"><%= file.content %></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Save & Generate</button>
+          </form>
+          <!-- 저장 결과 메시지 출력 영역 -->
+          <div id="message" class="mt-3"></div>
+        </div>
+
+        <!-- 오른쪽 영역: 이미지 표시 및 추가 입력란 -->
+        <div class="col-md-6">
+          <h2>Layout</h2>
+
+          <!-- 오른쪽 상단에 입력란 추가 -->
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="yamlFileInput">libname</label>
+                <input type="text" id="yamlFileInput" name="yamlFile" class="form-control" placeholder="logic_generated"
+                  form="editForm">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="cellNameInput">cellname</label>
+                <input type="text" id="cellNameInput" name="cellname" class="form-control" placeholder="cellname"
+                  form="editForm">
+              </div>
+            </div>
+          </div>
+
+          <div class="text-center">
+            <!-- 기존 이미지 대신 캔버스 추가 -->
+            <canvas id="canvas" width="770" height="1080" style="border:1px solid #ccc; background:#fff;"></canvas>
+          </div>
+          <!-- pin on/off 버튼-->
+          <button id="pins" type="button" class="btn btn-primary">Pin</button>
+        </div>
+
+      </div>
+
+      <!-- 터미널 영역: 로그 파일 내용을 표시 -->
+      <div id="terminal"
+        style="background-color: black; color: lime; font-family: monospace; padding: 10px; height: 300px; overflow-y: auto; margin-top: 20px;">
+        <!-- 로그 내용이 여기에 표시됩니다 -->
+      </div>
+    </main>
+    <!-- /Main -->
 
 
-        fs.readdir(tempDir_y_u, (err, files) => {
-          if (err) {
-            console.error('temp_yaml 폴더 읽기 에러:', err);
+    <!-- ==================================================================================================== -->
+
+    <!-- 캔버스 기능 관련 스크립트 추가 -->
+
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // 서버에서 전달된 drawObjectDoc을 전역 변수로 설정 (빈 객체면 {})
+        var drawObjectDoc = (<% - JSON.stringify(drawObjectDoc || {}) %>);
+        // console.log("drawObjectDoc:", drawObjectDoc);
+
+        // 캔버스 및 전역 변수 선언
+        var rectList = [];
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // 캔버스의 변환 상태를 추적하는 함수
+        function trackTransforms(ctx) {
+          var svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
+          var xform = svg.createSVGMatrix();
+          ctx.getTransform = function () { return xform; };
+
+          var savedTransforms = [];
+          var save = ctx.save;
+          ctx.save = function () {
+            savedTransforms.push(xform.translate(0, 0));
+            return save.call(ctx);
+          };
+          var restore = ctx.restore;
+          ctx.restore = function () {
+            xform = savedTransforms.pop();
+            return restore.call(ctx);
+          };
+
+          var scale = ctx.scale;
+          ctx.scale = function (sx, sy) {
+            xform = xform.scaleNonUniform(sx, sy);
+            return scale.call(ctx, sx, sy);
+          };
+          var rotate = ctx.rotate;
+          ctx.rotate = function (radians) {
+            xform = xform.rotate(radians * 180 / Math.PI);
+            return rotate.call(ctx, radians);
+          };
+          var translate = ctx.translate;
+          ctx.translate = function (dx, dy) {
+            xform = xform.translate(dx, dy);
+            return translate.call(ctx, dx, dy);
+          };
+          var transform = ctx.transform;
+          ctx.transform = function (a, b, c, d, e, f) {
+            var m2 = svg.createSVGMatrix();
+            m2.a = a; m2.b = b; m2.c = c; m2.d = d; m2.e = e; m2.f = f;
+            xform = xform.multiply(m2);
+            return transform.call(ctx, a, b, c, d, e, f);
+          };
+          var setTransform = ctx.setTransform;
+          ctx.setTransform = function (a, b, c, d, e, f) {
+            xform.a = a;
+            xform.b = b;
+            xform.c = c;
+            xform.d = d;
+            xform.e = e;
+            xform.f = f;
+            return setTransform.call(ctx, a, b, c, d, e, f);
+          };
+          var pt = svg.createSVGPoint();
+          ctx.transformedPoint = function (x, y) {
+            pt.x = x; pt.y = y;
+            return pt.matrixTransform(xform.inverse());
+          }
+        }
+        trackTransforms(ctx);
+        ctx.translate(385, 540);
+        ctx.beginPath();
+
+        // 전역 함수 buildMap 등록 (window.buildMap)
+        window.buildMap = function (docs, cellname, libname) {
+          const parent_obj = docs[libname] && docs[libname][cellname];
+          if (!parent_obj) {
+            console.error("buildMap: docs[" + libname + "][" + cellname + "] is undefined.");
             return;
           }
-        
-          files.forEach(yamlFile => {
-            // YAML 파일만 처리 (확장자가 .yaml 혹은 .yml 인 파일)
-            if (yamlFile.endsWith('.yaml') || yamlFile.endsWith('.yml')) {
-              const filePath = path.join(tempDir_y_u, yamlFile);
-              fs.readFile(filePath, 'utf8', async (err, data) => {
-                if (err) {
-                  console.error(`파일 ${yamlFile} 읽기 에러:`, err);
-                  return;
-                }
-                try {
-                  // 확장자 제거 (예: logic_generated_templates.yaml -> logic_generated_templates)
-                  const filenameWithoutExt = yamlFile.replace(/\.[^/.]+$/, "");
-                  // 파일의 고유 식별자를 user, filename, filetype, filePath 조합으로 가정
-                  const fileQuery = {
-                    user: username,
-                    filename: filenameWithoutExt,
-                    filetype: 'yaml',
-                    filePath: req.query.path || '/'
-                  };
-        
-                  let fileData = {
-                    user: username,
-                    filename: filenameWithoutExt,
-                    content: data,
-                    filetype: 'yaml',
-                    filePath: req.query.path || '/'
-                  };
-        
-                  // 기존에 파일이 있는지 검색
-                  const existingFile = await File.findOne(fileQuery);
-        
-                  if (existingFile) {
-                    // 파일이 이미 있다면 내용 업데이트
-                    existingFile.content = data;
-                    await existingFile.save();
-                    // console.log(`${filenameWithoutExt} 데이터베이스 업데이트 완료`);
+          for (let child_obj_key in parent_obj) {
+            if (child_obj_key === 'masks') {
+              const masks = parent_obj[child_obj_key];
+              for (let mask_layer_name in masks) {
+                const mask_layer = masks[mask_layer_name];
+                mask_layer.forEach(mask => {
+                  let originX = mask[0][0] * 5;
+                  let originY = mask[0][1] * 5;
+                  let width = (mask[1][0] - mask[0][0]) * 5;
+                  let height = (mask[1][1] - mask[0][1]) * 5;
+                  rectList.push([originX, -originY, width, -height, "rgba(255, 0, 0, 0.5)", mask_layer_name, true, 'mask']);
+                });
+              }
+            } else if (child_obj_key === 'pins') {
+              const pins = parent_obj[child_obj_key];
+              for (let pin_name in pins) {
+                let pin = pins[pin_name];
+                let originX = pin['xy'][0][0] * 5;
+                let originY = pin['xy'][0][1] * 5;
+                let width = (pin['xy'][1][0] - pin['xy'][0][0]) * 5;
+                let height = (pin['xy'][1][1] - pin['xy'][0][1]) * 5;
+                rectList.push([originX, -originY, width, -height, "rgba(0,255,0, 0.5)", pin_name, true, 'pin']);
+              }
+            } else if (child_obj_key === 'subblocks') {
+              const subblocks = parent_obj[child_obj_key];
+              for (let subblock_name in subblocks) {
+                let subblock = subblocks[subblock_name];
+                if (subblock['libname'] == 'gpdk045_microtemplates_dense') {        //GPDK045가 아닌 경우에 대해 나중에 수정. 타 라이브러리에서도 "*microtempates*" 형태의 이름인지 확인 필요
+                  if (subblock['transform'] == 'MX') {
+                    let originX = subblock['xy'][0] * 5;
+                    let originY = subblock['xy'][1] * 5 - subblock['size'][1] * 5;
+                    let width = subblock['size'][0] * 5;
+                    let height = subblock['size'][1] * 5;
+                    rectList.push([originX, -originY, width, -height, "rgba(0, 0, 0, 1.0)", subblock_name, true, 'subblock']);
                   } else {
-                    // 없으면 새로 생성
-                    await File.create(fileData);
-                    // console.log(`${filenameWithoutExt} 데이터베이스 저장 완료`);
+                    let originX = subblock['xy'][0] * 5;
+                    let originY = subblock['xy'][1] * 5;
+                    let width = subblock['size'][0] * 5;
+                    let height = subblock['size'][1] * 5;
+                    rectList.push([originX, -originY, width, -height, "rgba(0, 0, 0, 1.0)", subblock_name, true, 'subblock']);
                   }
-        
-                  // 저장 후 파일 삭제 (원하지 않으면 이 부분은 제거)
-                  // fs.unlink(filePath, unlinkErr => {
-                  //   if (unlinkErr) {
-                  //     console.error(`${yamlFile} 삭제 에러:`, unlinkErr);
-                  //   } else {
-                  //     console.log(`${yamlFile} 파일 삭제 완료`);
-                  //   }
-                  // });
-                } catch (dbErr) {
-                  console.error('DB 저장 에러:', dbErr);
+                } else {
+                  if (subblock['transform'] == 'MX') {
+                    let subblock_called = docs['logic_generated'][subblock['cellname']];
+                    let originX = subblock['xy'][0] * 5;
+                    let originY = subblock['xy'][1] * 5 - subblock_called['bbox'][1][1] * 5;
+                    let width = subblock_called['bbox'][1][0] * 5;
+                    let height = subblock_called['bbox'][1][1] * 5;
+                    rectList.push([originX, -originY, width, -height, "rgba(0, 0, 0, 1.0)", subblock_name, true, 'subblock']);
+                  } else {
+                    let subblock_called = docs['logic_generated'][subblock['cellname']];
+                    let originX = subblock['xy'][0] * 5;
+                    let originY = subblock['xy'][1] * 5;
+                    let width = subblock_called['bbox'][1][0] * 5;
+                    let height = subblock_called['bbox'][1][1] * 5;
+                    rectList.push([originX, -originY, width, -height, "rgba(0, 0, 0, 1.0)", subblock_name, true, 'subblock']);
+                  }
+
                 }
-              });
+              }
             }
+          }
+        };
+
+        // 캔버스 재렌더링 함수
+        function redraw() {
+          ctx.save();
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.restore();
+          rectList.forEach(rect => {
+            if (rect[6]) {
+              if (rect[7] === 'subblock') {
+                ctx.lineWidth = 10;
+                ctx.strokeStyle = rect[4];
+                ctx.fillStyle = rect[4];
+                ctx.strokeRect(rect[0], rect[1], rect[2], rect[3]);
+                ctx.font = "400px Verdana";
+                ctx.fillText(rect[5], rect[0] + rect[2] / 2 - 200, rect[1] + rect[3] / 2 - 200);
+              } else if (rect[7] === 'pin') {
+                ctx.fillStyle = rect[4];
+                ctx.fillRect(rect[0], rect[1], rect[2], rect[3]);
+                ctx.fillStyle = 'rgba(255, 0, 0, 1.0)';
+                ctx.font = "400px Verdana";
+                ctx.fillText(rect[5], rect[0] + rect[2] / 2 - 200, rect[1] + rect[3] / 2 - 200);
+              } else { // mask
+                ctx.fillStyle = rect[4];
+                ctx.fillRect(rect[0], rect[1], rect[2], rect[3]);
+              }
+            }
+          });
+        }
+        redraw();
+
+        // 캔버스 드래그 및 줌 인터랙션 처리
+        let lastX = canvas.width / 2, lastY = canvas.height / 2;
+        let dragStart, dragged;
+        canvas.addEventListener('mousedown', function (evt) {
+          document.body.style.userSelect = 'none';
+          lastX = evt.offsetX;
+          lastY = evt.offsetY;
+          dragStart = ctx.transformedPoint(lastX, lastY);
+          dragged = false;
+        });
+        canvas.addEventListener('mousemove', function (evt) {
+          lastX = evt.offsetX;
+          lastY = evt.offsetY;
+          dragged = true;
+          if (dragStart) {
+            let pt = ctx.transformedPoint(lastX, lastY);
+            ctx.translate(pt.x - dragStart.x, pt.y - dragStart.y);
+            redraw();
+          }
+        });
+        canvas.addEventListener('mouseup', function (evt) {
+          dragStart = null;
+          if (!dragged) zoom(evt.shiftKey ? -1 : 1);
+        });
+        const scaleFactor = 1.1;
+        function zoom(clicks) {
+          let pt = ctx.transformedPoint(lastX, lastY);
+          ctx.translate(pt.x, pt.y);
+          let factor = Math.pow(scaleFactor, clicks);
+          ctx.scale(factor, factor);
+          ctx.translate(-pt.x, -pt.y);
+          redraw();
+        }
+        function handleScroll(evt) {
+          let delta = evt.wheelDelta ? evt.wheelDelta / 40 : evt.detail ? -evt.detail : 0;
+          if (delta) zoom(delta);
+          evt.preventDefault();
+          return false;
+        }
+        canvas.addEventListener('DOMMouseScroll', handleScroll, false);
+        canvas.addEventListener('mousewheel', handleScroll, false);
+
+        document.getElementById("pins").addEventListener('click', () => {
+          rectList.forEach(rect => {
+            if (rect[7] == 'pin') {
+              rect[6] = !rect[6];
+            }
+            redraw();
           });
         });
 
 
+        // 폼 제출 이벤트 핸들러 (AJAX)
+        document.getElementById("editForm").addEventListener("submit", async function (e) {
+          e.preventDefault();
+          console.log("폼 제출 이벤트 핸들러 실행됨");
+          // 폼 제출 시 최신 입력값 읽기
+          const cellname = document.getElementById("cellNameInput").value || 'cellname';
+          const libname = document.getElementById("yamlFileInput").value || 'logic_generated';
+          // console.log("Submitted cellname:", cellname);
+          // console.log("Submitted libname:", libname);
 
+          const form = e.target;
+          const formData = new FormData(form);
+          const data = new URLSearchParams();
+          for (const pair of formData) {
+            data.append(pair[0], pair[1]);
+          }
+          try {
+            const response = await fetch(form.action, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: data
+            });
+            const result = await response.json();
+            console.log("AJAX 응답:", result);
+            let messageDiv = document.getElementById("message");
+            if (response.ok && result.success) {
+              messageDiv.innerText = "저장되었습니다.";
+              if (result.drawObjectDoc) {
+                rectList = [];
+                buildMap(result.drawObjectDoc, cellname, libname);
+                redraw();
+              }
+            } else {
+              messageDiv.innerText = "저장에 실패했습니다.";
+            }
+            messageDiv.style.opacity = 1;
+            setTimeout(() => {
+              messageDiv.style.transition = "opacity 0.5s ease-out";
+              messageDiv.style.opacity = 0;
+            }, 1000);
+          } catch (error) {
+            let messageDiv = document.getElementById("message");
+            messageDiv.innerText = "오류가 발생했습니다.";
+            messageDiv.style.opacity = 1;
+            setTimeout(() => {
+              messageDiv.style.transition = "opacity 0.5s ease-out";
+              messageDiv.style.opacity = 0;
+            }, 2000);
+            console.error(error);
+          }
+        });
 
-        if (error) {
-          console.error('실행 에러:', error);
-          return res.status(500).json({ success: false, error: stderr });
-        }
-        return res.json({ success: true, output: stdout });
+        // 터미널 영역 폴링 (2초 간격)
+        setInterval(async () => {
+          try {
+            const fileId = "<%= file._id %>";
+            const response = await fetch(`/main/${fileId}/edit/logs`, { credentials: 'include' });
+            if (!response.ok) {
+              console.error("로그 파일 요청 실패:", response.status);
+            }
+            const text = await response.text();
+            try {
+              const result = JSON.parse(text);
+              document.getElementById("terminal").innerText = result.log;
+            } catch (parseError) {
+              console.error("JSON 파싱 에러:", parseError);
+            }
+          } catch (error) {
+            console.error("로그 파일을 불러오는 중 에러 발생:", error);
+          }
+        }, 2000);
       });
-    } else {
-      res.json({ success: true });
-    }
-});
+    </script>
+
+
+
+    <!-- ==================================================================================================== -->
+
+    <%- include('./include/_footer') %>

@@ -163,7 +163,7 @@
                 let originY = mask[0][1] * 5;
                 let width = (mask[1][0] - mask[0][0]) * 5;
                 let height = (mask[1][1] - mask[0][1]) * 5;
-                rectList.push([originX, originY, width, height, "rgba(255, 0, 0, 0.5)", mask_layer_name, true, 'mask']);
+                rectList.push([originX, -originY, width, -height, "rgba(255, 0, 0, 0.5)", mask_layer_name, true, 'mask']);
               });
             }
           } else if (child_obj_key === 'pins') {
@@ -174,18 +174,44 @@
               let originY = pin['xy'][0][1] * 5;
               let width = (pin['xy'][1][0] - pin['xy'][0][0]) * 5;
               let height = (pin['xy'][1][1] - pin['xy'][0][1]) * 5;
-              rectList.push([originX, originY, width, height, "rgba(0,255,0, 0.5)", pin_name, true, 'pin']);
+              rectList.push([originX, -originY, width, -height, "rgba(0,255,0, 0.5)", pin_name, true, 'pin']);
             }
           } else if (child_obj_key === 'subblocks') {
             const subblocks = parent_obj[child_obj_key];
             for (let subblock_name in subblocks) {
               let subblock = subblocks[subblock_name];
-              let subblock_called = docs['logic_generated'][subblock['cellname']];
-              let originX = subblock['xy'][0] * 5;
-              let originY = subblock['xy'][1] * 5;
-              let width = subblock_called['bbox'][1][0] * 5;
-              let height = subblock_called['bbox'][1][1] * 5;
-              rectList.push([originX, originY, width, height, "rgba(0, 0, 0, 1.0)", subblock_name, true, 'subblock']);
+              if(subblock['libname'] == 'gpdk045_microtemplates_dense'){        //GPDK045가 아닌 경우에 대해 나중에 수정. 타 라이브러리에서도 "*microtempates*" 형태의 이름인지 확인 필요
+                if(subblock['transform']=='MX'){
+                  let originX = subblock['xy'][0] * 5;
+                  let originY = subblock['xy'][1] * 5 - subblock['size'][1] * 5;
+                  let width = subblock['size'][0] * 5;
+                  let height = subblock['size'][1] * 5;
+                  rectList.push([originX, -originY, width, -height, "rgba(0, 0, 0, 1.0)", subblock_name, true, 'subblock']);
+                }else{
+                  let originX = subblock['xy'][0] * 5;
+                  let originY = subblock['xy'][1] * 5;
+                  let width = subblock['size'][0] * 5;
+                  let height = subblock['size'][1] * 5;
+                  rectList.push([originX, -originY, width, -height, "rgba(0, 0, 0, 1.0)", subblock_name, true, 'subblock']);
+                }
+              }else{
+                if(subblock['transform']=='MX'){
+                  let subblock_called = docs['logic_generated'][subblock['cellname']];
+                  let originX = subblock['xy'][0] * 5;
+                  let originY = subblock['xy'][1] * 5 - subblock_called['bbox'][1][1] * 5;
+                  let width = subblock_called['bbox'][1][0] * 5;
+                  let height = subblock_called['bbox'][1][1] * 5;
+                  rectList.push([originX, -originY, width, -height, "rgba(0, 0, 0, 1.0)", subblock_name, true, 'subblock']);
+                }else{
+                  let subblock_called = docs['logic_generated'][subblock['cellname']];
+                  let originX = subblock['xy'][0] * 5;
+                  let originY = subblock['xy'][1] * 5;
+                  let width = subblock_called['bbox'][1][0] * 5;
+                  let height = subblock_called['bbox'][1][1] * 5;
+                  rectList.push([originX, -originY, width, -height, "rgba(0, 0, 0, 1.0)", subblock_name, true, 'subblock']);
+                }
+                
+              }               
             }
           }
         }
