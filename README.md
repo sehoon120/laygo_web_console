@@ -50,3 +50,7 @@ Nifty github 임의 변경점:
 - Grid 설정: canvas에서 grid를 직접 지원하지는 않아 확대/축소 시 문제가 있음. 일단 제외.
 
 - 2025/4/9~ Design.export_to_template 쪽 손보는 중;(templete.py) mos bbox 출력 목표; Design.virtual_instance 밑에 mos들 존재 / template.export_to_dict도 수정(template core.py)
+
+
+## 통합(DESIGN)
+- Design directory서 진행중
