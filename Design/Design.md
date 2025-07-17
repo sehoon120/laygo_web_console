@@ -124,3 +124,8 @@
     + 권한 검사를 위해, jsonwebtoken(JWT) 이용해야 하므로, 연결
     + 잘못된 접근 시 404 연결
     + 이용하는 파일, I/O: use dbConnect from /config/dbConnect.js, use router files from /route => 최종적으로 view와 연결, use /middlewares/JWT
+
+ 
+ 
+ # 추가 수정 사항
+ - Laygo 수정: width까지 가져오는 함수 추가 필요(검토 필요)
