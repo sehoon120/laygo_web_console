@@ -1,6 +1,5 @@
 # contactModel.md - 기본 기능
-- 계정 인증 메일 API 연결 수행
-    + contact 관련 정보에 대한 DB schema 작성
+- contact 관련 정보에 대한 DB schema 작성
     + 사용 기술: moongoose
     + contact의 attribute: name, mail, phone, timestamp(생성 시점, 수정 시점) => 사용자명, 사용자의 인증 이메일, 휴대전화번호를 하나로 묶는다.
 
