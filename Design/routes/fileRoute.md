@@ -9,20 +9,42 @@
 - 각 페이지별 설명
     + /: get method로 접근 시 getAllContacts controller 함수 객체 호출해 처리->모든 파일 리스트 불러와 getallfiles.ejs로 렌더
     + /add: get method로 접근 시 addContactForm controller 함수 객체 호출해 처리->add.ejs 렌더 / post method로 접근 시 createContact 함수 객체 호출해 처리->유저로부터 입력받은 파일 메타데이터와 데이터(파일을 업로드한 경우) 읽어 저장
-    + /(userID): get method로 접근 시 getcontact controller 함수 객체 호출해 처리->update.ejs 렌더 / put method로 접근 시 updateConatct 함수 객체 호출해 처리->file의 name, type, path 업데이트
+    + /(userID): get method로 접근 시 getcontact controller 함수 객체 호출해 처리->update.ejs 렌더 / put method로 접근 시 updateConatct 함수 객체 호출해 처리->file의 name, type, path 업데이트 / delete method 접근 시 deleteContact 객체 호출해 삭제 수행
     + /(userID)/edit: get method로 접근 시 editFile 함수 객체 호출해 처리->수정할 파일 내용 읽어 편집 페이지 렌더 / put method로 접근시 saveFile 함수 객체 호출해 처리->수정내용 받아 저장
+    + /(userID)/edit/logs: get method로 접근 시 getLogFile 함수 객체 호출해 log 가져옴
+    + /(userID)/edit/generate: get method로 접근 시 generateLayout 함수 객체 호출해 layout 생성
+    + /(userID)/edit/showLayout: get method로 접근 시 showLayout 함수 객체 호출해 layout 보여줌
+
 - pseudocode
 ```
-# mongoose 사용 설정
-mongoose = require('mongoose')
+# router, multer 사용 설정
 
-#fileSchema 객체: schema 정의(mongoose 이용)
-fileSchema = mongoose.Schema({
-    username: {attribute type: string, 필수},
-    password: {attribute type: string, 필수},
-    email: {attribute type: string, 필수, unique(반드시 그래야 하나? 생각필요)},
-})
+# 사용할 객체 import
+{getAllContacts, createContact, getContact, updateContact, deleteContact, addContactForm, editFile, saveFile, getLogfile, generateLayout, showLayout} <- Import from controllers/fileController
 
-#model 객체 생성
-user = mongoose.model('user', userSchema)
+#routing
+router.route('/')
+    .get(getAllContacts);
+
+router.route('/add')
+    .get(addContactForm)
+    .post(upload.single('uploadFile'), createContact);
+
+router.route('/:id')
+    .get(getContact)
+    .put(updateContact)
+    .delete(deleteContact);
+
+router.route('/:id/edit')
+    .get(editFile)
+    .put(saveFile);
+
+router.route('/:id/edit/logs')
+    .get(getLogFile);
+
+router.route('/:id/edit/generate')
+    .get(generateLayout, 저장된 파일 전달);
+
+router.route('/:id/showLayout')
+    .get(showLayout, 레이아웃 정보 파일 전달);
 ```
