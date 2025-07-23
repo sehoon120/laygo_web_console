@@ -77,7 +77,7 @@
 # DIR: routes
 - router 모음
 - fileRoutes.js: file 관련 route
-    + add.js서 /main 아래로 들어가게 된다.
+    + app.js서 /main 아래로 들어가게 된다.
     + 관련 페이지들에 접근 시(get, put, post method 등) fileController의 함수 객체들에 연결해 대응
     + 관련 기능: (추가필요)
     + 사용 파일: fileController
