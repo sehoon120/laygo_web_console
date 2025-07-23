@@ -20,4 +20,6 @@
 
 - 함수 generateLayout: 레이아웃 생성. Laygo script file을 실행시켜 yaml 파일로 저장. Log 저장 => 이때 모든 정보를 뽑기 위해 Laygo 수정 필요. Laygo에 feature 추가 필요
 
+- 함수 showLayout: 레이아웃 파일 열어 표시
+
 - 함수 getLogFile: log file 읽어 반환
