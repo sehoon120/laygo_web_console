@@ -54,3 +54,6 @@ Nifty github 임의 변경점:
 
 ## 통합(DESIGN)
 - Design directory서 진행중
+- (중요)Requirements 변경에 따른 prototype과의 design 변경점
+    + 1) Edit 페이지에서 Save&Generate 이외에 Layout draw 여부를 선택 가능하게 수정(上) => Edit 페이지에서 save(&delete previous generation result)와 generate버튼, layout draw 버튼 분리.
+    + 2)  
