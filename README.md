@@ -54,6 +54,38 @@ Nifty github 임의 변경점:
 
 ## 통합(DESIGN)
 - Design directory서 진행중
+- 개선 필요 requirements들 정리: 해당 requirements들을 보고 DESIGN 수정 수행
+```
+개선 필요 requirements
+중요도는 上/中/下로 분류
+上: 반드시 수정되어야 하는 사항
+中: 반드시 수정될 필요는 없으나 가급적이면 수정되어야 하는 사항
+下: 시간이 남으면 추가하면 좋을 기능 -> 정리된 개선 req들에서 下는 일단 제거함
+ 
+-Edit 페이지에서 Save&Generate 이외에 Layout draw 여부를 선택 가능하게 수정(上)
+ 
+-Export path는 상대경로로 지정하도록 수정(보류)
+
+-라이브러리인 Yaml 파일이 커지게 되면 generate 및 layout draw에 많은 시간이 걸림. 이보다 빠른 속도로 draw 하는 방법이 필요할 수 있음(中)
+->save/generate/draw 버튼 분리
+ 
+-Origin 기준 x, y 축 표시
+
+-instance에는 instance name, instance libname, cellname 표시 필요
+
+-grid drawing에 있어서, x, y축만을 그리는 것으로 requirement를 완화 / 혹은 dsb.bbox 내에만 그리드 줌
+
+-Layer 별로 표시를 켜고 끄는 기능. Instance / Instance pin 끄고 켜는 기능
+
+
+ 
+-Routing metal drawing: Yaml 파일로 출력 시 metal의 두께 정보가 담겨 나오지 않음. 따라서 일단 미구현됨. Pin과 동일한 방식으로 표시되고, 켜기/끄기가 된다고 생각하면 됨.
+->논의사항: 조사 결과 hextenstion, vextension에 두께가 담겨져 있어서 skill export 시에 두께를 정의하게 된다고 하는데, yaml 출력 시에도 이러한 방식으로 해도 될 지 확인이 필요함.
+->아니근데이걸레이고안고치고할수있나
+ 
+
+```
+
 - (중요)Requirements 변경에 따른 prototype과의 design 변경점
     + 1) Edit 페이지에서 Save&Generate 이외에 Layout draw 여부를 선택 가능하게 수정(上) => Edit 페이지에서 save(&delete previous generation result)와 generate버튼, layout draw 버튼 분리.
     + 2)  
