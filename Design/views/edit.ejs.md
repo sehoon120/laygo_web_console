@@ -20,7 +20,9 @@
     + 추가 입력 필드:
         + `libname` (default: `logic_generated`)
         + `cellname` (default: `cellname`)
-    + 저장 버튼: `Save & Generate` → 서버에 PUT 요청 전송
+    + 저장 버튼: `Save` → 서버에 PUT 요청 전송
+    + Laygo 실행 버튼: `Generate` → laygo script 실행
+    + Layout draw 버튼: `Draw` → 서버에 POST 요청 전송
 
 ---
 - 우측 영역 (Canvas 및 입력 필드)

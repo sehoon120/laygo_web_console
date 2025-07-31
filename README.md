@@ -88,8 +88,10 @@ Nifty github 임의 변경점:
 ```
 
 - (중요)Requirements 변경에 따른 prototype과의 design 변경점
-    + 1) Edit 페이지에서 Save&Generate 이외에 Layout draw 여부를 선택 가능하게 수정(上) => Edit 페이지에서 save(&delete previous generation result)와 generate버튼, layout draw 버튼 분리.
-    + 2) Origin 기준 x, y 축 표시 => Drawing 하는 페이지 코드 수정
-    + 3) instance에는 instance name, instance libname, cellname 표시 필요 => Drawing 하는 페이지 코드 수정
-    + 4) Layer 별로 표시를 켜고 끄는 기능. Instance / Instance pin 끄고 켜는 기능 => Drawing 하는 페이지 코드 수정
-    + 4) Routing metal drawing 시 두께 값 추출: Laygo 함수 추가...?
+    + 1) Edit 페이지에서 Save&Generate 이외에 Layout draw 여부를 선택 가능하게 수정(上) => Edit 페이지에서 save(&delete previous generation result)와 generate버튼, layout draw 버튼 분리.(edit.ejs, fileRoutes.js, fileController.js)
+    + 2) Origin 기준 x, y 축 표시 => Drawing 하는 페이지 코드 수정(edit.ejs)
+    + 3) instance에는 instance name, instance libname, cellname 표시 필요 => Drawing 하는 페이지 코드 수정(edit.ejs)
+    + 4) Layer 별로 표시를 켜고 끄는 기능. Instance / Instance pin 끄고 켜는 기능 => Drawing 하는 페이지 코드 수정(edit.ejs)
+    + 4) Routing metal drawing 시 두께 값 추출: Laygo 함수 추가...?(fileController.js 수정 + laygo 신규 함수 추가)
+        + laygo 신규 함수: yaml로 두께 값을 포함한 정보를 출력하는 함수(기존 yaml 출력 함수를 상속받아 작성?)
+        + WebConsole에서 laygo script 실행 시 자동으로 뒤에 위의 함수를 붙여 실행시키고, 임시 디렉터리에 결과 출력 후 그것을 읽어 그릴 수 있게 한다.
