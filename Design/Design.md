@@ -52,7 +52,12 @@
 # DIR: controllers
 - DB와의 연결, 수정 등 고려한 backend 구성 파일들
 - fileController.js: /main url에서 사용될 파일 수정 및 실행과 관련된 함수 객체들 작성
-    + 내부 함수: file 메타데이터를 DB에서 불러오는 함수(getAllContacts), file 추가를 위한 함수(get/post 접근 각각 addContactForm, createcontact), file 메타데이터 수정을 위한 함수(get/put접근 각각 getContact, updateContact), file 내용 수정을 위한 함수(editFile), 수정된 내용을 저장하는 함수(saveFile), 레이아웃을 생성하는 함수(generateLayout), log읽는 함수(getLogFile)
+    + 내부 함수
+        + file 메타데이터를 DB에서 불러오는 함수(getAllContacts)
+        + file 추가를 위한 함수(get/post 접근 각각 addContactForm, createcontact)
+        + file 메타데이터 수정을 위한 함수(get/put접근 각각 getContact, updateContact)
+        + file 내용 수정을 위한 함수(editFile), 수정된 내용을 저장하고 인자에 따라 레이아웃을 생성하는 함수(saveFile)
+        + log읽는 함수(getLogFile)
     + Prototype과 다르게 저장과 layout 생성을 서로 분리 필요
 - loginController.js
     + login page에 대한 get/post의 내용을 담은 getLogin/loginUser, register page에 대한 get/post의 내용을 담은 getRegister/registerUser, email verification에 대한 sendVerificationEmail과 verifyEmailCode로 구성
@@ -79,7 +84,7 @@
 - fileRoutes.js: file 관련 route
     + app.js서 /main 아래로 들어가게 된다.
     + 관련 페이지들에 접근 시(get, put, post method 등) fileController의 함수 객체들에 연결해 대응
-    + 관련 기능: (추가필요)
+    + 관련 기능: 디렉터리 구조 및 파일 리스트 출력, 파일 추가, 메타데이터 수정, 파일 삭제, 파일 내용 수정, laygo script 실행
     + 사용 파일: fileController
 - loginRoutes.js: login 관련 route
     + 관련 페이지들에 접근 시 loginController의 함수 객체들에 연결해 대응
