@@ -95,3 +95,8 @@ Nifty github 임의 변경점:
     + 4) Routing metal drawing 시 두께 값 추출: Laygo 함수 추가...?(fileController.js 수정 + laygo 신규 함수 추가)
         + laygo 신규 함수: yaml로 두께 값을 포함한 정보를 출력하는 함수(기존 yaml 출력 함수를 상속받아 작성?)
         + WebConsole에서 laygo script 실행 시 자동으로 뒤에 위의 함수를 붙여 실행시키고, 임시 디렉터리에 결과 출력 후 그것을 읽어 그릴 수 있게 한다.
+
+
+## 구현(Implementation)
+- Prototype과 동일하게 이용하는 code
+    + /config, /controllors/loginController.js, /middlewares, /models, /public, /routes/loginRoutes.js, /routes/logoutRoutes.js, /views/include, /views/404.ejs, /views/add.ejs, /views/getallfiles.ejs, /views/home.ejs, /views/update.ejs, /views/register.ejs
