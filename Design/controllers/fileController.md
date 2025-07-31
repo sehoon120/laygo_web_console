@@ -16,10 +16,6 @@
 
 - 함수 editFile: 파일 수정. 수정할 File type이 directory이면 해당 directory의 페이지로 redirect, 일반 file이면 파일 내용 수정 페이지 렌더링
 
-- 함수 saveFile: 파일 저장. file id와 수정할 내용(content) 받아 file에 저장
-
-- 함수 generateLayout: 레이아웃 생성. Laygo script file을 실행시켜 yaml 파일로 저장. Log 저장 => 이때 모든 정보를 뽑기 위해 Laygo 수정 필요. Laygo에 feature 추가 필요
-
-- 함수 showLayout: 레이아웃 파일 열어 표시
+- 함수 saveFile: 파일 저장. file id와 수정할 내용(content) 받아 file에 저장 . 인자로 generate=true 주면 레이아웃 생성. Laygo script file을 실행시켜 yaml 파일로 저장. Log 저장 => 이때 모든 정보를 뽑기 위해 Laygo 수정 필요. Laygo에 feature 추가 필요
 
 - 함수 getLogFile: log file 읽어 반환

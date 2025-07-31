@@ -17,12 +17,9 @@
     + 파일 이름 제목: `<h2><%= file.filename %></h2>`
     + 폼: `<form id="editForm"...>`
     + `textarea`로 기존 파일 내용(`file.content`) 수정
-    + 추가 입력 필드:
-        + `libname` (default: `logic_generated`)
-        + `cellname` (default: `cellname`)
-    + 저장 버튼: `Save` → 서버에 PUT 요청 전송
-    + Laygo 실행 버튼: `Generate` → laygo script 실행
-    + Layout draw 버튼: `Draw` → 서버에 POST 요청 전송
+    + 저장 버튼: `Save` → 서버에 PUT 요청 전송. 인자로 generate = false 준다.
+    + Laygo 실행 버튼: `Save & Generate` → 서버에 PUT 요청 전송. 인자로 generate = true 준다.
+    + Layout draw 버튼: `Draw` → draw 하는 script 실행.
 
 ---
 - 우측 영역 (Canvas 및 입력 필드)

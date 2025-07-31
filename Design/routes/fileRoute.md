@@ -10,7 +10,7 @@
     + /: get method로 접근 시 getAllContacts controller 함수 객체 호출해 처리->모든 파일 리스트 불러와 getallfiles.ejs로 렌더
     + /add: get method로 접근 시 addContactForm controller 함수 객체 호출해 처리->add.ejs 렌더 / post method로 접근 시 createContact 함수 객체 호출해 처리->유저로부터 입력받은 파일 메타데이터와 데이터(파일을 업로드한 경우) 읽어 저장
     + /(userID): get method로 접근 시 getcontact controller 함수 객체 호출해 처리->update.ejs 렌더 / put method로 접근 시 updateConatct 함수 객체 호출해 처리->file의 name, type, path 업데이트 / delete method 접근 시 deleteContact 객체 호출해 삭제 수행
-    + /(userID)/edit: get method로 접근 시 editFile 함수 객체 호출해 처리->수정할 파일 내용 읽어 편집 페이지 렌더 / put method로 접근시 saveFile 함수 객체 호출해 처리->수정내용 받아 저장
+    + /(userID)/edit: get method로 접근 시 editFile 함수 객체 호출해 처리->수정할 파일 내용 읽어 편집 페이지 렌더 / put method로 접근시 saveFile 함수 객체 호출해 처리->수정내용 받아 저장 / post method로 접근 시 lib, cellname 보내 레이아웃 draw
     + /(userID)/edit/logs: get method로 접근 시 getLogFile 함수 객체 호출해 log 가져옴
     + /(userID)/edit/generate: get method로 접근 시 generateLayout 함수 객체 호출해 layout 생성
     + /(userID)/edit/showLayout: get method로 접근 시 showLayout 함수 객체 호출해 layout 보여줌
