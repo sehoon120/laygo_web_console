@@ -40,3 +40,12 @@ router.route('/:id/edit')
 router.route('/:id/edit/logs')
     .get(getLogFile);
 ```
+
+- Edit 페이지에서 Save / Generate / Layout Draw 버튼 분리 (上)
+```
+# pseudocode
+# 각 버튼 라우트 추가
+router.post("/file/save", fileController.saveYaml);
+router.post("/file/generate", fileController.generateLayout);
+router.post("/file/draw", fileController.drawLayout);
+```

@@ -25,3 +25,17 @@ funcion saveFile(req, res){
 ```
 
 - 함수 getLogFile: log file 읽어 반환
+
+
+- Edit 페이지에서 Save / Generate / Layout Draw 버튼 분리 (上)
+```
+# pseudocode
+# saveyaml 함수
+# -> savefile 사용
+
+# generate_layout 함수
+
+
+# draw_layout 함수
+
+```

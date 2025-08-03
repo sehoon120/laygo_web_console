@@ -19,6 +19,44 @@
     + `textarea`로 기존 파일 내용(`file.content`) 수정
     + 저장 버튼: `Save` → 서버에 PUT 요청 전송. 인자로 generate = false 준다.
     + Laygo 실행 버튼: `Save & Generate` → 서버에 PUT 요청 전송. 인자로 generate = true 준다.
+    ```
+    # Pseudocode
+    # Edit 페이지에서 Save / Generate / Layout Draw 버튼 분리 (上)
+    <button type="submit" class="btn btn-primary">Save & Generate</button>
+    change to 
+    <button id="saveBtn">Save</button>
+    <button id="generateBtn">Generate</button>
+    <button id="drawBtn">Draw Layout</button>
+
+    # js 이벤트 핸들러 추가
+    <script>
+    document.getElementById("saveBtn").addEventListener("click", () => {
+        fetch("/file/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ filename: "<%= file.name %>", content: editor.getValue() })
+        }).then(res => res.ok ? alert("Saved!") : alert("Save failed"));
+    });
+
+    document.getElementById("generateBtn").addEventListener("click", () => {
+        fetch("/file/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ filename: "<%= file.name %>" })
+        }).then(res => res.ok ? alert("Generation complete!") : alert("Generation failed"));
+    });
+
+    document.getElementById("drawBtn").addEventListener("click", () => {
+        fetch("/file/draw", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ filename: "<%= file.name %>" })
+        }).then(res => res.json()).then(data => {
+            renderLayout(data); // ← layout draw 함수 쓰기
+        });
+    });
+    </script>
+    ```
     + Layout draw 버튼: `Draw` → draw 하는 script 실행.
 
 ---
@@ -27,6 +65,46 @@
   레이아웃 정보(`mask`, `pin`, `subblock`) 시각화
     + 마우스 드래그로 이동, 마우스 휠로 줌 인/아웃 가능
     + 자동 배율/이동 상태 추적(`trackTransforms`) 구현
+
+    ```
+    # pseudocode
+    # Origin 기준 X, Y 축 표시 (中)
+    function redraw() {
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+
+    // === origin 축 표시 ===
+    ctx.save();
+    ctx.beginPath();
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "#444";  // 연한 회색
+    const pt0 = ctx.transformedPoint(0, 0);
+    const ptX1 = ctx.transformedPoint(canvas.width, 0);
+    const ptY1 = ctx.transformedPoint(0, canvas.height);
+
+    // X축
+    ctx.beginPath();
+    ctx.moveTo(ptX1.x, pt0.y);
+    ctx.lineTo(pt0.x, pt0.y);
+    ctx.stroke();
+
+    // Y축
+    ctx.beginPath();
+    ctx.moveTo(pt0.x, ptY1.y);
+    ctx.lineTo(pt0.x, pt0.y);
+    ctx.stroke();
+    ctx.restore();
+
+    // === 기존 레이아웃 그리기 ===
+    rectList.forEach(rect => {
+        if (rect[6]) {
+        ...
+        }
+    });
+    }
+    ```
 
 ---
 
