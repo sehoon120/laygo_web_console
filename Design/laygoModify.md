@@ -1,0 +1,48 @@
+# LAYGO 수정사항 / 수정중(2025-08-04)
+
+## 개요
+- Web console 수정을 위한 laygo 코드 수정 내용 정리
+- Laygo 함수 추가와 환경변수 수정이 필요
+- PDK로 GPDK45를 사용하는 경우 기준으로 설정
+
+## 환경변수 수정
+- 서버 내에 저장된 bag_workspace_gpdk45의 자원들을 이용해 레이아웃을 생성한다.
+- \bag_workspace_gpdk045\gpdk045\workspace_setup\.cshrc_bag 변경
+    + setenv BAG_PYTHON "/TOOL/Anaconda/current/bin/python3.7" -> setenv BAG_PYTHON "/usr/bin/python3"
+- \bag_workspace_gpdk045\start_bag_test.sh 추가 (이후 이름 변경 예정)
+    + Web console에서 layout의 생성을 위해 실행하는 script
+    + Pseudocode
+    ```
+    # $PYTHONPATH 설정 -> Laygo pakage들 import 위함
+    export PYHONPATH = "서버내 bag_workspace_gpdk45 경로 : $PYTHONPATH"
+    export PYHONPATH = "서버내 bag_workspace_gpdk45/laygo2 경로 : $PYTHONPATH"
+
+    # 서버의 fileController에서는 스크립트 실행 인자로 순서대로 generate를 시도한 유저명(USERNAME), 실행한 파일명(FILENAME), Laygo script가 임시로 저장되어 있는 경로(CODE_PATH), Web console의 최상위 디렉터리(RUNDIR)를 준다.
+
+    # 로그 파일 생성
+    make directory when there is no RUNDIR/temp
+    LOG_FILE = RUNDIR/temp/USERNAME_FILENAME_output.log
+
+    # 기타 실행 중 메시지 출력
+    (생략)
+    
+    # 스크립트 실행 및 로그 저장
+    {BAG_PYTHON or python3} CODE_PATH >> LOG_FILE
+    ```
+
+## Laygo에 web console용 출력 함수 추가
+- 기존 LAYGO의 export 메커니즘
+    + laygo2.interface.yaml.export_template : Template object와 출력할 filename 받아 yaml로 출력 수행. Template을 dict로 변환 후 그것을 yaml로 출력. 
+    + class laygo2.object.database.Design의 member function export_to_template : Design object를 NativeInstanceTemplate로 출력
+        + 문제 1) Subblock의 출력 안 됨
+        + 문제 2)
+        + Prototype에서의 수정 내역:  object/database.py line 1759 -> subblock에 virtual instance들도 추가
+    + class laygo2.object.template.NativeInstanceTemplate의 member function export_to_dict : NativeInstanceTemplate을 python dict로 출력
+        + libname, cellname, bbox, pins, masks, subblocks, metals 출력
+        + Prototype에서의 수정 내역: subblock이 virtual instance일 경우 해당 virtual instance의 size와 pin을 추가해 export
+        + 문제) metal 출력의 metal['xy']에 두께 데이터가 존재하지 않음
+    + 두께 데이터(hextension, vextension은 어디에 있는가?)
+
+- 기존 YAML로의 export로 출력된 export data는 두께 데이터를 포함하고 있지 않으며, 따라서 draw를 위해 추가가 필요하다.
+- laygo2.interface.yaml.export_for_webconsole(filename)
+    + templete database로의 export와 출력을 위한 파일 생성 수행
