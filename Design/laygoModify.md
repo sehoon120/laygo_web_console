@@ -41,8 +41,15 @@
         + libname, cellname, bbox, pins, masks, subblocks, metals 출력
         + Prototype에서의 수정 내역: subblock이 virtual instance일 경우 해당 virtual instance의 size와 pin을 추가해 export
         + 문제) metal 출력의 metal['xy']에 두께 데이터가 존재하지 않음
-    + 두께 데이터(hextension, vextension은 어디에 있는가?)
+    + 두께 데이터(hextension, vextension)은 어디에 있는가?
+        + 1) Routing 과정에서(RoutingGrid 클래스의 라우팅 관련 함수들-route() 등-에서) 생성 후 metal에 해당하는 Rect 객체에 담아 반환
+        + 2) Routing 과정: Design 객체의 route 함수에서 RoutingGrid의 route 함수 호출해 metal 생성 후, 내부 리스트에 append해 저장
+        + 3) 따라서, design.export_to_template에서 export 시 hextension / vextension을 포함하지 않는 것이 문제가 된다.
+        + 4) Design.rect의 metal들에는 extension들이 포함되어 있다.
 
 - 기존 YAML로의 export로 출력된 export data는 두께 데이터를 포함하고 있지 않으며, 따라서 draw를 위해 추가가 필요하다.
-- laygo2.interface.yaml.export_for_webconsole(filename)
-    + templete database로의 export와 출력을 위한 파일 생성 수행
+- 추가 함수 1: laygo2.interface.yaml.export_for_webconsole(filename)
+    + templete database(YAML 라이브러리)로의 export와 출력을 위한 파일 생성(각 Laygo 스크립트별로 할당된 YAML 파일) 수행
+    + parameter: template:"laygo2.object.template.Template", filename:str, mode:str='append'
+    + 출력(외부 파일 출력): Template database update(export_yaml과 같은 방법) / YAML output file for layout drawing
+- 추가 함수 2: laygo2.object.design.Design에 export_to_template (?) 그냥합칠까 흠
