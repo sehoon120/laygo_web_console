@@ -8,6 +8,12 @@ const cookieParser = require('cookie-parser');
 
 const app = express();
 
+// app.use((req, res, next) => {
+//   console.log("🧭 Incoming request:", req.method, req.originalUrl);
+//   next();
+// });// 디버깅
+
+
 app.set('view engine', 'ejs');
 app.set('views', './views');
 
@@ -48,6 +54,15 @@ app.use((req, res, next) => {       // 에러 페이지
     res.render('404');
     next();
 });
+// app.use((req, res, next) => {
+//   if (req.accepts('html')) {
+//     res.status(404).render('404');
+//   } else if (req.accepts('json')) {
+//     res.status(404).json({ success: false, message: 'Not Found' });
+//   } else {
+//     res.status(404).type('txt').send('404 Not Found');
+//   }
+// });
 
 
 app.listen(3000, () => {

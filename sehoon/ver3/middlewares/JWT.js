@@ -26,6 +26,8 @@ const verifyAsync = promisify(jwt.verify);
 
 const authenticateJWT =  asyncHandler(async(req, res, next) => {
     const token = req.cookies.token;
+    // console.log('🪪 [AUTH] JWT Middleware 접근됨');
+    // console.log('🪪 token:', token);
     if (!token) {
         return res.status(401).send(`세션이 만료되었습니다.`);
     }
@@ -39,7 +41,8 @@ const authenticateJWT =  asyncHandler(async(req, res, next) => {
         next();
     } catch (error) {
         // console.error(error);
-        res.send(`세션이 만료되었습니다.`);
+        res.status(403).json({ success: false, message: '토큰 인증 실패 또는 만료되었습니다.' });
+        // res.send(`세션이 만료되었습니다.`);
     }
 });
 

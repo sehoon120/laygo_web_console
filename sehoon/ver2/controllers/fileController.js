@@ -101,25 +101,6 @@ const getContact = asyncHandler(async (req, res) => {
 
 // change file name
 // PUT
-// const updateContact = asyncHandler(async (req, res) => {
-//     const id = req.params.id;
-//     const {name, type, path} = req.body;
-//     const currentPath = req.query.path || '/';
-//     const file = await File.findById(id);
-//     if (!file) {
-//         throw new Error('File not found.');
-//     }
-
-//     file.filename = name;
-//     file.filetype = type;
-//     file.filePath = path;
-//     file.save();
-//     res.redirect('/main?path=' + encodeURIComponent(currentPath));
-// });
-
-
-// change file name
-// PUT
 const updateContact = asyncHandler(async (req, res) => {
     const id = req.params.id;
     const { name, type, path } = req.body;
@@ -197,10 +178,8 @@ const editFile = asyncHandler(async (req, res) => {
 
 const saveFile = asyncHandler(async (req, res) => {
   const id = req.params.id;
-  const { content } = req.body;
-  
+  const { content, generate } = req.body;
   const userDir = path.join(tempYamlDir, req.user.username);
-
   const file = await File.findById(id);
   if (!file) {
     return res.status(404).json({ error: 'File not found.' });
@@ -209,6 +188,16 @@ const saveFile = asyncHandler(async (req, res) => {
   // 1. 파일 내용 저장
   file.content = content;
   await file.save();
+
+  if (!generate || generate !== 'on') {
+    return res.json({
+      success: true,
+      message: "Saved only (no generation)"
+      // drawObjectDoc: null,
+      // cellname: null,
+      // libname: null
+    });
+  }
 
   // 2. filetype이 py일 때 실행
   if (file.filetype === 'py') {
@@ -325,31 +314,92 @@ const saveFile = asyncHandler(async (req, res) => {
       try {
         doc = yaml.load(fs.readFileSync(tempDir_y_u_yaml, 'utf8')); 
         // console.info(doc);
-     } catch (e) {
+      } catch (e) {
         console.error(e);
-     }
-      return res.json({ success: true, output: stdout, drawObjectDoc: doc, cellname: req.body.cellname, libname: lib });
+      }
+      return res.json({
+        success: true,
+        output: stdout,
+        drawObjectDoc: doc,
+        cellname: req.body.cellname || null,   // null safety
+        libname: lib
+      });
+      // return res.json({ success: true, output: stdout, drawObjectDoc: doc, cellname: req.body.cellname, libname: lib });
     });
   } else {
-    res.json({ success: true });
+    return res.json({
+      success: true,
+      message: "Saved (non-py filetype)",
+      drawObjectDoc: null,
+      cellname: null,
+      libname: null
+    });
+    // res.json({ success: true });
   }
 });
 
-// save file
-// PUT
-// const saveFile = asyncHandler(async (req, res) => {
-//     const id = req.params.id;
-//     const { content } = req.body;
+// ==================================================
 
-//     const file = await File.findById(id);
-//     if (!file) {
-//         return res.status(404).json({ error: 'File not found.' });
+// const drawLayout = asyncHandler(async (req, res) => {
+//   console.log("✅ drawLayout 라우터 실행됨", {
+//     libname,
+//     cellname,
+//     username
+//   });
+//  //이거 안나온다.
+//   const { libname, cellname } = req.body;
+//   const username = req.user.username;
+
+//   const yamlPath = path.join(__dirname, '../../temp_yaml', username, `${libname}_templates.yaml`);
+//   if (!fs.existsSync(yamlPath)) {
+//     return res.status(404).json({ success: false, message: 'YAML 파일이 존재하지 않습니다.' });
+//   }
+
+//   try {
+//     const doc = yaml.load(fs.readFileSync(yamlPath, 'utf8'));
+//     if (!doc[libname] || !doc[libname][cellname]) {
+//       return res.status(400).json({ success: false, message: 'cellname이 YAML에 존재하지 않습니다.' });
 //     }
 
-//     file.content = content;
-//     await file.save();
-//     res.json({ success: true });
+//     return res.json({
+//       success: true,
+//       drawObjectDoc: doc,
+//       libname,
+//       cellname
+//     });
+//   } catch (e) {
+//     console.error('YAML 파싱 에러:', e);
+//     return res.status(500).json({ success: false, message: 'YAML 파싱 중 에러' });
+//   }
 // });
+
+const drawLayout = asyncHandler(async (req, res) => {
+  const { libname, cellname } = req.query;  // 🔁 GET 방식으로 바뀌었기 때문에 query로 받음
+  const username = req.user.username;
+
+  const yamlPath = path.join(__dirname, '../../temp_yaml', username, `${libname}_templates.yaml`);
+  if (!fs.existsSync(yamlPath)) {
+    return res.status(404).json({ success: false, message: 'YAML 파일이 존재하지 않습니다.' });
+  }
+
+  try {
+    const doc = yaml.load(fs.readFileSync(yamlPath, 'utf8'));
+    if (!doc[libname] || !doc[libname][cellname]) {
+      return res.status(400).json({ success: false, message: 'cellname이 YAML에 존재하지 않습니다.' });
+    }
+
+    return res.json({
+      success: true,
+      drawObjectDoc: doc,
+      libname,
+      cellname
+    });
+  } catch (e) {
+    console.error('YAML 파싱 에러:', e);
+    return res.status(500).json({ success: false, message: 'YAML 파싱 중 에러' });
+  }
+});
+
 
 // ==================================================
 
@@ -391,7 +441,8 @@ module.exports = {
     addContactForm,
     editFile,
     saveFile,
-    getLogFile
+    getLogFile,
+    drawLayout
     // ,
     // adddir,
     // createDir

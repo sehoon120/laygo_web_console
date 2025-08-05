@@ -25,7 +25,19 @@
             <textarea name="content" class="form-control" rows="48"
               placeholder="Write your code here"><%= file.content %></textarea>
           </div>
-          <button type="submit" class="btn btn-primary">Save & Generate</button>
+          <!-- ✅ Generate 스위치 추가 -->
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="generateSwitch" name="generate" value="on" form="editForm">
+            <label class="form-check-label" for="generateSwitch">Generate (Save 후 실행)</label>
+          </div>
+
+          <!-- ✅ Save 버튼 수정 -->
+          <button type="submit" class="btn btn-primary" form="editForm">Save</button>
+
+          <!-- ✅ Layout Draw 버튼 분리 -->
+          <button id="layoutDrawBtn" type="button" class="btn btn-secondary mt-2">Layout Draw</button>
+
+          <!-- <button type="submit" class="btn btn-primary">Save & Generate</button> -->
         </form>
         <!-- 저장 결과 메시지 출력 영역 -->
         <div id="message" class="mt-3"></div>
@@ -77,6 +89,110 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
+
+      // ================================================================================
+      // 임의로 추가한것
+      // 레이아웃 그리기 버튼 관련
+      document.getElementById("layoutDrawBtn").addEventListener("click", async function () {
+        const cellname = document.getElementById("cellNameInput").value.trim() || 'cellname';
+        const libname = document.getElementById("yamlFileInput").value.trim() || 'logic_generated';
+        const messageDiv = document.getElementById("message");
+
+        if (!cellname || !libname) {
+          messageDiv.innerText = "libname과 cellname을 입력해주세요.";
+          return;
+        }
+
+        const fileId = "<%= file._id %>";
+        const currentPathEncoded = encodeURIComponent("<%= currentPath %>");
+        const lib = encodeURIComponent(libname);
+        const cell = encodeURIComponent(cellname);
+
+        try {
+          const response = await fetch(`/main/${fileId}/edit/draw?path=${currentPathEncoded}&libname=${lib}&cellname=${cell}`, {
+            method: 'GET'  // ✅ GET으로 변경
+          });
+
+          const text = await response.text();
+          let result;
+          try {
+            result = JSON.parse(text);
+          } catch (parseErr) {
+            console.error("서버 응답이 JSON이 아님:", text);
+            messageDiv.innerText = "서버에서 JSON 응답을 받지 못했습니다.";
+            return;
+          }
+
+          if (response.ok && result.success && result.drawObjectDoc) {
+            rectList = [];
+            buildMap(result.drawObjectDoc, cellname, libname);
+            redraw();
+            messageDiv.innerText = "Layout 그리기 완료";
+          } else {
+            messageDiv.innerText = result.message || "Layout 실패";
+          }
+        } catch (error) {
+          console.error("Layout draw 요청 중 에러:", error);
+          messageDiv.innerText = "에러 발생";
+        }
+      });
+
+      // document.getElementById("layoutDrawBtn").addEventListener("click", async function () {
+      //   const cellname = document.getElementById("cellNameInput").value.trim() || 'cellname';
+      //   const libname = document.getElementById("yamlFileInput").value.trim() || 'logic_generated';
+      //   const messageDiv = document.getElementById("message");
+
+      //   if (!cellname || !libname) {
+      //     messageDiv.innerText = "libname과 cellname을 입력해주세요.";
+      //     return;
+      //   }
+
+      //   const formData = new URLSearchParams();
+      //   formData.append('cellname', cellname);
+      //   formData.append('libname', libname);
+
+      //   try {
+      //     const fileId = "<%= file._id %>";
+      //     const currentPathEncoded = "<%= encodeURIComponent(currentPath) %>";
+      //     // const encodedLib = encodeURIComponent(libname);
+      //     // const encodedCell = encodeURIComponent(cellname);
+      //     // console.log(fileId, currentPathEncoded)
+      //     // const response = await fetch(`/main/${fileId}/edit/draw?libname=${encodedLib}&cellname=${encodedCell}&path=${currentPathEncoded}`);
+      //     const response = await fetch(`/main/${fileId}/edit/draw?path=${currentPathEncoded}`, {
+      //       method: 'POST',
+      //       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      //       body: formData,
+      //       credentials: 'include'  
+      //     });
+
+      //     const text = await response.text();  // 먼저 텍스트로 받음
+      //     let result;
+      //     // console.log("aasasas")
+      //     // console.log(text)
+      //     try {
+      //       result = JSON.parse(text);
+      //     } catch (parseErr) {
+      //       console.error("서버 응답이 JSON이 아님:", text);
+      //       messageDiv.innerText = "서버에서 JSON 응답을 받지 못했습니다.";
+      //       return;
+      //     }
+
+      //     if (response.ok && result.success && result.drawObjectDoc) {
+      //       rectList = [];
+      //       buildMap(result.drawObjectDoc, cellname, libname);
+      //       redraw();
+      //       messageDiv.innerText = "Layout 그리기 완료";
+      //     } else {
+      //       messageDiv.innerText = result.message || "Layout 실패";
+      //     }
+      //   } catch (error) {
+      //     console.error("Layout draw 요청 중 에러:", error);
+      //     messageDiv.innerText = "에러 발생";
+      //   }
+      // });
+
+      // ================================================================================
+
       // 서버에서 전달된 drawObjectDoc을 전역 변수로 설정 (빈 객체면 {})
       var drawObjectDoc = (<%- JSON.stringify(drawObjectDoc || {}) %>);
       // console.log("drawObjectDoc:", drawObjectDoc);
@@ -346,19 +462,41 @@
           const response = await fetch(form.action, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: data
+            body: data,
+            credentials: 'include'
           });
           const result = await response.json();
           console.log("AJAX 응답:", result);
           let messageDiv = document.getElementById("message");
-          if (response.ok && result.success) {
-            messageDiv.innerText = "저장되었습니다.";
-            if (result.drawObjectDoc) {
-              rectList = [];
-              buildMap(result.drawObjectDoc, cellname, libname);
-              redraw();
+          // if (response.ok && result.success) {
+          //   messageDiv.innerText = "저장되었습니다.";
+          //   if (result.drawObjectDoc) {
+          //     rectList = [];
+          //     buildMap(result.drawObjectDoc, cellname, libname);
+          //     redraw();
+          //   }
+          // } 
+          if (response.ok && result.success) {    // switch에 따라 다른 응답
+            const generateSwitch = document.getElementById("generateSwitch");
+            if (generateSwitch && generateSwitch.checked) {
+              messageDiv.innerText = "Generate 완료되었습니다.";
+            } else {
+              messageDiv.innerText = "저장되었습니다.";
             }
-          } else {
+
+            // if (result.drawObjectDoc) {
+            //   rectList = [];
+            //   buildMap(result.drawObjectDoc, cellname, libname);
+            //   redraw();
+            // }
+            // Save에선 layout을 절대 그리지 않도록
+            // if (result.drawObjectDoc && result.libname && result.cellname) {
+            //   rectList = [];
+            //   buildMap(result.drawObjectDoc, result.cellname, result.libname);
+            //   redraw();
+            // }
+          } 
+          else {
             messageDiv.innerText = "저장에 실패했습니다.";
           }
           messageDiv.style.opacity = 1;

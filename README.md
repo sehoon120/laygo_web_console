@@ -89,6 +89,7 @@ Nifty github 임의 변경점:
 
 - (중요)Requirements 변경에 따른 prototype과의 design 변경점
     + 1) Edit 페이지에서 Save&Generate 이외에 Layout draw 여부를 선택 가능하게 수정(上) => Edit 페이지에서 save(&delete previous generation result)와 generate버튼, layout draw 버튼 분리.(edit.ejs, fileRoutes.js, fileController.js)
+    -> 진행중(천세훈) 현재 generate 스위치 여부와 상관없이 파일 실행되는 버그, drawLayout 함수가 실행되지 않는 버그가 있음 
     + 2) Origin 기준 x, y 축 표시 => Drawing 하는 페이지 코드 수정(edit.ejs)
     -> 개선 완료 - sehoon/ver3에서
     + 3) instance에는 instance name, instance libname, cellname 표시 필요 => Drawing 하는 페이지 코드 수정(edit.ejs)

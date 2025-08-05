@@ -14,14 +14,10 @@ const {
     addContactForm,
     editFile,
     saveFile,
-    getLogFile
-    // ,
-    // adddir,
-    // createDir
+    getLogFile,
+    drawLayout
 } = require('../controllers/fileController');
 
-router.route('/')
-    .get(getAllContacts);
 
 router.route('/add')
     .get(addContactForm)
@@ -31,16 +27,27 @@ router.route('/add')
 //     .get(adddir)
 //     .post(createDir);
 
+
+
+
+
+router.route('/:id/edit/draw')
+    .get(drawLayout);  // ✅ 새로 추가될 layout draw 전용 라우트
+
+router.route('/:id/edit/logs')
+    .get(getLogFile);
+
+router.route('/:id/edit')
+    .get(editFile)
+    .put(saveFile);     // Save (with optional generate)
+
 router.route('/:id')
     .get(getContact)
     .put(updateContact)
     .delete(deleteContact);
 
-router.route('/:id/edit')
-    .get(editFile)
-    .put(saveFile);
+router.route('/')
+    .get(getAllContacts);
 
-router.route('/:id/edit/logs')
-    .get(getLogFile);
-
+    
 module.exports = router;
