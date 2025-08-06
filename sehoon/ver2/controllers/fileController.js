@@ -177,13 +177,23 @@ const editFile = asyncHandler(async (req, res) => {
 // const SCRIPT_PATH = path.join(BAG_WORKSPACE_PATH, 'start_bag.sh');
 
 const saveFile = asyncHandler(async (req, res) => {
+  const fs = require('fs');
+  fs.appendFileSync('server_log.txt', '📩 saveFile 함수 진입\n');
+
+  console.log("📩 saveFile 함수 진입");
+
   const id = req.params.id;
   const { content, generate } = req.body;
   const userDir = path.join(tempYamlDir, req.user.username);
+  console.log("📥 req.body:", req.body);
+
+  console.log("▶️ generate 값:", generate);
+
   const file = await File.findById(id);
   if (!file) {
     return res.status(404).json({ error: 'File not found.' });
   }
+
 
   // 1. 파일 내용 저장
   file.content = content;
@@ -387,7 +397,7 @@ const drawLayout = asyncHandler(async (req, res) => {
     if (!doc[libname] || !doc[libname][cellname]) {
       return res.status(400).json({ success: false, message: 'cellname이 YAML에 존재하지 않습니다.' });
     }
-
+    
     return res.json({
       success: true,
       drawObjectDoc: doc,

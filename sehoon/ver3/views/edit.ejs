@@ -93,50 +93,6 @@
       // ================================================================================
       // 임의로 추가한것
       // 레이아웃 그리기 버튼 관련
-      document.getElementById("layoutDrawBtn").addEventListener("click", async function () {
-        const cellname = document.getElementById("cellNameInput").value.trim() || 'cellname';
-        const libname = document.getElementById("yamlFileInput").value.trim() || 'logic_generated';
-        const messageDiv = document.getElementById("message");
-
-        if (!cellname || !libname) {
-          messageDiv.innerText = "libname과 cellname을 입력해주세요.";
-          return;
-        }
-
-        const fileId = "<%= file._id %>";
-        const currentPathEncoded = encodeURIComponent("<%= currentPath %>");
-        const lib = encodeURIComponent(libname);
-        const cell = encodeURIComponent(cellname);
-
-        try {
-          const response = await fetch(`/main/${fileId}/edit/draw?path=${currentPathEncoded}&libname=${lib}&cellname=${cell}`, {
-            method: 'GET'  // ✅ GET으로 변경
-          });
-
-          const text = await response.text();
-          let result;
-          try {
-            result = JSON.parse(text);
-          } catch (parseErr) {
-            console.error("서버 응답이 JSON이 아님:", text);
-            messageDiv.innerText = "서버에서 JSON 응답을 받지 못했습니다.";
-            return;
-          }
-
-          if (response.ok && result.success && result.drawObjectDoc) {
-            rectList = [];
-            buildMap(result.drawObjectDoc, cellname, libname);
-            redraw();
-            messageDiv.innerText = "Layout 그리기 완료";
-          } else {
-            messageDiv.innerText = result.message || "Layout 실패";
-          }
-        } catch (error) {
-          console.error("Layout draw 요청 중 에러:", error);
-          messageDiv.innerText = "에러 발생";
-        }
-      });
-
       // document.getElementById("layoutDrawBtn").addEventListener("click", async function () {
       //   const cellname = document.getElementById("cellNameInput").value.trim() || 'cellname';
       //   const libname = document.getElementById("yamlFileInput").value.trim() || 'logic_generated';
@@ -147,28 +103,18 @@
       //     return;
       //   }
 
-      //   const formData = new URLSearchParams();
-      //   formData.append('cellname', cellname);
-      //   formData.append('libname', libname);
+      //   const fileId = "<%= file._id %>";
+      //   const currentPathEncoded = encodeURIComponent("<%= currentPath %>");
+      //   const lib = encodeURIComponent(libname);
+      //   const cell = encodeURIComponent(cellname);
 
       //   try {
-      //     const fileId = "<%= file._id %>";
-      //     const currentPathEncoded = "<%= encodeURIComponent(currentPath) %>";
-      //     // const encodedLib = encodeURIComponent(libname);
-      //     // const encodedCell = encodeURIComponent(cellname);
-      //     // console.log(fileId, currentPathEncoded)
-      //     // const response = await fetch(`/main/${fileId}/edit/draw?libname=${encodedLib}&cellname=${encodedCell}&path=${currentPathEncoded}`);
-      //     const response = await fetch(`/main/${fileId}/edit/draw?path=${currentPathEncoded}`, {
-      //       method: 'POST',
-      //       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      //       body: formData,
-      //       credentials: 'include'  
+      //     const response = await fetch(`/main/${fileId}/edit/draw?path=${currentPathEncoded}&libname=${lib}&cellname=${cell}`, {
+      //       method: 'GET'  // ✅ GET으로 변경
       //     });
 
-      //     const text = await response.text();  // 먼저 텍스트로 받음
+      //     const text = await response.text();
       //     let result;
-      //     // console.log("aasasas")
-      //     // console.log(text)
       //     try {
       //       result = JSON.parse(text);
       //     } catch (parseErr) {
@@ -190,6 +136,8 @@
       //     messageDiv.innerText = "에러 발생";
       //   }
       // });
+
+      
 
       // ================================================================================
 
@@ -503,7 +451,7 @@
           setTimeout(() => {
             messageDiv.style.transition = "opacity 0.5s ease-out";
             messageDiv.style.opacity = 0;
-          }, 1000);
+          }, 2000);
         } catch (error) {
           let messageDiv = document.getElementById("message");
           messageDiv.innerText = "오류가 발생했습니다.";
@@ -516,6 +464,65 @@
         }
       });
     
+
+      document.getElementById("layoutDrawBtn").addEventListener("click", async function () {
+        console.log("📐 Layout Draw 버튼 클릭됨");
+
+        // 필요한 입력값 추출
+        const cellname = document.getElementById("cellNameInput").value || 'cellname';
+        const libname = document.getElementById("yamlFileInput").value || 'logic_generated';
+
+        const form = document.getElementById("editForm");
+        const formData = new FormData(form);
+
+        const data = new URLSearchParams();
+        for (const pair of formData) {
+          data.append(pair[0], pair[1]);
+        }
+
+        try {
+          const response = await fetch(`${form.action}/draw`, {   // ✅ draw 전용 라우터 호출
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: data,
+            credentials: 'include'
+          });
+
+          const result = await response.json();
+          console.log("🎯 Layout Draw 응답:", result);
+
+          const messageDiv = document.getElementById("message");
+          if (response.ok && result.drawObjectDoc) {
+            const { drawObjectDoc, cellname, libname } = result;
+            const messageDiv = document.getElementById("message");
+
+            if (
+              drawObjectDoc.hasOwnProperty(libname) &&
+              drawObjectDoc[libname].hasOwnProperty(cellname)
+            ) {
+              setTimeout(() => {
+                messageDiv.innerText = '✅ Layout Draw 성공';
+              }, 2000); // 2초 후에 메시지 제거
+
+              // messageDiv.innerText = "✅ Layout Draw 성공";
+              rectList = [];
+              buildMap(drawObjectDoc, cellname, libname);
+              redraw();
+            } else {
+              setTimeout(() => {
+                messageDiv.innerText = `⚠️ Layout Draw 실패: ${libname} / ${cellname} 없음`;
+              }, 2000);
+              // messageDiv.innerText = `⚠️ Layout Draw 실패: ${libname} / ${cellname} 없음`;
+              console.warn(`drawObjectDoc[${libname}][${cellname}] is undefined`);
+            }
+          }
+        } catch (error) {
+          console.error("❌ Layout Draw 오류:", error);
+          document.getElementById("message").innerText = "서버 오류로 Layout을 그릴 수 없습니다.";
+        }
+      });
+
+
       // 터미널 영역 폴링 (2초 간격)
       setInterval(async () => {
         try {

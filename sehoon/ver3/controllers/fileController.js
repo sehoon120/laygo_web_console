@@ -197,13 +197,23 @@ const editFile = asyncHandler(async (req, res) => {
 
 const saveFile = asyncHandler(async (req, res) => {
   const id = req.params.id;
-  const { content } = req.body;
+  const { content, generate } = req.body;
   
   const userDir = path.join(tempYamlDir, req.user.username);
 
   const file = await File.findById(id);
   if (!file) {
     return res.status(404).json({ error: 'File not found.' });
+  }
+
+  if (!generate || generate !== 'on') {
+    return res.json({
+      success: true,
+      message: "Saved only (no generation)"
+      // drawObjectDoc: null,
+      // cellname: null,
+      // libname: null
+    });
   }
 
   // 1. 파일 내용 저장
