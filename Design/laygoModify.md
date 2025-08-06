@@ -9,6 +9,18 @@
 - 서버 내에 저장된 bag_workspace_gpdk45의 자원들을 이용해 레이아웃을 생성한다.
 - \bag_workspace_gpdk045\gpdk045\workspace_setup\.cshrc_bag 변경
     + setenv BAG_PYTHON "/TOOL/Anaconda/current/bin/python3.7" -> setenv BAG_PYTHON "/usr/bin/python3"
+- \bag_workspace_gpdk045\gpdk045\laygo2_tech\core.py 변경
+    + 서버 구현 시 실행 dir의 차이 때문에 tech_fname 경로 변경
+    ```
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    tech_fname = os.path.join(base_dir, 'laygo2_tech.yaml')
+    ```
+- \bag_workspace_gpdk045\gpdk045\laygo2_tech\flex.py 변경
+    + 서버 구현 시 실행 dir의 차이 때문에 tech_fname 경로 변경
+    ```
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    tech_fname = os.path.join(base_dir, 'laygo2_tech.yaml')
+    ```
 - \bag_workspace_gpdk045\start_bag_test.sh 추가 (이후 이름 변경 예정)
     + Web console에서 layout의 생성을 위해 실행하는 script
     + Pseudocode
@@ -46,6 +58,18 @@
         + 2) Routing 과정: Design 객체의 route 함수에서 RoutingGrid의 route 함수 호출해 metal 생성 후, 내부 리스트에 append해 저장
         + 3) 따라서, design.export_to_template에서 export 시 hextension / vextension을 포함하지 않는 것이 문제가 된다.
         + 4) Design.rect의 metal들에는 extension들이 포함되어 있다.
+    + Skill, yaml export 코드 예시
+```
+        # 7. Export to physical database.
+        print("Export design\n")
+        laygo2.export(lib, tech=tech, filename=export_path_skill+libname+'_'+cellname+'.il')
+        # Filename example: ./laygo2_generators_private/logic/skill/logic_generated_nand_2x.il
+ 
+        # 8. Export to a template database file.
+        nat_temp = dsn.export_to_template()
+        laygo2.export_template(nat_temp, filename=export_path+libname+'_templates.yaml', mode='append')
+        # Filename example: ./laygo2_generators_private/logic/logic_generated_templates.yaml
+```
 
 - 기존 YAML로의 export로 출력된 export data는 두께 데이터를 포함하고 있지 않으며, 따라서 draw를 위해 추가가 필요하다.
 - 추가 함수 1: laygo2.interface.yaml.export_for_webconsole(filename)
