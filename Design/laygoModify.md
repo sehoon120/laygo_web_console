@@ -1,4 +1,4 @@
-# LAYGO 수정사항 / 수정중(2025-08-04)
+# LAYGO 수정사항 / 수정중(2025-08-07)
 
 ## 개요
 - Web console 수정을 위한 laygo 코드 수정 내용 정리
@@ -43,11 +43,10 @@
     ```
 
 ## Laygo에 web console용 출력 함수 추가
-- 기존 LAYGO의 export 메커니즘
+- 기존 LAYGO의 yaml export 메커니즘
     + laygo2.interface.yaml.export_template : Template object와 출력할 filename 받아 yaml로 출력 수행. Template을 dict로 변환 후 그것을 yaml로 출력. 
     + class laygo2.object.database.Design의 member function export_to_template : Design object를 NativeInstanceTemplate로 출력
         + 문제 1) Subblock의 출력 안 됨
-        + 문제 2)
         + Prototype에서의 수정 내역:  object/database.py line 1759 -> subblock에 virtual instance들도 추가
     + class laygo2.object.template.NativeInstanceTemplate의 member function export_to_dict : NativeInstanceTemplate을 python dict로 출력
         + libname, cellname, bbox, pins, masks, subblocks, metals 출력
@@ -77,13 +76,32 @@
     + Issue 1) Web console에서의 접근과 단순 local에서의 접근을 어떻게 구분하지?
     + Issue 2) MongoDB atlas 접근: https://ohnyong.tistory.com/35
 - 수정 함수 2: laygo.interface.core.export()
-    + Export target에 WebConsole 추가: webconsole.py의 export 호출
+    + Export target에 webconsole 추가: webconsole.py의 export(추가 함수 1) 호출
+    + 추가 내용
+    ```
+    elif target == 'webconsole':  # webconsole export
+        return webconsole.export(
+            db=db,
+            filename=filename,
+            cellname=cellname,
+        )
+    ```
 
 - 추가 함수 1: laygo2.interface.webconsole.export()
     + 출력을 위한 파일 생성(각 Laygo 스크립트별로 할당된 YAML 파일) 수행
-    + 입력: 
+    + 입력: db: "laygo2.object.database.Library", cellname: str = None
     + 출력: 서버에 WebConsole 출력을 위한 yaml 파일 저장
-    + 
+    + 관련 정보: libaray에 design을 append할 경우, library 아래의 element dictionary에 design이 들어가게 됨
+    + Pseudocode
+    ```
+    function export(db, cellname) {
+        For element in  db.elements {
+            temp_dictionary = element.export_to_dict_with_extension();
+            Write_yaml(temp_dictionary, path=../laygowebconsole/temp/USRNAME/SCRIPTNAME/cellname.yaml)
+        }
+    }
+    ```
+    + 추가 문제: Username과 Scriptname은 어디서 받지?
 
 ## Laygo script에 templete database 입력 함수 수정
 - 기존 방식의 문제점: local에 존재하는 template database 디렉터리의 위치를 알아야 import가 가능 -> 다른 유저의 디렉터리에 대한 접근도 가능해질 수 있다. 서버 내의 디렉터리 구조를 알아야 한다는 전제가 있다.
