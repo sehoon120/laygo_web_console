@@ -76,12 +76,14 @@
     + MongoDB에 저장된 template database 파일로 출력되도록 해야 함(Local directory가 아니라) 
     + Issue 1) Web console에서의 접근과 단순 local에서의 접근을 어떻게 구분하지?
     + Issue 2) MongoDB atlas 접근: https://ohnyong.tistory.com/35
-- 추가 함수 1: laygo2.interface.yaml.export_for_webconsole(filename)
+- 수정 함수 2: laygo.interface.core.export()
+    + Export target에 WebConsole 추가: webconsole.py의 export 호출
+
+- 추가 함수 1: laygo2.interface.webconsole.export()
     + 출력을 위한 파일 생성(각 Laygo 스크립트별로 할당된 YAML 파일) 수행
-    + 이때, filename에 있는 경로는 template database의 경로, 즉 DB 상의 경로로 함 = Template database는 DB에, 출력용 yaml은 서버에 저장
-    + 출력(외부 파일 출력): Template database update(export_yaml과 같은 방법) / YAML output file for layout drawing
-- 추가 함수 2: laygo2.object.design.Design에 export_to_template (?) 그냥합칠까 흠
-- 
+    + 입력: 
+    + 출력: 서버에 WebConsole 출력을 위한 yaml 파일 저장
+    + 
 
 ## Laygo script에 templete database 입력 함수 수정
 - 기존 방식의 문제점: local에 존재하는 template database 디렉터리의 위치를 알아야 import가 가능 -> 다른 유저의 디렉터리에 대한 접근도 가능해질 수 있다. 서버 내의 디렉터리 구조를 알아야 한다는 전제가 있다.
