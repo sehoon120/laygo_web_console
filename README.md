@@ -89,9 +89,10 @@ Nifty github 임의 변경점:
 
 - (중요)Requirements 변경에 따른 prototype과의 design 변경점
     + 1) Edit 페이지에서 Save&Generate 이외에 Layout draw 여부를 선택 가능하게 수정(上) => Edit 페이지에서 save(&delete previous generation result)와 generate버튼, layout draw 버튼 분리.(edit.ejs, fileRoutes.js, fileController.js)
-    -> 개선 완료 - sehoon/ver3에서 cellname 자동 추출 방식은 고안이 필요함 
+        -> 개선 완료 - sehoon/ver3에서 cellname 자동 추출 방식은 고안이 필요함 
+        -> 파이썬 코드 보고 간단한 libname, cellname 자동추출 기능 제작 + 여전히 수동 지정 가능
     + 2) Origin 기준 x, y 축 표시 => Drawing 하는 페이지 코드 수정(edit.ejs)
-    -> 개선 완료 - sehoon/ver3에서
+        -> 개선 완료 - sehoon/ver3에서
     + 3) instance에는 instance name, instance libname, cellname 표시 필요 => Drawing 하는 페이지 코드 수정(edit.ejs)
     + 4) Layer 별로 표시를 켜고 끄는 기능. Instance / Instance pin 끄고 켜는 기능 => Drawing 하는 페이지 코드 수정(edit.ejs)
     + 4) Routing metal drawing 시 두께 값 추출: Laygo 함수 추가...?(fileController.js 수정 + laygo 신규 함수 추가)

@@ -14,7 +14,8 @@ const {
     addContactForm,
     editFile,
     saveFile,
-    getLogFile
+    getLogFile,
+    drawLayout
     // ,
     // adddir,
     // createDir
@@ -42,5 +43,8 @@ router.route('/:id/edit')
 
 router.route('/:id/edit/logs')
     .get(getLogFile);
+
+router.route('/:id/edit/draw')
+    .post(drawLayout);
 
 module.exports = router;
