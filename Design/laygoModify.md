@@ -74,6 +74,7 @@
 - 수정 함수 1: laygo2.interface.yaml.export_template()
     + MongoDB에 저장된 template database 파일로 출력되도록 해야 함(Local directory가 아니라) 
     + Issue 1) Web console에서의 접근과 단순 local에서의 접근을 어떻게 구분하지?
+        + 아래 import와 마찬가지: Laygo 환경변수에 WebConsole 환경 여부를 포함시키고, import_template 함수에서는 이 환경변수를 확인해 webconsole 환경인 경우 DB에서 정보를 읽어옴
     + Issue 2) MongoDB atlas 접근: https://ohnyong.tistory.com/35
 - 수정 함수 2: laygo.interface.core.export()
     + Export target에 webconsole 추가: webconsole.py의 export(추가 함수 1) 호출
@@ -102,10 +103,13 @@
     }
     ```
     + 추가 문제: Username과 Scriptname은 어디서 받지?
+        + 스크립트의 실행 시 인자로 username과 filename을 넘겨주는 방식이므로 그것을 이용 -> 단순히 환경변수 등만 이용 시 여러 유저 접속 시 문제가 될 수 있을 것 같다. 함수의 인자로 직접 넘겨줄 방법이 없을까?
 
 ## Laygo script에 templete database 입력 함수 수정
 - 기존 방식의 문제점: local에 존재하는 template database 디렉터리의 위치를 알아야 import가 가능 -> 다른 유저의 디렉터리에 대한 접근도 가능해질 수 있다. 서버 내의 디렉터리 구조를 알아야 한다는 전제가 있다.
 - 수정 목표: /main에 보이는 유저의 DB 내 디렉터리 구조 내에 template database를 저장할 수 있다. 해당 디렉터리 구조 내의 주소로 template DB 접근 가능하게 함.
 - 수정 대상 함수: laygo2.interface.yaml.py 의 import_template()
     + Issue 1) Web console에서의 접근과 단순 local에서의 접근을 어떻게 구분하지?
+        + 가능하면 새 함수를 정의하지 않는 방식. 오버로딩 안되나? -> Python은 오버로딩이 불가능할뿐더러 매개변수가 다르지도 않음
+        + Laygo 환경변수에 WebConsole 환경 여부를 포함시키고, import_template 함수에서는 이 환경변수를 확인해 webconsole 환경인 경우 DB에서 정보를 읽어옴
     + Issue 2) MongoDB atlas 접근: https://ohnyong.tistory.com/35
