@@ -95,7 +95,7 @@
     + 관련 정보: libaray에 design을 append할 경우, library 아래의 element dictionary에 design이 들어가게 됨
     + Pseudocode
     ```
-    function export(db, cellname) {
+    function export(db, username, cellname) {
         For element in  db.elements {
             temp_dictionary = element.export_to_dict_with_extension();
             Write_yaml(temp_dictionary, path=../laygowebconsole/temp/USRNAME/SCRIPTNAME/cellname.yaml)
@@ -103,7 +103,11 @@
     }
     ```
     + 추가 문제: Username과 Scriptname은 어디서 받지?
-        + 스크립트의 실행 시 인자로 username과 filename을 넘겨주는 방식이므로 그것을 이용 -> 단순히 환경변수 등만 이용 시 여러 유저 접속 시 문제가 될 수 있을 것 같다. 함수의 인자로 직접 넘겨줄 방법이 없을까?
+        + 스크립트의 실행 시 인자로 username과 filename을 넘겨주는 방식이므로 그것을 이용 -> 함수의 인자로 직접 넘겨줄 방법이 없을까?
+        + Script 실행 시 인자로 전달하고, 인자 처리용 코드를 임시 저장 시 스크립트에 추가한다. start_bag.sh와 fileController.js에서 구현
+        + 인자 처리용 코드 디자인
+            + 1) 스크립트 파일 위에 인자 받아서 변수에 저장하는 코드 추가(sys.argv)
+            + 2) 사용자는 export(db)로 함수 사용, 실행 시 스크립트 내용에서 export(db, username, cellname)으로 수정 
 
 ## Laygo script에 templete database 입력 함수 수정
 - 기존 방식의 문제점: local에 존재하는 template database 디렉터리의 위치를 알아야 import가 가능 -> 다른 유저의 디렉터리에 대한 접근도 가능해질 수 있다. 서버 내의 디렉터리 구조를 알아야 한다는 전제가 있다.
