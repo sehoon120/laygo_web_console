@@ -107,7 +107,11 @@
         + Script 실행 시 인자로 전달하고, 인자 처리용 코드를 임시 저장 시 스크립트에 추가한다. start_bag.sh와 fileController.js에서 구현
         + 인자 처리용 코드 디자인
             + 1) 스크립트 파일 위에 인자 받아서 변수에 저장하는 코드 추가(sys.argv)
-            + 2) 사용자는 export(db)로 함수 사용, 실행 시 스크립트 내용에서 export(db, username, cellname)으로 수정 
+            + 2) 사용자는 export(db)로 함수 사용, 실행 시 스크립트 내용에서 export(db, username, cellname)으로 수정
+    + Pseudocode: start_bag.sh(현재 start_bag_test.sh) 수정
+    ```
+    (line30) ${BAG_PYTHON:-python3} "$CODE_PATH" "$USERNAME" "$FILENAME" >> "$LOG_FILE" 2>&1
+    ```
 
 ## Laygo script에 templete database 입력 함수 수정
 - 기존 방식의 문제점: local에 존재하는 template database 디렉터리의 위치를 알아야 import가 가능 -> 다른 유저의 디렉터리에 대한 접근도 가능해질 수 있다. 서버 내의 디렉터리 구조를 알아야 한다는 전제가 있다.
