@@ -27,11 +27,39 @@ function addContactForm(req, res) {
 function createContact(req, res) {
     filename <- req.body.filename
     filetype <- req.body.filetype
+    currentpath <- req.query.path
     
+    if(filename or filetype is empty)
+        error
+
+    map filedata <- {user: req.user.username, filename: filename, filetype: filetype, filepath: currentpath}
+
+    if(req.file is not empty) {
+        if(using memory storage) {
+            fileData.content <- req.file.buffer
+        }
+        elif (using disk storage) {
+            fileData.content <- read(req.file.path)
+        }
+        else{
+            Do nothing
+        }
+    }
+
+    create file with filedata
+
+    res.redirect('/main?path=' + encodeURIComponent(currentPath))
 }
 ```
 
-- 함수 getContact: 파일 이름 받아 파일 찾아서 해당 페이지 render
+- 함수 getContact: 파일 이름(id) 받아 파일 찾아서 해당 페이지 render
+```
+function getContact(req, res) {
+    file <- File.findByID(req.params.id)
+    currentPath <- req.query.path
+    res.render('updage', {file, currentPath})            # update.ejs render
+}
+```
 
 - 함수 updateContact: 파일 경로 변경. Name, type, path를 새로 request 받아 이를 변환. Directory에 대해서도 경로 변경이 가능하므로, 이 경우 하위 파일들에 대해서도 메타데이터를 변환시켜주어야 한다.
 
