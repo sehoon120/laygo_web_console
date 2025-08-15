@@ -113,7 +113,7 @@
     (line30) ${BAG_PYTHON:-python3} "$CODE_PATH" "$USERNAME" "$FILENAME" >> "$LOG_FILE" 2>&1
     ```
 
-## Laygo script에 templete database 입력 함수 수정
+## Laygo script에 templete database import 함수 수정
 - 기존 방식의 문제점: local에 존재하는 template database 디렉터리의 위치를 알아야 import가 가능 -> 다른 유저의 디렉터리에 대한 접근도 가능해질 수 있다. 서버 내의 디렉터리 구조를 알아야 한다는 전제가 있다.
 - 수정 목표: /main에 보이는 유저의 DB 내 디렉터리 구조 내에 template database를 저장할 수 있다. 해당 디렉터리 구조 내의 주소로 template DB 접근 가능하게 함.
 - 수정 대상 함수: laygo2.interface.yaml.py 의 import_template()
@@ -121,3 +121,22 @@
         + 가능하면 새 함수를 정의하지 않는 방식. 오버로딩 안되나? -> Python은 오버로딩이 불가능할뿐더러 매개변수가 다르지도 않음
         + Laygo 환경변수에 WebConsole 환경 여부를 포함시키고, import_template 함수에서는 이 환경변수를 확인해 webconsole 환경인 경우 DB에서 정보를 읽어옴
     + Issue 2) MongoDB atlas 접근: https://ohnyong.tistory.com/35
+
+
+## 이와 같이 Design 된 경우에 대한 스크립트 작성 예시
+```
+export_path = "Location on DB server"
+libname = "libname"
+# import from templete database
+laygo2.import_template() 
+
+# Export to physical database.
+print("Export design\n")
+laygo2.export(lib, tech=tech, filename=libname+'_'+cellname+'.yaml', target='webconsole')             # Export to webconsole.
+ 
+# 8. Export to a template database file.
+nat_temp = dsn.export_to_template()
+laygo2.export_template(nat_temp, filename=export_path+libname+'_templates.yaml', mode='append')                         # Same as local execution
+# Filename example: ./laygo2_generators_private/logic/logic_generated_templates.yaml
+
+```
