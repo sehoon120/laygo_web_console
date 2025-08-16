@@ -108,3 +108,7 @@ Nifty github 임의 변경점:
 ## 구현(Implementation)
 - Prototype과 동일하게 이용하는 code
     + /config, /controllors/loginController.js, /middlewares, /models, /public, /routes/loginRoutes.js, /routes/logoutRoutes.js, /views/include, /views/404.ejs, /views/add.ejs, /views/getallfiles.ejs, /views/home.ejs, /views/update.ejs, /views/register.ejs
+
+- 진행상황(박제윤)
+    + laygo import 함수 수정 구현 완료, 이후 실제 운영 시에는 DB URL 관련 수정해 운용. 또한 이를 위한 start_bag_test.sh 수정
+    + 해당 수정 내용은 webconsole 디렉터리가 아니라 laygo에 대한 수정사항이므로, 구현이 모두 완료된 후 교수님의 최종 컨펌을 받아 반영할 것임

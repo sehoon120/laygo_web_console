@@ -121,6 +121,7 @@
         + 가능하면 새 함수를 정의하지 않는 방식. 오버로딩 안되나? -> Python은 오버로딩이 불가능할뿐더러 매개변수가 다르지도 않음
         + Laygo 환경변수에 WebConsole 환경 여부를 포함시키고, import_template 함수에서는 이 환경변수를 확인해 webconsole 환경인 경우 DB에서 정보를 읽어옴
     + Issue 2) MongoDB atlas 접근: https://ohnyong.tistory.com/35
+- 입력 추가: username 받아야 함
 
 
 ## 이와 같이 Design 된 경우에 대한 스크립트 작성 예시
@@ -128,7 +129,7 @@
 export_path = "Location on DB server"
 libname = "libname"
 # import from templete database
-laygo2.import_template() 
+laygo2.import_template(filename=export_path+'logic_generated_templates.yaml') 
 
 # Export to physical database.
 print("Export design\n")
