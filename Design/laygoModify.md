@@ -76,6 +76,7 @@
     + Issue 1) Web console에서의 접근과 단순 local에서의 접근을 어떻게 구분하지?
         + 아래 import와 마찬가지: Laygo 환경변수에 WebConsole 환경 여부를 포함시키고, import_template 함수에서는 이 환경변수를 확인해 webconsole 환경인 경우 DB에서 정보를 읽어옴
     + Issue 2) MongoDB atlas 접근: https://ohnyong.tistory.com/35
+    + 수정 진행중...
 - 수정 함수 2: laygo.interface.core.export()
     + Export target에 webconsole 추가: webconsole.py의 export(추가 함수 1) 호출
     + 추가 내용
@@ -122,6 +123,7 @@
         + Laygo 환경변수에 WebConsole 환경 여부를 포함시키고, import_template 함수에서는 이 환경변수를 확인해 webconsole 환경인 경우 DB에서 정보를 읽어옴
     + Issue 2) MongoDB atlas 접근: https://ohnyong.tistory.com/35
 - 입력 추가: username 받아야 함
+- 구현 완료: Laygo2 디렉터리 확인해 최종 반영만 남음
 
 
 ## 이와 같이 Design 된 경우에 대한 스크립트 작성 예시

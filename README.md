@@ -111,4 +111,9 @@ Nifty github 임의 변경점:
 
 - 진행상황(박제윤)
     + laygo import 함수 수정 구현 완료, 이후 실제 운영 시에는 DB URL 관련 수정해 운용. 또한 이를 위한 start_bag_test.sh 수정
+    + laygo template export도 수정 완료,  따라서 templete import, export 시 local이 아니라 DB에서 사용하도록 수정 완료
+    + (진행중)script에 username 포함하도록 수정
+    + (진행중)출력용 yaml 뽑기
+        + interface.core.export 수정
+        + interface.webconsole.export() 만들기
     + 해당 수정 내용은 webconsole 디렉터리가 아니라 laygo에 대한 수정사항이므로, 구현이 모두 완료된 후 교수님의 최종 컨펌을 받아 반영할 것임
