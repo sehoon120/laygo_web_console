@@ -1,0 +1,217 @@
+bbox:
+- [0, 0]
+- [1230, 2000]
+cellname: inv_4x
+libname: test_logic
+metals:
+- layer: Metal2
+  xy:
+  - [370, 750]
+  - [860, 830]
+- layer: Metal2
+  xy:
+  - [370, 450]
+  - [860, 530]
+- layer: Metal2
+  xy:
+  - [-120, -120]
+  - [1350, 120]
+- layer: Metal1
+  xy:
+  - [165, -40]
+  - [245, 530]
+- layer: Metal1
+  xy:
+  - [575, -40]
+  - [655, 530]
+- layer: Metal1
+  xy:
+  - [985, -40]
+  - [1065, 530]
+- layer: Metal2
+  xy:
+  - [85, -120]
+  - [1145, 120]
+- layer: Metal2
+  xy:
+  - [370, 1170]
+  - [860, 1250]
+- layer: Metal2
+  xy:
+  - [370, 1470]
+  - [860, 1550]
+- layer: Metal2
+  xy:
+  - [-120, 1880]
+  - [1350, 2120]
+- layer: Metal1
+  xy:
+  - [165, 1470]
+  - [245, 2040]
+- layer: Metal1
+  xy:
+  - [575, 1470]
+  - [655, 2040]
+- layer: Metal1
+  xy:
+  - [985, 1470]
+  - [1065, 2040]
+- layer: Metal2
+  xy:
+  - [85, 1880]
+  - [1145, 2120]
+- layer: Metal2
+  xy:
+  - [165, 750]
+  - [655, 830]
+- layer: Metal2
+  xy:
+  - [165, 1170]
+  - [655, 1250]
+- layer: Metal3
+  xy:
+  - [165, 750]
+  - [245, 1250]
+- layer: Metal3
+  xy:
+  - [780, 450]
+  - [860, 1550]
+- layer: Metal2
+  xy:
+  - [-120, -120]
+  - [1350, 120]
+- layer: Metal2
+  xy:
+  - [-120, 1880]
+  - [1350, 2120]
+pins:
+- layer: Metal2
+  name: 'VSS:'
+  netname: 'VSS:'
+  xy:
+  - [0, -120]
+  - [1230, 120]
+- layer: Metal2
+  name: 'VDD:'
+  netname: 'VDD:'
+  xy:
+  - [0, 1880]
+  - [1230, 2120]
+- layer: Metal3
+  name: I
+  netname: I
+  xy:
+  - [165, 790]
+  - [245, 1210]
+- layer: Metal3
+  name: O
+  netname: O
+  xy:
+  - [780, 490]
+  - [860, 1510]
+subblocks:
+- cellname: nmos4_fast_boundary
+  libname: gpdk045_microtemplates_dense
+  name: bndl
+  pins: {}
+  transform: R0
+  xy: [0, 0]
+- cellname: nmos4_fast_boundary
+  libname: gpdk045_microtemplates_dense
+  name: bndr
+  pins: {}
+  transform: R0
+  xy: [0, 1025]
+- cellname: nmos4_fast_center_nf2
+  libname: gpdk045_microtemplates_dense
+  name: core
+  pins:
+    D0: {netname: null, termName: D0}
+    G0: {netname: null, termName: G0}
+    S0: {netname: null, termName: S0}
+    S1: {netname: null, termName: S1}
+  transform: R0
+  xy: [0, 205]
+- cellname: via_M1_M2_0
+  libname: gpdk045_microtemplates_dense
+  name: VIA_G
+  pins: {}
+  transform: R0
+  xy: [410, 790]
+- cellname: via_M1_M2_0
+  libname: gpdk045_microtemplates_dense
+  name: VIA_D
+  pins: {}
+  transform: R0
+  xy: [410, 490]
+- cellname: via_M1_M2_1
+  libname: gpdk045_microtemplates_dense
+  name: VIA_TIE0
+  pins: {}
+  transform: R0
+  xy: [0, 205]
+- cellname: via_M1_M2_1
+  libname: gpdk045_microtemplates_dense
+  name: VIA_TIE1
+  pins: {}
+  transform: R0
+  xy: [0, 615]
+- cellname: via_M1_M2_1
+  libname: gpdk045_microtemplates_dense
+  name: VIA_TIE2
+  pins: {}
+  transform: R0
+  xy: [0, 1025]
+- cellname: pmos4_fast_boundary
+  libname: gpdk045_microtemplates_dense
+  name: bndl
+  pins: {}
+  transform: MX
+  xy: [0, 2000]
+- cellname: pmos4_fast_boundary
+  libname: gpdk045_microtemplates_dense
+  name: bndr
+  pins: {}
+  transform: MX
+  xy: [0, 975]
+- cellname: pmos4_fast_center_nf2
+  libname: gpdk045_microtemplates_dense
+  name: core
+  pins:
+    D0: {netname: null, termName: D0}
+    G0: {netname: null, termName: G0}
+    S0: {netname: null, termName: S0}
+    S1: {netname: null, termName: S1}
+  transform: MX
+  xy: [0, 1795]
+- cellname: via_M1_M2_0
+  libname: gpdk045_microtemplates_dense
+  name: VIA_G
+  pins: {}
+  transform: MX
+  xy: [410, 1210]
+- cellname: via_M1_M2_0
+  libname: gpdk045_microtemplates_dense
+  name: VIA_D
+  pins: {}
+  transform: MX
+  xy: [410, 1510]
+- cellname: via_M1_M2_1
+  libname: gpdk045_microtemplates_dense
+  name: VIA_TIE0
+  pins: {}
+  transform: MX
+  xy: [0, 1795]
+- cellname: via_M1_M2_1
+  libname: gpdk045_microtemplates_dense
+  name: VIA_TIE1
+  pins: {}
+  transform: MX
+  xy: [0, 1385]
+- cellname: via_M1_M2_1
+  libname: gpdk045_microtemplates_dense
+  name: VIA_TIE2
+  pins: {}
+  transform: MX
+  xy: [0, 975]
+vias: []
