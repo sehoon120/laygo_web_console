@@ -62,6 +62,27 @@ function getContact(req, res) {
 ```
 
 - 함수 updateContact: 파일 경로 변경. Name, type, path를 새로 request 받아 이를 변환. Directory에 대해서도 경로 변경이 가능하므로, 이 경우 하위 파일들에 대해서도 메타데이터를 변환시켜주어야 한다.
+```
+function updateContact(req, res) = {
+    id <- req.params.id;
+    name <- req.body.name;
+    currentPath <- req.query.path;
+    file <- File.findById(id);
+
+    if(file.type is directory) {
+        oldDirFullPath <- concat(file.filePath, file.fileName);
+        newDirFullPath <- concat(file.filePath + name);
+
+        children <- File.find({filePath: oldDirFullPath/~~ , user: req.user.username});
+        for child in children {
+            child.filePath <- Replace oldDirFullPath in child.filePath to newDirFullPath;
+        }
+    }
+    file.filename <- name;
+    file.filetype <- type;
+    file.filePath <- path;
+}
+```
 
 - 함수 deleteContact: 파일 삭제.
 
