@@ -83,17 +83,66 @@ function updateContact(req, res) = {
     file.filePath <- path;
 }
 ```
-
 - 함수 deleteContact: 파일 삭제.
+```
+function deleteContact(req, res) = {
+    id <- req.params.id;
+    delete File.findByID(id);
+    redirect to current URL;
+}
+```
 
 - 함수 editFile: 파일 수정. 수정할 File type이 directory이면 해당 directory의 페이지로 redirect, 일반 file이면 파일 내용 수정 페이지 렌더링
+```
+function editFile(req, res) = {
+    id <- req.params.id;
+    file <- File.findById(id);
+    currentPath <- req.query.path;
+
+    if(fiie.filetype is 'dir') {
+        newPath <- concat(currentPath, file.filename);
+        redirect to newPath;
+    } else {
+        render('edit', {file: file, currentPath: currentPath, drawObjectDoc: {}, cellname: 'dummycell'});
+    }
+}
+```
 
 - 함수 saveFile: 파일 저장. file id와 수정할 내용(content) 받아 file에 저장 . 인자로 generate=true 주면 레이아웃 생성. Laygo script file을 실행시켜 yaml 파일로 저장. Log 저장 => 이때 모든 정보를 뽑기 위해 Laygo 수정 필요. Laygo에 feature 추가 필요 (laygoModify.md)
     + laygoModify.md의 webconsole.export() 부분의 논의 참고해 작성할 것
 ```
 #Pseudocode
 funcion saveFile(req, res){
-    id <- req.params.id
+    id <- req.params.id;
+    generate <- req.params.generate;
+    content <- req.body;
+  
+    userDir <- '(temporary directory for yaml file which is used for drawing)/username'
+
+    file <- await File.findById(id);
+    if (!file) {
+        return res.status(404).json({ error: 'File not found.' });
+    }
+
+    file.content <- content;
+    file.save();
+
+    if(generate is True and file.filetype is python script){
+        username <- req.user.username;
+        filename <- Remove filename extension(file.filename);
+        tempDir <- '(temporary directory for script file)';
+        rundir <- '(directory that runs server)';
+        genDir <- '(temporary directory for yaml file)/(username)/(script path)/(libname)';      //Directory that saves yaml files for generator
+        tempFile <- concat(tempDir, '(username)_(script file name)_temp.py');
+        bag_dir <- laygo execution directory;
+
+        save script file at tempFile;
+
+        command <- 'csh -c cd {bag_dir}; source .cshrc_bag; bash {bag_dir}/start_bag_test.sh ${username} ${filename} ${tempFileWSL} ${runDirWsl}"'
+
+        execute command;
+        delete tempfile;
+    }
 }
 ```
 
@@ -103,12 +152,8 @@ funcion saveFile(req, res){
 - Edit 페이지에서 Save / Generate / Layout Draw 버튼 분리 (上)
 ```
 # pseudocode
-# saveyaml 함수
-# -> savefile 사용
+# File 저장, laygout generate -> saveFile 함수 이용
 
 # generate_layout 함수
-
-
-# draw_layout 함수
-
+function 
 ```
