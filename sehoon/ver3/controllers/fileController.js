@@ -597,6 +597,92 @@ const drawLayout = asyncHandler(async (req, res) => {
 });
 
 // ====================================================================================================
+// yaml format 변경 후 사용 예정
+const drawLayout_ver2 = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  const file = await File.findById(id);
+  if (!file) return res.status(404).json({ error: 'File not found.' });
+
+  // 1) 사용자 입력
+  let lib = (req.body.libname || req.body.yamlFile || '').trim() || null;
+  let cell = (req.body.cellname || '').trim() || null;
+
+  // 2) 없으면 파이썬 코드에서 추출 (기존 유지)
+  if (!lib || !cell) {
+    const { lib: l2, cell: c2 } = extractLibCellFromPy(file.content || '');
+    lib = lib || l2;
+    cell = cell || c2;
+  }
+
+  const username = req.user?.username || 'guest';
+
+  // 둘 중 하나라도 없으면 명시적으로 요청
+  if (!lib || !cell) {
+    return res.status(400).json({
+      success: false,
+      message: 'libname/cellname 미지정. 입력하거나 Save+Generate 후 다시 시도하세요.',
+    });
+  }
+
+  // 3) 정확한 YAML 경로 구성: temp_yaml/<username>/<lib>/<cell>.yaml
+  const userYamlRoot = path.join(__dirname, '../../temp_yaml', username);
+  const unsafePath = path.join(userYamlRoot, lib, `${cell}.yaml`);
+  const targetYaml = path.normalize(unsafePath);
+
+  // 루트 이탈 방지
+  if (!targetYaml.startsWith(path.normalize(userYamlRoot + path.sep))) {
+    return res.status(400).json({ success: false, message: '잘못된 경로입니다.' });
+  }
+
+  // 4) YAML 읽기 (신규 포맷 전용)
+  let doc = null;
+  try {
+    await fsp.access(targetYaml, fs.constants.R_OK);
+  } catch {
+    return res.status(404).json({
+      success: false,
+      message: 'YAML 파일을 찾을 수 없습니다.',
+      expectedPath: targetYaml,
+      resolvedLibname: lib,
+      resolvedCellname: cell,
+    });
+  }
+
+  try {
+    const raw = await fsp.readFile(targetYaml, 'utf8');
+    doc = yaml.load(raw);
+
+    // (선택) 서브블록 bbox 병합용 훅: 필요 시 백엔드에서 채워서 내려주기
+    // doc.__libBBoxes = await buildLibBBoxMapIfNeeded(...);
+
+    // 신규 포맷 검증(가벼운 체크)
+    if (!doc || !doc.bbox || (!doc.metals && !doc.pins && !doc.subblocks)) {
+      return res.status(422).json({
+        success: false,
+        message: '신규 YAML 포맷이 아니거나 필수 필드가 없습니다.',
+        sourceYamlPath: targetYaml,
+      });
+    }
+  } catch (e) {
+    return res.status(500).json({
+      success: false,
+      message: `YAML 파싱 실패: ${String(e)}`,
+      sourceYamlPath: targetYaml,
+    });
+  }
+
+  // 5) 응답 (프론트의 buildMap(cellObj) 바로 사용 가능)
+  return res.json({
+    success: true,
+    drawObjectDoc: doc,
+    resolvedLibname: lib,
+    resolvedCellname: cell,
+    sourceYamlPath: targetYaml,
+  });
+});
+// ====================================================================================================
+
+// ====================================================================================================
 
 module.exports = {
     getAllContacts, 

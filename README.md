@@ -94,10 +94,12 @@ Nifty github 임의 변경점:
     + 2) Origin 기준 x, y 축 표시 => Drawing 하는 페이지 코드 수정(edit.ejs)
         -> 개선 완료 - sehoon/ver3에서
     + 3) instance에는 instance name, instance libname, cellname 표시 필요 => Drawing 하는 페이지 코드 수정(edit.ejs)
+        -> 공유받은 inv_2x.yaml을 기준으로 빌드맵 재 작성중 - sehoon/ver3/~/edit.ejs.buildMap_ver2
     + 4) Layer 별로 표시를 켜고 끄는 기능. Instance / Instance pin 끄고 켜는 기능 => Drawing 하는 페이지 코드 수정(edit.ejs)
     + 4) Routing metal drawing 시 두께 값 추출: Laygo 함수 추가...?(fileController.js 수정 + laygo 신규 함수 추가)
         + laygo 신규 함수: yaml로 두께 값을 포함한 정보를 출력하는 함수(기존 yaml 출력 함수를 상속받아 작성?)
         + WebConsole에서 laygo script 실행 시 자동으로 뒤에 위의 함수를 붙여 실행시키고, 임시 디렉터리에 결과 출력 후 그것을 읽어 그릴 수 있게 한다.
+        + layout draw 함수 수정: 공유받은 inv_2x.yaml을 기준으로 drawLayout_ver2 작성중 - sehoon/ver3/~/fileController.js.drawLayout_ver2
 
 - ToDo list(2025-08-04): Design 파트에서 수정 및 좀 더 자세히 해야 할 부분 존재
     + 1) Laygo 함수 추가에 대한 부분 -> 일단 정확히 이번 프로젝트에 속한 것은 아니라서 제외했었음. 그러나 이 부분도 작성은 해놓는게 좋을 듯 함. => 진행중(박제윤)

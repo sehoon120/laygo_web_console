@@ -31,6 +31,9 @@
 
     # 서버의 fileController에서는 스크립트 실행 인자로 순서대로 generate를 시도한 유저명(USERNAME), 실행한 파일명(FILENAME), Laygo script가 임시로 저장되어 있는 경로(CODE_PATH), Web console의 최상위 디렉터리(RUNDIR)를 준다.
 
+    # laygo2로 username을 전달하는건 환경변수로 전달하는 방식으로 생각중 -> sehoon/ver3/.sh/start_bag_test.sh
+    매 generate 실행마다 개별 프로세스를 사용하는 구조이기에 섞일 문제는 없을것
+
     # 로그 파일 생성
     make directory when there is no RUNDIR/temp
     LOG_FILE = RUNDIR/temp/USERNAME_FILENAME_output.log
