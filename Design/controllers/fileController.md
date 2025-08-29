@@ -132,13 +132,12 @@ funcion saveFile(req, res){
         filename <- Remove filename extension(file.filename);
         tempDir <- '(temporary directory for script file)';
         rundir <- '(directory that runs server)';
-        genDir <- '(temporary directory for yaml file)/(username)/(script path)/(libname)';      //Directory that saves yaml files for generator
         tempFile <- concat(tempDir, '(username)_(script file name)_temp.py');
         bag_dir <- laygo execution directory;
 
         save script file at tempFile;
 
-        command <- 'csh -c cd {bag_dir}; source .cshrc_bag; bash {bag_dir}/start_bag_test.sh ${username} ${filename} ${tempFileWSL} ${runDirWsl}"'
+        command <- 'csh -c cd {bag_dir}; source .cshrc_bag; bash {bag_dir}/start_bag_test.sh ${username} ${filename} ${tempFile(WSL)} ${runDir(Wsl)}"'
 
         execute command;
         delete tempfile;
@@ -154,6 +153,15 @@ funcion saveFile(req, res){
 # pseudocode
 # File 저장, laygout generate -> saveFile 함수 이용
 
-# generate_layout 함수
-function 
+# draw_layout 함수: 그려낼 libname, cellname을 받아 그에 대한 yaml 파일을 반환
+function draw_layout(req, res){
+    libname <- req.body.libname;
+    cellname <- req.body.cellname;
+    username <- req.user.username;
+    genDir <- '(temporary directory for yaml file)/(username)/(script path)/(libname)';      //Directory that saves yaml files for generator
+    yamlPath <- '(genDir)/(cellname)'
+
+    doc <- load yaml with path = yamlPath and endcoding = 'utf8'      
+    return return res.json({ success: true, output: stdout, drawObjectDoc: doc, cellname: cellname, libname: libname });
+}
 ```
