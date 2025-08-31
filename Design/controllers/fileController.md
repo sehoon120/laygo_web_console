@@ -130,9 +130,9 @@ funcion saveFile(req, res){
     if(generate is True and file.filetype is python script){
         username <- req.user.username;
         filename <- Remove filename extension(file.filename);
-        tempDir <- '(temporary directory for script file)';
+        tempCodeDir <- '(temporary directory for script file)';
         rundir <- '(directory that runs server)';
-        tempFile <- concat(tempDir, '(username)_(script file name)_temp.py');
+        tempFile <- concat(tempDir, '(username)_(script file name with path)_temp.py');
         bag_dir <- laygo execution directory;
 
         save script file at tempFile;

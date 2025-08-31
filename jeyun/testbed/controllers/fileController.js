@@ -195,6 +195,7 @@ const editFile = asyncHandler(async (req, res) => {
 // const BAG_WORKSPACE_PATH = '/mnt/c/GraduationProject/bag_workspace_gpdk045';
 // const SCRIPT_PATH = path.join(BAG_WORKSPACE_PATH, 'start_bag.sh');
 
+/*
 const saveFile = asyncHandler(async (req, res) => {
   const id = req.params.id;
   const { content } = req.body;
@@ -336,22 +337,141 @@ const saveFile = asyncHandler(async (req, res) => {
     res.json({ success: true });
   }
 });
+*/
 
-// save file
-// PUT
-// const saveFile = asyncHandler(async (req, res) => {
-//     const id = req.params.id;
-//     const { content } = req.body;
+//===============================================
+//New version of saveFile and drawLayout function
+const saveFile = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  const { content, generate } = req.body;
 
-//     const file = await File.findById(id);
-//     if (!file) {
-//         return res.status(404).json({ error: 'File not found.' });
-//     }
+  const file = await File.findById(id);
+  if (!file) {
+    return res.status(404).json({ error: 'File not found.' });
+  }
 
-//     file.content = content;
-//     await file.save();
-//     res.json({ success: true });
-// });
+  // 0) 항상 먼저 저장
+  file.content = content;
+  await file.save();
+
+  // generate 스위치가 꺼져있으면 여기서 종료 (일관된 응답 필드)
+  if (generate !== 'on') {
+    return res.json({
+      success: true,
+      message: 'Saved only (no generation)',
+      output: '',
+      drawObjectDoc: null,
+      cellname: req.body.cellname ?? null,
+      libname: null,
+    });
+  }
+
+  // 1) 준비
+  const username = (req.user && req.user.username) ? req.user.username : 'guest';
+  const baseName = file.filename.replace(/\.[^/.]+$/, ''); // 확장자 제거
+  const tempCodeDir = path.join(__dirname, '../../temp_code');
+  const tempYamlRoot = path.join(__dirname, '../../temp_yaml');
+  if (!fs.existsSync(tempCodeDir)) fs.mkdirSync(tempCodeDir, { recursive: true });
+
+  // 임시 코드 파일(Windows 경로)
+  const tempFileWin = path.join(tempCodeDir, `${username}_${baseName}_temp.py`);
+  fs.writeFileSync(tempFileWin, content, 'utf8');
+
+  // WSL 경로로 변환 (드라이브 자동 추출)
+  const drive = tempFileWin[0].toLowerCase(); // e.g., 'c'
+  const rest = tempFileWin.slice(3).replace(/\\/g, '/'); // 'path/to/file.py'
+  const tempFileWSL = `/mnt/${drive}/${rest}`;
+
+  // YAML 경로 설정
+  if (!fs.existsSync(tempYamlRoot)) fs.mkdirSync(tempYamlRoot, { recursive: true });
+  const userYamlDir = path.join(tempYamlRoot, username);
+  if (!fs.existsSync(userYamlDir)) fs.mkdirSync(userYamlDir, { recursive: true });
+
+  const yamlBase = req.body.yamlFile ? `${req.body.yamlFile}_templates.yaml` : 'logic_generated_templates.yaml';
+  const libname = req.body.yamlFile ? req.body.yamlFile : 'logic_generated';
+  const targetYamlPath = path.join(userYamlDir, yamlBase); // 우리가 우선적으로 읽으려는 파일
+
+  // 2) WSL 스크립트 실행 (spawn 권장)
+  const scriptWSL = `/mnt/c/GraduationProject/bag_workspace_gpdk045/start_bag_test.sh`;
+  const cmd = 'wsl';
+  // -lc: 로그인 쉘 + 명령 문자열, 인자에 공백 안전하게 따옴표
+  const args = [
+    'bash', '-lc',
+    `"${scriptWSL}" "${username.replace(/"/g, '\\"')}" "${baseName.replace(/"/g, '\\"')}" "${tempFileWSL.replace(/"/g, '\\"')}"`
+  ];
+  const child = spawn(cmd, args, { shell: false });
+
+  let stdout = '';
+  let stderr = '';
+  child.stdout.on('data', (d) => { stdout += d.toString(); });
+  child.stderr.on('data', (d) => { stderr += d.toString(); });
+
+  child.on('close', async (code) => {
+    // 임시 파일 제거 (실패해도 진행)
+    fs.unlink(tempFileWin, () => {});
+
+    if (code !== 0) {
+      return res.status(500).json({ success: false, error: stderr || `Process exited with code ${code}` });
+    }
+
+    // 3) user 폴더 내 YAML들 스캔하여 DB upsert (끝까지 보장)
+    let yamlFiles = [];
+    try {
+      yamlFiles = fs.readdirSync(userYamlDir)
+        .filter(f => f.endsWith('.yaml') || f.endsWith('.yml'))
+        .map(f => path.join(userYamlDir, f));
+    } catch (e) {
+      // 폴더 읽기 실패 시 계속
+    }
+
+    try {
+      await Promise.all(yamlFiles.map(async (ypath) => {
+        const data = await fs.promises.readFile(ypath, 'utf8');
+        const filenameWithoutExt = path.basename(ypath).replace(/\.[^/.]+$/, "");
+        const fileQuery = {
+          user: username,
+          filename: filenameWithoutExt,
+          filetype: 'yaml',
+          filePath: req.query.path || '/'
+        };
+
+        const existing = await File.findOne(fileQuery);
+        if (existing) {
+          existing.content = data;
+          await existing.save();
+        } else {
+          await File.create({
+            ...fileQuery,
+            content: data
+          });
+        }
+      }));
+    } catch (dbErr) {
+      // DB 저장 실패해도 drawObjectDoc만이라도 리턴
+      // 필요하면 여기서 로그만 남기고 계속 진행
+      // console.error('DB 저장 에러:', dbErr);
+    }
+
+    // 4) 최종 doc 로드 (타겟 YAML 우선)
+    let doc = null;
+    if (fs.existsSync(targetYamlPath)) {
+      try {
+        doc = yaml.load(fs.readFileSync(targetYamlPath, 'utf8'));
+      } catch (e) {
+        // YAML 파싱 실패 시 null 유지
+      }
+    }
+
+    return res.json({
+      success: true,
+      output: stdout,
+      drawObjectDoc: doc,
+      cellname: req.body.cellname ?? null,
+      libname
+    });
+  });
+});
+
 
 // ==================================================
 
