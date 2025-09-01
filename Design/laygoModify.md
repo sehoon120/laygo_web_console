@@ -84,13 +84,16 @@
     + Issue 2) MongoDB atlas 접근: https://ohnyong.tistory.com/35
     + 수정 진행중...
 - 수정 함수 2: laygo.interface.core.export()
-    + Export target에 webconsole 추가: webconsole.py의 export(추가 함수 1) 호출
+    + Export target에 webconsole 추가: webconsole.py의 export(추가 함수 1) 호출, username/filename을 환경변수에서 추출
     + 추가 내용
     ```
     elif target == 'webconsole':  # webconsole export
+        consoleUsername = os.environ['LAYGO_USERNAME']
+        consoleFilepath = os.environ['LAYGO_BASENAME']
+        path = consoleUsername + '/' + consoleFilepath          #path for temporary file which is from a specific file for an user
         return webconsole.export(
             db=db,
-            filename=filename
+            path=path
         )
     ```
 
@@ -109,11 +112,7 @@
     }
     ```
     + 추가 문제: Username과 Scriptname은 어디서 받지?
-        + 스크립트의 실행 시 인자로 username과 filename을 넘겨주는 방식이므로 그것을 이용 -> 함수의 인자로 직접 넘겨줄 방법이 없을까?
-        + Script 실행 시 인자로 전달하고, 인자 처리용 코드를 임시 저장 시 스크립트에 추가한다. start_bag.sh와 fileController.js에서 구현
-        + 인자 처리용 코드 디자인
-            + 1) 스크립트 파일 위에 인자 받아서 변수에 저장하는 코드 추가(sys.argv)
-            + 2) 사용자는 export(db)로 함수 사용, 실행 시 스크립트 내용에서 export(db, username, cellname)으로 수정
+        + 프로세스별로 환경변수를 다르게 줄 수 있으므로 그렇게 한다.
     + Pseudocode: start_bag.sh(현재 start_bag_test.sh) 수정
     ```
     (line30) ${BAG_PYTHON:-python3} "$CODE_PATH" "$USERNAME" "$FILENAME" >> "$LOG_FILE" 2>&1
