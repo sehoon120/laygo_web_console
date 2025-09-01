@@ -366,7 +366,7 @@ const saveFile = asyncHandler(async (req, res) => {
     });
   }
 
-  // 1) 준비
+  // 1) 준비 -> temp_code, temp_yaml dir 생성: laygo에서의 기능과 겹치기도 함. 둘 중 하나 제거 가능
   const username = (req.user && req.user.username) ? req.user.username : 'guest';
   const baseName = file.filename.replace(/\.[^/.]+$/, ''); // 확장자 제거
   const tempCodeDir = path.join(__dirname, '../../temp_code');
@@ -391,13 +391,17 @@ const saveFile = asyncHandler(async (req, res) => {
   const libname = req.body.yamlFile ? req.body.yamlFile : 'logic_generated';
   const targetYamlPath = path.join(userYamlDir, yamlBase); // 우리가 우선적으로 읽으려는 파일
 
+  //Added by me
+  const runDirWin = path.join(__dirname, '..');
+  const runDirWsl = `/mnt/${runDirWin[0].toLowerCase()}/${runDirWin.slice(3).replace(/\\/g, '/')}`;
+
   // 2) WSL 스크립트 실행 (spawn 권장)
   const scriptWSL = `/mnt/c/GraduationProject/bag_workspace_gpdk045/start_bag_test.sh`;
   const cmd = 'wsl';
   // -lc: 로그인 쉘 + 명령 문자열, 인자에 공백 안전하게 따옴표
   const args = [
     'bash', '-lc',
-    `"${scriptWSL}" "${username.replace(/"/g, '\\"')}" "${baseName.replace(/"/g, '\\"')}" "${tempFileWSL.replace(/"/g, '\\"')}"`
+    `"${scriptWSL}" "${username.replace(/"/g, '\\"')}" "${baseName.replace(/"/g, '\\"')}" "${tempFileWSL.replace(/"/g, '\\"')}" "${runDirWsl.replace(/"/g, '\\"')}"`
   ];
   const child = spawn(cmd, args, { shell: false });
 

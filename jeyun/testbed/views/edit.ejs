@@ -1,3 +1,5 @@
+<% /* eslint-disable */ %>
+
 <%- include('./include/_header') %>
 
   <!-- 파일 목록으로 돌아가기 버튼 (왼쪽 상단) -->
@@ -23,7 +25,19 @@
             <textarea name="content" class="form-control" rows="48"
               placeholder="Write your code here"><%= file.content %></textarea>
           </div>
-          <button type="submit" class="btn btn-primary">Save & Generate</button>
+          <!-- ✅ Generate 스위치 추가 -->
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="generateSwitch" name="generate" value="on" form="editForm">
+            <label class="form-check-label" for="generateSwitch">Generate (Save 후 실행)</label>
+          </div>
+
+          <!-- ✅ Save 버튼 수정 -->
+          <button type="submit" class="btn btn-primary" form="editForm">Save</button>
+
+          <!-- ✅ Layout Draw 버튼 분리 -->
+          <button id="layoutDrawBtn" type="button" class="btn btn-secondary mt-2">Layout Draw</button>
+
+          <!-- <button type="submit" class="btn btn-primary">Save & Generate</button> -->
         </form>
         <!-- 저장 결과 메시지 출력 영역 -->
         <div id="message" class="mt-3"></div>
@@ -55,8 +69,6 @@
           <!-- 기존 이미지 대신 캔버스 추가 -->
           <canvas id="canvas" width="770" height="1080" style="border:1px solid #ccc; background:#fff;"></canvas>
         </div>
-        <!-- pin on/off 버튼-->
-        <button id="pins" type="button" class="btn btn-primary">Pin</button>
       </div>
 
     </div>
@@ -77,6 +89,58 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
+
+      // ================================================================================
+      // 임의로 추가한것
+      // 레이아웃 그리기 버튼 관련
+      // document.getElementById("layoutDrawBtn").addEventListener("click", async function () {
+      //   const cellname = document.getElementById("cellNameInput").value.trim() || 'cellname';
+      //   const libname = document.getElementById("yamlFileInput").value.trim() || 'logic_generated';
+      //   const messageDiv = document.getElementById("message");
+
+      //   if (!cellname || !libname) {
+      //     messageDiv.innerText = "libname과 cellname을 입력해주세요.";
+      //     return;
+      //   }
+
+      //   const fileId = "<%= file._id %>";
+      //   const currentPathEncoded = encodeURIComponent("<%= currentPath %>");
+      //   const lib = encodeURIComponent(libname);
+      //   const cell = encodeURIComponent(cellname);
+
+      //   try {
+      //     const response = await fetch(`/main/${fileId}/edit/draw?path=${currentPathEncoded}&libname=${lib}&cellname=${cell}`, {
+      //       method: 'GET'  // ✅ GET으로 변경
+      //     });
+
+      //     const text = await response.text();
+      //     let result;
+      //     try {
+      //       result = JSON.parse(text);
+      //     } catch (parseErr) {
+      //       console.error("서버 응답이 JSON이 아님:", text);
+      //       messageDiv.innerText = "서버에서 JSON 응답을 받지 못했습니다.";
+      //       return;
+      //     }
+
+      //     if (response.ok && result.success && result.drawObjectDoc) {
+      //       rectList = [];
+      //       buildMap(result.drawObjectDoc, cellname, libname);
+      //       redraw();
+      //       messageDiv.innerText = "Layout 그리기 완료";
+      //     } else {
+      //       messageDiv.innerText = result.message || "Layout 실패";
+      //     }
+      //   } catch (error) {
+      //     console.error("Layout draw 요청 중 에러:", error);
+      //     messageDiv.innerText = "에러 발생";
+      //   }
+      // });
+
+      
+
+      // ================================================================================
+
       // 서버에서 전달된 drawObjectDoc을 전역 변수로 설정 (빈 객체면 {})
       var drawObjectDoc = (<%- JSON.stringify(drawObjectDoc || {}) %>);
       // console.log("drawObjectDoc:", drawObjectDoc);
@@ -143,7 +207,9 @@
         }
       }
       trackTransforms(ctx);
-      ctx.translate(385, 540);
+      // ctx.translate(-385, 540);
+      ctx.translate(-385 * 0.05, 1080 - 540 * 0.05);
+      ctx.scale(0.05, 0.05);
       ctx.beginPath();
     
       // 전역 함수 buildMap 등록 (window.buildMap)
@@ -216,6 +282,156 @@
           }
         }
       };
+
+      // ====================================================================================================
+      // yaml format 변경 후 예상 빌드맵
+
+      // 전역: rectList, labelList 사용 (필요 시 초기화)
+      window.buildMap_ver2 = function(cellObj) {
+        const SCALE = 5;
+        window.rectList = [];
+        window.labelList = [];
+
+        const cellname = cellObj.cellname || "(unknown)";
+        const libname  = cellObj.libname  || "(unknown)";
+
+        const metalColor = (layer) => {
+          if (!layer) return "rgba(0,0,255,0.35)";
+          const L = String(layer).toLowerCase();
+          if (L.includes('metal1')) return "rgba(0,128,255,0.35)";
+          if (L.includes('metal2')) return "rgba(255,128,0,0.35)";
+          if (L.includes('metal3')) return "rgba(160,32,240,0.35)";
+          return "rgba(0,0,255,0.35)";
+        };
+
+        function pushRectFromXY(xy, color, label, kind, meta={}) {
+          if (!xy || xy.length !== 2) return;
+          const ox = xy[0][0] * SCALE;
+          const oy = xy[0][1] * SCALE;
+          const w  = (xy[1][0] - xy[0][0]) * SCALE;
+          const h  = (xy[1][1] - xy[0][1]) * SCALE;
+          rectList.push([ox, -oy, w, -h, color, label, true, kind, meta]);
+          // 라벨
+          labelList.push({
+            x: ox + 2, y: -(oy) - 2, text: label,
+            font: "11px sans-serif", fill: "#222",
+            align: "left", baseline: "top", z: 50
+          });
+        }
+
+        // 0) bbox (셀 외곽)
+        if (Array.isArray(cellObj.bbox) && cellObj.bbox.length === 2) {
+          const [p0, p1] = cellObj.bbox;
+          const ox = p0[0] * SCALE, oy = p0[1] * SCALE;
+          const w  = (p1[0] - p0[0]) * SCALE;
+          const h  = (p1[1] - p0[1]) * SCALE;
+          rectList.push([ox, -oy, w, -h, "rgba(128,128,128,0.12)", "bbox", true, "bbox", {kind:"bbox"}]);
+        }
+
+        // 1) metals
+        if (Array.isArray(cellObj.metals)) {
+          cellObj.metals.forEach((m, i) => {
+            const color = metalColor(m.layer);
+            const label = `${m.layer || "Metal"} #${i}`;
+            pushRectFromXY(m.xy, color, label, "metal", { layer: m.layer || "" });
+          });
+        }
+
+        // 2) pins
+        if (Array.isArray(cellObj.pins)) {
+          cellObj.pins.forEach((p) => {
+            const name = p.name || p.netname || "pin";
+            pushRectFromXY(p.xy, "rgba(0,200,0,0.55)", String(name), "pin", {
+              layer: p.layer || "", netname: p.netname || ""
+            });
+          });
+        }
+
+        // 3) subblocks
+        if (Array.isArray(cellObj.subblocks)) {
+          cellObj.subblocks.forEach((sb) => {
+            const instName = sb.name || "(inst)";
+            const instLib  = sb.libname || "";
+            const instCell = sb.cellname || "";
+            const xy       = sb.xy || [0,0];
+            const tr       = sb.transform || "R0";
+
+            // subblock 크기 추정: microtemplates는 내부적으로 size가 있으니,
+            // YAML에 바로 size가 없으면 라이브러리 bbox를 백엔드에서 붙여오게 하는 게 가장 정확.
+            // 일단 여기서는 gpdk045_microtemplates_dense는 대개 bbox가 라이브러리 정의에 있음 → 백엔드가 병합해 내려주길 권장.
+            const bbox = sb.bbox || cellObj.__libBBoxes?.[`${instLib}:${instCell}`]; // (옵션) 백엔드가 합쳐서 내려준 경우
+            if (!bbox || bbox.length !== 2) {
+              console.warn("subblock bbox missing; skip:", sb);
+              return;
+            }
+
+            const w = (bbox[1][0] - bbox[0][0]) * SCALE;
+            const h = (bbox[1][1] - bbox[0][1]) * SCALE;
+
+            let ox = xy[0] * SCALE;
+            let oy = xy[1] * SCALE;
+            if (tr === "MX") oy -= h;
+
+            // 사각형
+            rectList.push([ox, -oy, w, -h, "rgba(0,0,0,1.0)", instName, true, "subblock", {
+              kind:"subblock", instName, instLib, instCell, transform: tr
+            }]);
+
+            // 라벨(두 줄)
+            labelList.push({ x: ox+2, y: -(oy)-2,  text: `Inst: ${instName}`, font: "12px sans-serif", fill:"#000", align:"left", baseline:"top", z: 70 });
+            labelList.push({ x: ox+2, y: -(oy)-16, text: `Lib: ${instLib}, Cell: ${instCell}`, font: "11px sans-serif", fill:"#444", align:"left", baseline:"top", z: 70 });
+          });
+        }
+
+        // 4) 상단 오버레이: cell/lib
+        labelList.push({ x: 10, y: 10, text: `cellname: ${cellname}`, font: "bold 14px sans-serif", fill: "#111", align: "left", baseline: "top", z: 1000 });
+        labelList.push({ x: 10, y: 28, text: `libname: ${libname}`,   font: "12px sans-serif",       fill: "#333", align: "left", baseline: "top", z: 1000 });
+      };
+
+
+      // 그리기 예시
+      function drawScene(ctx) {
+        // rect 그리기 (순서대로)
+        rectList.forEach(([x, y, w, h, color]) => {
+          ctx.fillStyle = color;
+          ctx.fillRect(x, y, w, h);
+        });
+
+        // 라벨은 z 정렬 후 그리기
+        const sorted = [...labelList].sort((a,b) => (a.z||0) - (b.z||0));
+        sorted.forEach(l => {
+          ctx.font = l.font || "12px sans-serif";
+          ctx.fillStyle = l.fill || "#000";
+          ctx.textAlign = l.align || "left";
+          ctx.textBaseline = l.baseline || "alphabetic";
+          ctx.fillText(l.text, l.x, l.y);
+        });
+      }
+
+
+      // ====================================================================================================
+
+      function drawOriginAxes() {
+        ctx.save();
+        ctx.strokeStyle = '#0077cc';
+        ctx.lineWidth = 20;
+
+        const LONG = 100000;
+
+        // X축: y=0, 좌우 전체 그리기
+        ctx.beginPath();
+        ctx.moveTo(385 - LONG, 540);  // 시작점: 왼쪽으로
+        ctx.lineTo(385 + LONG, 540);   // 끝점: 오른쪽으로
+        ctx.stroke();
+
+        // Y축: x=0, 위아래 전체 그리기
+        ctx.beginPath();
+        ctx.moveTo(385, 540 - LONG);  // 시작점: 위쪽으로
+        ctx.lineTo(385, 540 + LONG);   // 끝점: 아래쪽으로
+        ctx.stroke();
+
+        ctx.restore();
+      }
     
       // 캔버스 재렌더링 함수
       function redraw() {
@@ -223,6 +439,18 @@
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.restore();
+
+          // === origin 축 표시 ===
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "#444";  // 연한 회색
+        const pt0 = ctx.transformedPoint(0, 0);
+        const ptX1 = ctx.transformedPoint(canvas.width, 0);
+        const ptY1 = ctx.transformedPoint(0, canvas.height);
+
+        drawOriginAxes(); 
+        
         rectList.forEach(rect => {
           if (rect[6]) {
             if (rect[7] === 'subblock') {
@@ -288,15 +516,6 @@
       }
       canvas.addEventListener('DOMMouseScroll', handleScroll, false);
       canvas.addEventListener('mousewheel', handleScroll, false);
-
-      document.getElementById("pins").addEventListener('click', () => {
-            rectList.forEach(rect => {
-                if(rect[7] == 'pin'){
-                    rect[6] = !rect[6];
-                }
-                redraw();
-            });
-        });
     
       // 폼 제출 이벤트 핸들러 (AJAX)
       document.getElementById("editForm").addEventListener("submit", async function (e) {
@@ -305,8 +524,8 @@
         // 폼 제출 시 최신 입력값 읽기
         const cellname = document.getElementById("cellNameInput").value || 'cellname';
         const libname = document.getElementById("yamlFileInput").value || 'logic_generated';
-        //console.log("Submitted cellname:", cellname);
-        //console.log("Submitted libname:", libname);
+        // console.log("Submitted cellname:", cellname);
+        // console.log("Submitted libname:", libname);
     
         const form = e.target;
         const formData = new FormData(form);
@@ -314,31 +533,52 @@
         for (const pair of formData) {
           data.append(pair[0], pair[1]);
         }
-        
         try {
           const response = await fetch(form.action, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: data
+            body: data,
+            credentials: 'include'
           });
           const result = await response.json();
           console.log("AJAX 응답:", result);
           let messageDiv = document.getElementById("message");
-          if (response.ok && result.success) {
-            messageDiv.innerText = "저장되었습니다.";
-            if (result.drawObjectDoc) {
-              rectList = [];
-              buildMap(result.drawObjectDoc, cellname, libname);
-              redraw();
+          // if (response.ok && result.success) {
+          //   messageDiv.innerText = "저장되었습니다.";
+          //   if (result.drawObjectDoc) {
+          //     rectList = [];
+          //     buildMap(result.drawObjectDoc, cellname, libname);
+          //     redraw();
+          //   }
+          // } 
+          if (response.ok && result.success) {    // switch에 따라 다른 응답
+            const generateSwitch = document.getElementById("generateSwitch");
+            if (generateSwitch && generateSwitch.checked) {
+              messageDiv.innerText = "Generate 완료되었습니다.";
+            } else {
+              messageDiv.innerText = "저장되었습니다.";
             }
-          } else {
+
+            // if (result.drawObjectDoc) {
+            //   rectList = [];
+            //   buildMap(result.drawObjectDoc, cellname, libname);
+            //   redraw();
+            // }
+            // Save에선 layout을 절대 그리지 않도록
+            // if (result.drawObjectDoc && result.libname && result.cellname) {
+            //   rectList = [];
+            //   buildMap(result.drawObjectDoc, result.cellname, result.libname);
+            //   redraw();
+            // }
+          } 
+          else {
             messageDiv.innerText = "저장에 실패했습니다.";
           }
           messageDiv.style.opacity = 1;
           setTimeout(() => {
             messageDiv.style.transition = "opacity 0.5s ease-out";
             messageDiv.style.opacity = 0;
-          }, 1000);
+          }, 2000);
         } catch (error) {
           let messageDiv = document.getElementById("message");
           messageDiv.innerText = "오류가 발생했습니다.";
@@ -351,7 +591,123 @@
         }
       });
     
+      // default layout function
+      // document.getElementById("layoutDrawBtn").addEventListener("click", async function () {
+      //   console.log("📐 Layout Draw 버튼 클릭됨");
+
+      //   // 필요한 입력값 추출
+      //   const cellname = document.getElementById("cellNameInput").value || 'cellname';
+      //   const libname = document.getElementById("yamlFileInput").value || 'logic_generated';
+
+      //   const form = document.getElementById("editForm");
+      //   const formData = new FormData(form);
+
+      //   const data = new URLSearchParams();
+      //   for (const pair of formData) {
+      //     data.append(pair[0], pair[1]);
+      //   }
+
+      //   try {
+      //     const response = await fetch(`${form.action}/draw`, {   // ✅ draw 전용 라우터 호출
+      //       method: 'POST',
+      //       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      //       body: data,
+      //       credentials: 'include'
+      //     });
+
+      //     const result = await response.json();
+      //     console.log("🎯 Layout Draw 응답:", result);
+
+      //     const messageDiv = document.getElementById("message");
+      //     if (response.ok && result.drawObjectDoc) {
+      //       const { drawObjectDoc, cellname, libname } = result;
+      //       const messageDiv = document.getElementById("message");
+
+      //       if (
+      //         drawObjectDoc.hasOwnProperty(libname) &&
+      //         drawObjectDoc[libname].hasOwnProperty(cellname)
+      //       ) {
+      //         setTimeout(() => {
+      //           messageDiv.innerText = '✅ Layout Draw 성공';
+      //         }, 2000); // 2초 후에 메시지 제거
+
+      //         // messageDiv.innerText = "✅ Layout Draw 성공";
+      //         rectList = [];
+      //         buildMap(drawObjectDoc, cellname, libname);
+      //         redraw();
+      //       } else {
+      //         setTimeout(() => {
+      //           messageDiv.innerText = `⚠️ Layout Draw 실패: ${libname} / ${cellname} 없음`;
+      //         }, 2000);
+      //         // messageDiv.innerText = `⚠️ Layout Draw 실패: ${libname} / ${cellname} 없음`;
+      //         console.warn(`drawObjectDoc[${libname}][${cellname}] is undefined`);
+      //       }
+      //     }
+      //   } catch (error) {
+      //     console.error("❌ Layout Draw 오류:", error);
+      //     document.getElementById("message").innerText = "서버 오류로 Layout을 그릴 수 없습니다.";
+      //   }
+      // });
+
+
       // 터미널 영역 폴링 (2초 간격)
+      
+      
+      document.getElementById("layoutDrawBtn").addEventListener("click", async function () {
+        const form = document.getElementById("editForm");
+        const urlObj = new URL(form.action, window.location.origin);
+        const basePath = urlObj.pathname; // "/main/:id/edit"
+        const pathParam = urlObj.searchParams.get('path') || '/';
+
+        // ✅ 진짜 draw 경로로 보냄 (쿼리 앞에 /draw를 붙인다)
+        const drawUrl = `${basePath}/draw?path=${encodeURIComponent(pathParam)}`;
+
+        const formData = new FormData(form);
+        // 사용자가 입력한 lib/cell 비면 빈 문자열로 보내서 서버가 추론하도록
+        const cellFromInput = (document.getElementById("cellNameInput").value || '').trim();
+        const libFromInput  = (document.getElementById("yamlFileInput").value || '').trim();
+        formData.set('cellname', cellFromInput);
+        formData.set('libname', libFromInput);
+
+        const data = new URLSearchParams();
+        for (const pair of formData) data.append(pair[0], pair[1]);
+
+        try {
+          const response = await fetch(drawUrl, {
+            method: 'POST', // draw는 POST로
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: data,
+            credentials: 'include'
+          });
+
+          const result = await response.json();
+          console.log("🎯 Layout Draw 응답:", result);
+
+          const msg = document.getElementById("message");
+          if (response.ok && result.drawObjectDoc) {
+            const lib  = result.resolvedLibname || libFromInput || 'logic_generated';
+            const cell = result.resolvedCellname || cellFromInput || 'cellname';
+
+            if (result.drawObjectDoc?.[lib]?.[cell]) {
+              msg.innerText = '✅ Layout Draw 성공';
+              rectList = [];
+              buildMap(result.drawObjectDoc, cell, lib);
+              redraw();
+            } else {
+              msg.innerText = `⚠️ Layout Draw 실패: ${lib} / ${cell} 없음`;
+              console.warn(`drawObjectDoc[${lib}][${cell}] is undefined`);
+            }
+          } else {
+            msg.innerText = result?.message || '⚠️ Layout Draw 실패';
+          }
+        } catch (err) {
+          console.error("❌ Layout Draw 오류:", err);
+          document.getElementById("message").innerText = "서버 오류로 Layout을 그릴 수 없습니다.";
+        }
+      });
+
+            
+      
       setInterval(async () => {
         try {
           const fileId = "<%= file._id %>";

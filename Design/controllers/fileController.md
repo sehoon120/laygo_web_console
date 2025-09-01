@@ -108,7 +108,7 @@ function editFile(req, res) = {
 }
 ```
 
-- 함수 saveFile: 파일 저장. file id와 수정할 내용(content) 받아 file에 저장 . 인자로 generate=true 주면 레이아웃 생성. Laygo script file을 실행시켜 yaml 파일로 저장. Log 저장 => 이때 모든 정보를 뽑기 위해 Laygo 수정 필요. Laygo에 feature 추가 필요 (laygoModify.md)
+- 함수 saveFile: 파일 저장. file id와 수정할 내용(content) 받아 file에 저장 . 인자로 generate=true 주면 레이아웃 생성. Laygo script file을 실행시켜 yaml 파일로 저장.
     + laygoModify.md의 webconsole.export() 부분의 논의 참고해 작성할 것
 ```
 #Pseudocode
