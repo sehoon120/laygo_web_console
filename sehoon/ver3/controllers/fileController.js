@@ -1,7 +1,9 @@
 const asyncHandler = require('express-async-handler');
 const File = require('../models/fileModel');
 const multer = require('multer');
-const fs = require('fs');
+const fs = require('fs');              // sync/비동기 콜백 방식
+const fsp = require('fs/promises');    // 프로미스 기반 (await 사용 가능)
+
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -616,6 +618,9 @@ const drawLayout_ver2 = asyncHandler(async (req, res) => {
 
   const username = req.user?.username || 'guest';
 
+  // 빠른 진단 로그
+  // console.log('[DRAW] user:', username, 'lib:', lib, 'cell:', cell);
+
   // 둘 중 하나라도 없으면 명시적으로 요청
   if (!lib || !cell) {
     return res.status(400).json({
@@ -637,12 +642,14 @@ const drawLayout_ver2 = asyncHandler(async (req, res) => {
   // 4) YAML 읽기 (신규 포맷 전용)
   let doc = null;
   try {
-    await fsp.access(targetYaml, fs.constants.R_OK);
-  } catch {
+    // access 체크 생략
+    const raw = await fsp.readFile(targetYaml, 'utf8'); // 파일 없으면 여기서 throw
+    doc = yaml.load(raw);
+  } catch (e) {
     return res.status(404).json({
       success: false,
-      message: 'YAML 파일을 찾을 수 없습니다.',
-      expectedPath: targetYaml,
+      message: `YAML 파일을 읽을 수 없습니다: ${String(e)}`,
+      sourceYamlPath: targetYaml,
       resolvedLibname: lib,
       resolvedCellname: cell,
     });
@@ -694,7 +701,8 @@ module.exports = {
     editFile,
     saveFile,
     getLogFile,
-    drawLayout
+    drawLayout,
+    drawLayout_ver2
     // ,
     // adddir,
     // createDir
