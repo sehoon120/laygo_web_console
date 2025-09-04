@@ -129,7 +129,7 @@ funcion saveFile(req, res){
 
     if(generate is True and file.filetype is python script){
         username <- req.user.username;
-        filename <- Remove filename extension(file.filename);
+        filename <- Remove filename extension from filepath(file.filename);
         tempCodeDir <- '(temporary directory for script file)';
         rundir <- '(directory that runs server)';
         tempFile <- concat(tempDir, '(username)_(script file name with path)_temp.py');

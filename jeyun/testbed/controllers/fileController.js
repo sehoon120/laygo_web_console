@@ -396,12 +396,20 @@ const saveFile = asyncHandler(async (req, res) => {
   const runDirWsl = `/mnt/${runDirWin[0].toLowerCase()}/${runDirWin.slice(3).replace(/\\/g, '/')}`;
 
   // 2) WSL 스크립트 실행 (spawn 권장)
-  const scriptWSL = `/mnt/c/GraduationProject/bag_workspace_gpdk045/start_bag_test.sh`;
+  const scriptWSL = `cd /mnt/c/For_english_only_directories/LaygoWebConsole/bag_workspace_gpdk045; source .cshrc_bag; bash /mnt/c/For_english_only_directories/LaygoWebConsole/bag_workspace_gpdk045/start_bag_test.sh`;
   const cmd = 'wsl';
+  username_repl = username.replace(/"/g, '\\"');
+  basename_repl = baseName.replace(/"/g, '\\"');
+  tempFileWsl_repl = tempFileWSL.replace(/"/g, '\\"');
+  runDirWsl_repl = runDirWsl.replace(/"/g, '\\"');
+  console.log(username_repl);
+  console.log(basename_repl);
+  console.log(tempFileWsl_repl);
+  console.log(runDirWsl_repl);
   // -lc: 로그인 쉘 + 명령 문자열, 인자에 공백 안전하게 따옴표
   const args = [
-    'bash', '-lc',
-    `"${scriptWSL}" "${username.replace(/"/g, '\\"')}" "${baseName.replace(/"/g, '\\"')}" "${tempFileWSL.replace(/"/g, '\\"')}" "${runDirWsl.replace(/"/g, '\\"')}"`
+    'csh', '-c',
+    '${scriptWSL} ${username_repl} ${baseName_repl} ${tempFileWSL_repl} ${runDirWsl_repl}'
   ];
   const child = spawn(cmd, args, { shell: false });
 
@@ -415,6 +423,7 @@ const saveFile = asyncHandler(async (req, res) => {
     fs.unlink(tempFileWin, () => {});
 
     if (code !== 0) {
+      console.log(`Process exited with code ${code}`);
       return res.status(500).json({ success: false, error: stderr || `Process exited with code ${code}` });
     }
 
@@ -425,6 +434,7 @@ const saveFile = asyncHandler(async (req, res) => {
         .filter(f => f.endsWith('.yaml') || f.endsWith('.yml'))
         .map(f => path.join(userYamlDir, f));
     } catch (e) {
+      console.error('3qjfdsa');
       // 폴더 읽기 실패 시 계속
     }
 
@@ -453,7 +463,7 @@ const saveFile = asyncHandler(async (req, res) => {
     } catch (dbErr) {
       // DB 저장 실패해도 drawObjectDoc만이라도 리턴
       // 필요하면 여기서 로그만 남기고 계속 진행
-      // console.error('DB 저장 에러:', dbErr);
+      console.error('DB 저장 에러:', dbErr);
     }
 
     // 4) 최종 doc 로드 (타겟 YAML 우선)
@@ -463,6 +473,7 @@ const saveFile = asyncHandler(async (req, res) => {
         doc = yaml.load(fs.readFileSync(targetYamlPath, 'utf8'));
       } catch (e) {
         // YAML 파싱 실패 시 null 유지
+        console.error('4번에러');
       }
     }
 
