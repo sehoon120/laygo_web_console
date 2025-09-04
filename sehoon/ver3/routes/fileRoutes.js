@@ -15,7 +15,8 @@ const {
     editFile,
     saveFile,
     getLogFile,
-    drawLayout
+    drawLayout,
+    drawLayout_ver2
     // ,
     // adddir,
     // createDir
@@ -45,6 +46,8 @@ router.route('/:id/edit/logs')
     .get(getLogFile);
 
 router.route('/:id/edit/draw')
-    .post(drawLayout);
+    .post(drawLayout_ver2);
+    // .post(drawLayout);
+    
 
 module.exports = router;

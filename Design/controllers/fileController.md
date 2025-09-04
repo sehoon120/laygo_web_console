@@ -131,16 +131,24 @@ funcion saveFile(req, res){
         username <- req.user.username;
         filename <- Remove filename extension from filepath(file.filename);
         tempCodeDir <- '(temporary directory for script file)';
+        tempYamlDir <- '(temporary directory for yaml file)';
         rundir <- '(directory that runs server)';
         tempFile <- concat(tempDir, '(username)_(script file name with path)_temp.py');
         bag_dir <- laygo execution directory;
 
         save script file at tempFile;
 
-        command <- 'csh -c cd {bag_dir}; source .cshrc_bag; bash {bag_dir}/start_bag_test.sh ${username} ${filename} ${tempFile(WSL)} ${runDir(Wsl)}"'
-
-        execute command;
+        command <- 'csh -c cd ${bag_dir}; source .cshrc_bag; bash ${bag_dir}/start_bag_test.sh ${username} ${filename} ${tempFile(WSL)} ${runDir(Wsl)}"'
+        execute command on child process;
         delete tempfile;
+        if(execution end but exited with error){
+            return res with (success <- false);
+        }
+
+        read yaml files in tempYamlDir/(username);              # Laygo2 수정과 맞지 않는 부분 있어 수정 고려 필요(username/scriptname으로 접근 필요)
+        Save or update those yaml files to DB(Query: {user: username, filename: filename with path without extension, filetype: 'yaml" });          # Yaml 파일의 DB 저장 관련 논의 필요 -> 반드시 필요하지는 않으나 이렇게 설계되어있는만큼 굳이 바꿀 필요도 없을 것 같음.
+        doc <- yaml.load(tempYamlDir/(requested yaml file name));            # doc의 전달이 반드시 필요한 것은 아님(Draw에 대한 부분 따로 존재)
+        return res({success: true, output: stdout, drawObjectDoc: doc, cellname: cellname});
     }
 }
 ```
@@ -153,15 +161,19 @@ funcion saveFile(req, res){
 # pseudocode
 # File 저장, laygout generate -> saveFile 함수 이용
 
-# draw_layout 함수: 그려낼 libname, cellname을 받아 그에 대한 yaml 파일을 반환
-function draw_layout(req, res){
+# drawLayout 함수: 그려낼 libname, cellname을 받아 그에 대한 yaml 파일을 반환
+function drawLayout(req, res){
     libname <- req.body.libname;
     cellname <- req.body.cellname;
     username <- req.user.username;
-    genDir <- '(temporary directory for yaml file)/(username)/(script path)/(libname)';      //Directory that saves yaml files for generator
-    yamlPath <- '(genDir)/(cellname)'
+    
+    #Local에 yaml 파일 저장한 경우 -> 현재는 DB에서 받도록 함
+    #genDir <- '(temporary directory for yaml file)/(username)/(script path)/(libname)';      //Directory that saves yaml files for generator
+    #yamlPath <- '(genDir)/(cellname)'
+    #doc <- load yaml with path = yamlPath and endcoding = 'utf8'      
 
-    doc <- load yaml with path = yamlPath and endcoding = 'utf8'      
+    id <- req.params.id;
+    file <- File.findById(id);
     return return res.json({ success: true, output: stdout, drawObjectDoc: doc, cellname: cellname, libname: libname });
 }
 ```
