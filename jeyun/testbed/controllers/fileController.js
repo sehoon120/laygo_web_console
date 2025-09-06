@@ -387,11 +387,11 @@ const saveFile = asyncHandler(async (req, res) => {
   const userYamlDir = path.join(tempYamlRoot, username);
   if (!fs.existsSync(userYamlDir)) fs.mkdirSync(userYamlDir, { recursive: true });
 
-  const yamlBase = req.body.yamlFile ? `${req.body.yamlFile}_templates.yaml` : 'logic_generated_templates.yaml';
+  //const yamlBase = req.body.yamlFile ? `${req.body.yamlFile}_templates.yaml` : 'logic_generated_templates.yaml';
   const libname = req.body.yamlFile ? req.body.yamlFile : 'logic_generated';
-  const targetYamlPath = path.join(userYamlDir, yamlBase); // 우리가 우선적으로 읽으려는 파일
-  console.log("targetYamlPath");
-  console.log(targetYamlPath);
+  const targetYamlDir = path.join(userYamlDir, libname); // 우리가 우선적으로 읽으려는 파일
+  console.log("targetYamlDir");
+  console.log(targetYamlDir);
   console.log("tempfilewin");
   console.log(tempFileWin);
   console.log("userYamlDir");
@@ -427,61 +427,29 @@ const saveFile = asyncHandler(async (req, res) => {
       return res.status(500).json({ success: false, error: stderr || `Process exited with code ${code}` });
     }
 
-    // 3) user 폴더 내 YAML들 스캔하여 DB upsert (끝까지 보장)
-    let yamlFiles = [];
-    try {
-      yamlFiles = fs.readdirSync(userYamlDir)
-        .filter(f => f.endsWith('.yaml') || f.endsWith('.yml'))
-        .map(f => path.join(userYamlDir, f));
-    } catch (e) {
-      // 폴더 읽기 실패 시 계속
-    }
-
-    try {
-      await Promise.all(yamlFiles.map(async (ypath) => {
-        const data = await fs.promises.readFile(ypath, 'utf8');
-        const filenameWithoutExt = path.basename(ypath).replace(/\.[^/.]+$/, "");
-        console.log("filenameWithoutExt");
-        console.log(filenameWithoutExt);
-        const fileQuery = {
-          user: username,
-          filename: filenameWithoutExt,
-          filetype: 'yaml',
-          filePath: req.query.path || '/'
-        };
-
-        const existing = await File.findOne(fileQuery);
-        if (existing) {
-          existing.content = data;
-          await existing.save();
-        } else {
-          await File.create({
-            ...fileQuery,
-            content: data
-          });
-        }
-      }));
-    } catch (dbErr) {
-      // DB 저장 실패해도 drawObjectDoc만이라도 리턴
-      // 필요하면 여기서 로그만 남기고 계속 진행
-      console.error('DB 저장 에러:', dbErr);
-    }
-
-    // 4) 최종 doc 로드 (타겟 YAML 우선)
+    // 최종 doc 로드 (타겟 YAML 우선) => 일단 제거
     let doc = null;
-    if (fs.existsSync(targetYamlPath)) {
+    let targetYaml = null;
+    if (fs.existsSync(targetYamlDir)) {
       try {
-        doc = yaml.load(fs.readFileSync(targetYamlPath, 'utf8'));
+        const yamlFiles = fs.readdirSync(targetYamlDir)
+          .filter(f => f.endsWith('.yaml') || f.endsWith('.yml'))
+          .map(f => path.join(targetYamlDir, f))
+          .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
+        targetYaml = yamlFiles[0] || null;
+      } catch {}
+
+      try {
+        doc = yaml.load(fs.readFileSync(targetYaml, 'utf8'));
       } catch (e) {
         // YAML 파싱 실패 시 null 유지
-        console.error('4번에러');
       }
     }
 
     return res.json({
       success: true,
       output: stdout,
-      drawObjectDoc: doc,
+      drawObjectDoc: null,
       cellname: req.body.cellname ?? null,
       libname
     });
@@ -555,6 +523,7 @@ function pickFirstLibCellFromYamlDoc(doc) {
 
 // 컨트롤러(draw 전용)
 const drawLayout = asyncHandler(async (req, res) => {
+  console.log("DrawLayout called");
   const id = req.params.id;
   const file = await File.findById(id);
   if (!file) return res.status(404).json({ error: 'File not found.' });
@@ -576,7 +545,7 @@ const drawLayout = asyncHandler(async (req, res) => {
   const username = req.user?.username || 'guest';
   const userYamlDir = path.join(__dirname, '../../temp_yaml', username);
   const targetYaml = path.join(userYamlDir, lib, cell);
-  print(targetYaml)
+  console.log(targetYaml)
 
   // 가장 최근 yaml 선택
   /*let targetYaml = null;
@@ -602,6 +571,8 @@ const drawLayout = asyncHandler(async (req, res) => {
   if ((!lib || !cell) && !doc) {  // 추출 못하면 그냥 출력 안하기
     return res.status(400).json({ success:false, message:'libname/cellname 미지정. 먼저 Save+Generate 하거나 값을 입력하세요.' });
   }
+
+  console.log("Successfully got doc");
 
   // 5) 응답
   return res.json({

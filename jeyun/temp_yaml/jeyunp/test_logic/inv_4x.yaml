@@ -54,28 +54,28 @@ pins:
   - [780, 490]
   - [860, 1510]
 subblocks:
-- cellname: myvcell_MN0
+- bbox:
+  - [0, 0]
+  - [1230, 1000]
+  cellname: myvcell_MN0
   libname: gpdk045_microtemplates_dense
   name: MN0
   pins:
     D: {netname: null, termName: D}
     G: {netname: null, termName: G}
     RAIL: {netname: null, termName: RAIL}
-  size:
-  - [0, 0]
-  - [1230, 1000]
   transform: R0
   xy: [0, 0]
-- cellname: myvcell_MP0
+- bbox:
+  - [0, 1000]
+  - [1230, 2000]
+  cellname: myvcell_MP0
   libname: gpdk045_microtemplates_dense
   name: MP0
   pins:
     D: {netname: null, termName: D}
     G: {netname: null, termName: G}
     RAIL: {netname: null, termName: RAIL}
-  size:
-  - [0, 1000]
-  - [1230, 2000]
   transform: MX
   xy: [0, 2000]
 vias: []
