@@ -1,0 +1,81 @@
+bbox:
+- [0, 0]
+- [2050, 2000]
+cellname: inv_8x
+libname: test_logic
+metals:
+- layer: Metal2
+  xy:
+  - [165, 750]
+  - [1065, 830]
+- layer: Metal2
+  xy:
+  - [165, 1170]
+  - [1065, 1250]
+- layer: Metal3
+  xy:
+  - [165, 750]
+  - [245, 1250]
+- layer: Metal3
+  xy:
+  - [1600, 450]
+  - [1680, 1550]
+- layer: Metal2
+  xy:
+  - [-120, -120]
+  - [2170, 120]
+- layer: Metal2
+  xy:
+  - [-120, 1880]
+  - [2170, 2120]
+pins:
+- layer: Metal2
+  name: 'VSS:'
+  netname: 'VSS:'
+  xy:
+  - [0, -120]
+  - [2050, 120]
+- layer: Metal2
+  name: 'VDD:'
+  netname: 'VDD:'
+  xy:
+  - [0, 1880]
+  - [2050, 2120]
+- layer: Metal3
+  name: I
+  netname: I
+  xy:
+  - [165, 790]
+  - [245, 1210]
+- layer: Metal3
+  name: O
+  netname: O
+  xy:
+  - [1600, 490]
+  - [1680, 1510]
+subblocks:
+- cellname: myvcell_MN0
+  libname: gpdk045_microtemplates_dense
+  name: MN0
+  pins:
+    D: {netname: null, termName: D}
+    G: {netname: null, termName: G}
+    RAIL: {netname: null, termName: RAIL}
+  size:
+  - [0, 0]
+  - [2050, 1000]
+  transform: R0
+  xy: [0, 0]
+- cellname: myvcell_MP0
+  libname: gpdk045_microtemplates_dense
+  name: MP0
+  pins:
+    D: {netname: null, termName: D}
+    G: {netname: null, termName: G}
+    RAIL: {netname: null, termName: RAIL}
+  size:
+  - [0, 1000]
+  - [2050, 2000]
+  transform: MX
+  xy: [0, 2000]
+vias: []

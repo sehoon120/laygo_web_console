@@ -46,6 +46,7 @@
 
     # webconsole 환경 환경변수 설정
     export WC="webconsole"
+    WC가 정의되어 있는 경우 webconsole 환경으로 판단하고 동작하도록 laygo 수정
     ```
 
 ## Laygo에 web console용 출력 함수 추가
@@ -122,7 +123,8 @@
     + Laygo2.object.database.py Design 객체의 함수 추가
     + Design.export_to_template과 NativeInstanceTemplate.export_to_dict() 참고
 
-- export_to_raw_dict를 추가함수2 대신 사용가능할지 확인중...
+
+- export_to_raw_dict를 추가함수2 대신 사용가능할지 확인중 -> subblock의 size가 포함되지 않아 MOS의 drawing 불가능, 이를 수정하여 export_to_webconsole 만들겠음
 
 ## Laygo script에 templete database import 함수 수정
 - 기존 방식의 문제점: local에 존재하는 template database 디렉터리의 위치를 알아야 import가 가능 -> 다른 유저의 디렉터리에 대한 접근도 가능해질 수 있다. 서버 내의 디렉터리 구조를 알아야 한다는 전제가 있다.
