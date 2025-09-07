@@ -387,21 +387,30 @@ const saveFile = asyncHandler(async (req, res) => {
   const userYamlDir = path.join(tempYamlRoot, username);
   if (!fs.existsSync(userYamlDir)) fs.mkdirSync(userYamlDir, { recursive: true });
 
-  const yamlBase = req.body.yamlFile ? `${req.body.yamlFile}_templates.yaml` : 'logic_generated_templates.yaml';
+  //const yamlBase = req.body.yamlFile ? `${req.body.yamlFile}_templates.yaml` : 'logic_generated_templates.yaml';
   const libname = req.body.yamlFile ? req.body.yamlFile : 'logic_generated';
-  const targetYamlPath = path.join(userYamlDir, yamlBase); // 우리가 우선적으로 읽으려는 파일
+  const targetYamlDir = path.join(userYamlDir, libname); // 우리가 우선적으로 읽으려는 파일
+  console.log("targetYamlDir");
+  console.log(targetYamlDir);
+  console.log("tempfilewin");
+  console.log(tempFileWin);
+  console.log("userYamlDir");
+  console.log(userYamlDir);
+  console.log("req.query.path");
+  console.log(req.query.path);
 
   //Added by me
   const runDirWin = path.join(__dirname, '..');
   const runDirWsl = `/mnt/${runDirWin[0].toLowerCase()}/${runDirWin.slice(3).replace(/\\/g, '/')}`;
 
   // 2) WSL 스크립트 실행 (spawn 권장)
-  const scriptWSL = `/mnt/c/GraduationProject/bag_workspace_gpdk045/start_bag_test.sh`;
+  runDirWsl_repl = runDirWsl.replace(/"/g, '\\"');
+  const scriptWSL = `/mnt/c/For_english_only_directories/LaygoWebConsole/bag_workspace_gpdk045/start_bag_test.sh`;
   const cmd = 'wsl';
   // -lc: 로그인 쉘 + 명령 문자열, 인자에 공백 안전하게 따옴표
   const args = [
     'bash', '-lc',
-    `"${scriptWSL}" "${username.replace(/"/g, '\\"')}" "${baseName.replace(/"/g, '\\"')}" "${tempFileWSL.replace(/"/g, '\\"')}" "${runDirWsl.replace(/"/g, '\\"')}"`
+    `"${scriptWSL}" "${username.replace(/"/g, '\\"')}" "${baseName.replace(/"/g, '\\"')}" "${tempFileWSL.replace(/"/g, '\\"')}" "${runDirWsl_repl}"`
   ];
   const child = spawn(cmd, args, { shell: false });
 
@@ -413,54 +422,25 @@ const saveFile = asyncHandler(async (req, res) => {
   child.on('close', async (code) => {
     // 임시 파일 제거 (실패해도 진행)
     fs.unlink(tempFileWin, () => {});
-
     if (code !== 0) {
+      console.log(`Process exited with code ${code}`);
       return res.status(500).json({ success: false, error: stderr || `Process exited with code ${code}` });
     }
 
-    // 3) user 폴더 내 YAML들 스캔하여 DB upsert (끝까지 보장)
-    let yamlFiles = [];
-    try {
-      yamlFiles = fs.readdirSync(userYamlDir)
-        .filter(f => f.endsWith('.yaml') || f.endsWith('.yml'))
-        .map(f => path.join(userYamlDir, f));
-    } catch (e) {
-      // 폴더 읽기 실패 시 계속
-    }
-
-    try {
-      await Promise.all(yamlFiles.map(async (ypath) => {
-        const data = await fs.promises.readFile(ypath, 'utf8');
-        const filenameWithoutExt = path.basename(ypath).replace(/\.[^/.]+$/, "");
-        const fileQuery = {
-          user: username,
-          filename: filenameWithoutExt,
-          filetype: 'yaml',
-          filePath: req.query.path || '/'
-        };
-
-        const existing = await File.findOne(fileQuery);
-        if (existing) {
-          existing.content = data;
-          await existing.save();
-        } else {
-          await File.create({
-            ...fileQuery,
-            content: data
-          });
-        }
-      }));
-    } catch (dbErr) {
-      // DB 저장 실패해도 drawObjectDoc만이라도 리턴
-      // 필요하면 여기서 로그만 남기고 계속 진행
-      // console.error('DB 저장 에러:', dbErr);
-    }
-
-    // 4) 최종 doc 로드 (타겟 YAML 우선)
+    // 최종 doc 로드 (타겟 YAML 우선) => 일단 제거
     let doc = null;
-    if (fs.existsSync(targetYamlPath)) {
+    let targetYaml = null;
+    if (fs.existsSync(targetYamlDir)) {
       try {
-        doc = yaml.load(fs.readFileSync(targetYamlPath, 'utf8'));
+        const yamlFiles = fs.readdirSync(targetYamlDir)
+          .filter(f => f.endsWith('.yaml') || f.endsWith('.yml'))
+          .map(f => path.join(targetYamlDir, f))
+          .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
+        targetYaml = yamlFiles[0] || null;
+      } catch {}
+
+      try {
+        doc = yaml.load(fs.readFileSync(targetYaml, 'utf8'));
       } catch (e) {
         // YAML 파싱 실패 시 null 유지
       }
@@ -469,7 +449,7 @@ const saveFile = asyncHandler(async (req, res) => {
     return res.json({
       success: true,
       output: stdout,
-      drawObjectDoc: doc,
+      drawObjectDoc: null,
       cellname: req.body.cellname ?? null,
       libname
     });
@@ -504,6 +484,105 @@ const getLogFile = asyncHandler(async (req, res) => {
   }
 });
 
+// ====================================================================================================
+
+// utils: 파이썬 코드에서 lib/cell 추출
+function extractLibCellFromPy(pyContent) {
+  const src =
+    Buffer.isBuffer(pyContent) ? pyContent.toString('utf8') :
+    (typeof pyContent === 'string' ? pyContent : '');
+
+  if (!src) return { lib: null, cell: null };
+
+  const rxLib  = /libname\s*=\s*['"]([^'"]+)['"]/;
+  const rxCell = /cellname\s*=\s*['"]([^'"]+)['"]/;
+  const rxType = /cell_type\s*=\s*['"]([^'"]+)['"]/;
+  const rxNf   = /nf\s*=\s*([0-9]+)/;
+
+  let lib  = (src.match(rxLib)?.[1])  || null;
+  let cell = (src.match(rxCell)?.[1]) || null;
+
+  if (!cell) {
+    const t = src.match(rxType)?.[1];
+    const n = src.match(rxNf)?.[1];
+    if (t && n) cell = `${t}_${n}x`;
+  }
+  return { lib, cell };
+}
+
+
+function pickFirstLibCellFromYamlDoc(doc) {
+  if (!doc || typeof doc !== 'object') return { lib: null, cell: null };
+  const libs = Object.keys(doc);
+  if (!libs.length) return { lib: null, cell: null };
+  const lib = libs[0];
+  const cells = Object.keys(doc[lib] || {});
+  const cell = cells.length ? cells[0] : null;
+  return { lib, cell };
+}
+
+// 컨트롤러(draw 전용)
+const drawLayout = asyncHandler(async (req, res) => {
+  console.log("DrawLayout called");
+  const id = req.params.id;
+  const file = await File.findById(id);
+  if (!file) return res.status(404).json({ error: 'File not found.' });
+
+  // 1) 사용자 입력
+  let lib = (req.body.libname || req.body.yamlFile || '').trim() || null;
+  let cell = (req.body.cellname || '').trim() || null;
+
+  // 2) 없으면 파이썬 코드에서 추출
+  if (!lib || !cell) {
+    const { lib: l2, cell: c2 } = extractLibCellFromPy(file.content || '');
+    lib = lib || l2;
+    cell = cell || c2;
+  }
+
+  cell = cell + '.yaml';
+
+  // 3) YAML 읽기 (네가 이미 만든 유저별 temp_yaml/username/.. 구조)
+  const username = req.user?.username || 'guest';
+  const userYamlDir = path.join(__dirname, '../../temp_yaml', username);
+  const targetYaml = path.join(userYamlDir, lib, cell);
+  console.log(targetYaml)
+
+  // 가장 최근 yaml 선택
+  /*let targetYaml = null;
+  try {
+    const yamlFiles = fs.readdirSync(userYamlDir)
+      .filter(f => f.endsWith('.yaml') || f.endsWith('.yml'))
+      .map(f => path.join(userYamlDir, f))
+      .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
+    targetYaml = yamlFiles[0] || null;
+  } catch {}*/
+
+  let doc = null;
+  if (targetYaml && fs.existsSync(targetYaml)) {
+    try { doc = yaml.load(fs.readFileSync(targetYaml, 'utf8')); } catch {}
+  }
+
+  // 4) 그래도 비었으면 YAML에서 첫 lib/cell 고름
+  // if ((!lib || !cell) && doc) {
+  //   const { lib: l3, cell: c3 } = pickFirstLibCellFromYamlDoc(doc);
+  //   lib = lib || l3;
+  //   cell = cell || c3;
+  // }
+  if ((!lib || !cell) && !doc) {  // 추출 못하면 그냥 출력 안하기
+    return res.status(400).json({ success:false, message:'libname/cellname 미지정. 먼저 Save+Generate 하거나 값을 입력하세요.' });
+  }
+
+  console.log("Successfully got doc");
+
+  // 5) 응답
+  return res.json({
+    success: !!doc,
+    drawObjectDoc: doc,
+    resolvedLibname: lib || null,
+    resolvedCellname: cell || null,
+    sourceYamlPath: targetYaml || null
+  });
+});
 
 
 // ==================================================
@@ -517,7 +596,8 @@ module.exports = {
     addContactForm,
     editFile,
     saveFile,
-    getLogFile
+    getLogFile,
+    drawLayout
     // ,
     // adddir,
     // createDir

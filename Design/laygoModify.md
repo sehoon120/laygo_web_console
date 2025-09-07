@@ -46,6 +46,7 @@
 
     # webconsole 환경 환경변수 설정
     export WC="webconsole"
+    WC가 정의되어 있는 경우 webconsole 환경으로 판단하고 동작하도록 laygo 수정
     ```
 
 ## Laygo에 web console용 출력 함수 추가
@@ -83,7 +84,7 @@
         + 아래 import와 마찬가지: Laygo 환경변수에 WebConsole 환경 여부를 포함시키고, import_template 함수에서는 이 환경변수를 확인해 webconsole 환경인 경우 DB에서 정보를 읽어옴
     + Issue 2) MongoDB atlas 접근: https://ohnyong.tistory.com/35
     + 수정 진행중...
-- 수정 함수 2: laygo.interface.core.export()
+- 수정 함수 2: laygo2.interface.core.export()
     + Export target에 webconsole 추가: webconsole.py의 export(추가 함수 1) 호출, username/filename을 환경변수에서 추출
     + 추가 내용
     ```
@@ -122,7 +123,8 @@
     + Laygo2.object.database.py Design 객체의 함수 추가
     + Design.export_to_template과 NativeInstanceTemplate.export_to_dict() 참고
 
-- export_to_raw_dict를 추가함수2 대신 사용가능할지 확인중...
+
+- export_to_raw_dict를 추가함수2 대신 사용가능할지 확인중 -> subblock의 size가 포함되지 않아 MOS의 drawing 불가능, 이를 수정하여 export_to_webconsole 만들겠음
 
 ## Laygo script에 templete database import 함수 수정
 - 기존 방식의 문제점: local에 존재하는 template database 디렉터리의 위치를 알아야 import가 가능 -> 다른 유저의 디렉터리에 대한 접근도 가능해질 수 있다. 서버 내의 디렉터리 구조를 알아야 한다는 전제가 있다.
@@ -153,3 +155,20 @@ laygo2.export_template(nat_temp, filename=export_path+libname+'_templates.yaml',
 # Filename example: ./laygo2_generators_private/logic/logic_generated_templates.yaml
 
 ```
+
+
+## Quick view: 수정/작성된 함수 최종 정리
+- 위에 읽기 힘들면 이거보세요.
+- laygo2.interface.yaml.export_template() 수정
+    + template database를 DB로 출력
+
+- laygo2.interface.core.export() 수정
+
+- laygo2/interface에 webconsole.py 추가
+    + export()함수 정의 -> 출력용 yaml 로컬/서버 저장
+
+- laygo2.object.database.Design 객체에 export_to_webconsole() member 함수 추가
+    + dict 형태로 출력할 데이터 반환
+
+- laygo2.interface.yaml.import_template() 수정
+    + Webconsole 환경에서는 DB에서 template 읽어오도록 수정
