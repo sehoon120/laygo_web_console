@@ -1,3 +1,4 @@
+# bag_workspace_gpdk45/start_bag.sh 대신 사용할 것
 # ================================================== 임의 추가
 #!/usr/bin/env bash
 
@@ -21,12 +22,18 @@ export LAYGO_BASENAME="$FILENAME"
 
 # 로그 생성버전
 # 로그 디렉토리 만들기
-mkdir -p ${RUNDIR}/temp
+#mkdir -p ${RUNDIR}/temp
+#mkdir -p /mnt/c/For_english_only_directories/LaygoWebConsole/laygo_web_console/jeyun/testbed/temp
 LOG_FILE="${RUNDIR}/temp/${USERNAME}_${FILENAME}_output.log"
+#LOG_FILE="/mnt/c/For_english_only_directories/LaygoWebConsole/laygo_web_console/jeyun/testbed/temp/testlog.log"
 # 실행
 echo "[INFO] 실행 중: $CODE_PATH" > "$LOG_FILE"
 echo "[DEBUG] 현재실행경로: " >> "$LOG_FILE"
 pwd >> "$LOG_FILE"
+echo "USERNAME: $USERNAME" >> "$LOG_FILE"
+echo "FILENAME: $FILENAME" >> "$LOG_FILE"
+echo "RUNDIR: $RUNDIR" >> "$LOG_FILE"
+
 # 디버깅 로그
 # echo "[DEBUG] Which python: $(which "$BAG_PYTHON")" >> "$LOG_FILE"
 # echo "[DEBUG] Python version: $("$BAG_PYTHON" --version)" >> "$LOG_FILE"

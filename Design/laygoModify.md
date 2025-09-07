@@ -159,8 +159,8 @@ laygo2.export_template(nat_temp, filename=export_path+libname+'_templates.yaml',
 
 ## Quick view: 수정/작성된 함수 최종 정리
 - 위에 읽기 힘들면 이거보세요.
-- laygo2.interface.yaml.export_template() 수정
-    + template database를 DB로 출력
+- laygo2.interface.yaml.export_template()
+    + template database를 DB로 출력/입력
 
 - laygo2.interface.core.export() 수정
 
