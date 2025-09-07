@@ -6,54 +6,6 @@ libname: test_logic
 metals:
 - layer: Metal2
   xy:
-  - [250, 750]
-  - [570, 830]
-- layer: Metal2
-  xy:
-  - [250, 450]
-  - [570, 530]
-- layer: Metal2
-  xy:
-  - [-120, -120]
-  - [940, 120]
-- layer: Metal1
-  xy:
-  - [165, -40]
-  - [245, 530]
-- layer: Metal1
-  xy:
-  - [575, -40]
-  - [655, 530]
-- layer: Metal2
-  xy:
-  - [85, -120]
-  - [735, 120]
-- layer: Metal2
-  xy:
-  - [250, 1170]
-  - [570, 1250]
-- layer: Metal2
-  xy:
-  - [250, 1470]
-  - [570, 1550]
-- layer: Metal2
-  xy:
-  - [-120, 1880]
-  - [940, 2120]
-- layer: Metal1
-  xy:
-  - [165, 1470]
-  - [245, 2040]
-- layer: Metal1
-  xy:
-  - [575, 1470]
-  - [655, 2040]
-- layer: Metal2
-  xy:
-  - [85, 1880]
-  - [735, 2120]
-- layer: Metal2
-  xy:
   - [165, 750]
   - [450, 830]
 - layer: Metal2
@@ -102,96 +54,28 @@ pins:
   - [370, 490]
   - [450, 1510]
 subblocks:
-- cellname: nmos4_fast_boundary
+- cellname: myvcell_MN0
   libname: gpdk045_microtemplates_dense
-  name: bndl
-  pins: {}
+  name: MN0
+  pins:
+    D: {netname: null, termName: D}
+    G: {netname: null, termName: G}
+    RAIL: {netname: null, termName: RAIL}
+  bbox:
+  - [0, 0]
+  - [820, 1000]
   transform: R0
   xy: [0, 0]
-- cellname: nmos4_fast_boundary
+- cellname: myvcell_MP0
   libname: gpdk045_microtemplates_dense
-  name: bndr
-  pins: {}
-  transform: R0
-  xy: [0, 615]
-- cellname: nmos4_fast_center_nf2
-  libname: gpdk045_microtemplates_dense
-  name: core
+  name: MP0
   pins:
-    D0: {netname: null, termName: D0}
-    G0: {netname: null, termName: G0}
-    S0: {netname: null, termName: S0}
-    S1: {netname: null, termName: S1}
-  transform: R0
-  xy: [0, 205]
-- cellname: via_M1_M2_0
-  libname: gpdk045_microtemplates_dense
-  name: VIA_G
-  pins: {}
-  transform: R0
-  xy: [410, 790]
-- cellname: via_M1_M2_0
-  libname: gpdk045_microtemplates_dense
-  name: VIA_D
-  pins: {}
-  transform: R0
-  xy: [410, 490]
-- cellname: via_M1_M2_1
-  libname: gpdk045_microtemplates_dense
-  name: VIA_TIE0
-  pins: {}
-  transform: R0
-  xy: [0, 205]
-- cellname: via_M1_M2_1
-  libname: gpdk045_microtemplates_dense
-  name: VIA_TIE1
-  pins: {}
-  transform: R0
-  xy: [0, 615]
-- cellname: pmos4_fast_boundary
-  libname: gpdk045_microtemplates_dense
-  name: bndl
-  pins: {}
+    D: {netname: null, termName: D}
+    G: {netname: null, termName: G}
+    RAIL: {netname: null, termName: RAIL}
+  bbox:
+  - [0, 1000]
+  - [820, 2000]
   transform: MX
   xy: [0, 2000]
-- cellname: pmos4_fast_boundary
-  libname: gpdk045_microtemplates_dense
-  name: bndr
-  pins: {}
-  transform: MX
-  xy: [0, 1385]
-- cellname: pmos4_fast_center_nf2
-  libname: gpdk045_microtemplates_dense
-  name: core
-  pins:
-    D0: {netname: null, termName: D0}
-    G0: {netname: null, termName: G0}
-    S0: {netname: null, termName: S0}
-    S1: {netname: null, termName: S1}
-  transform: MX
-  xy: [0, 1795]
-- cellname: via_M1_M2_0
-  libname: gpdk045_microtemplates_dense
-  name: VIA_G
-  pins: {}
-  transform: MX
-  xy: [410, 1210]
-- cellname: via_M1_M2_0
-  libname: gpdk045_microtemplates_dense
-  name: VIA_D
-  pins: {}
-  transform: MX
-  xy: [410, 1510]
-- cellname: via_M1_M2_1
-  libname: gpdk045_microtemplates_dense
-  name: VIA_TIE0
-  pins: {}
-  transform: MX
-  xy: [0, 1795]
-- cellname: via_M1_M2_1
-  libname: gpdk045_microtemplates_dense
-  name: VIA_TIE1
-  pins: {}
-  transform: MX
-  xy: [0, 1385]
 vias: []

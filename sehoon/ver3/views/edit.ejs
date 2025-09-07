@@ -241,15 +241,133 @@
       // yaml format 변경 후 예상 빌드맵
 
       // 전역: rectList, labelList 사용 (필요 시 초기화)
+      // window.buildMap_ver2 = function(cellObj) {
+      //   const SCALE = 5;
+      //   // const rectList  = (window.rectList  = []);
+      //   // const labelList = (window.labelList = []);
+
+      //   const cellname = cellObj.cellname || "(unknown)";
+      //   const libname  = cellObj.libname  || "(unknown)";
+
+      //   const metalColor = (layer) => {
+      //     if (!layer) return "rgba(0,0,255,0.35)";
+      //     const L = String(layer).toLowerCase();
+      //     if (L.includes('metal1')) return "rgba(0,128,255,0.35)";
+      //     if (L.includes('metal2')) return "rgba(255,128,0,0.35)";
+      //     if (L.includes('metal3')) return "rgba(160,32,240,0.35)";
+      //     return "rgba(0,0,255,0.35)";
+      //   };
+      //   const DEBUG_DRAW = true;
+
+      //   function pushRectFromXY(xy, color, label, kind, meta={}) {
+      //     if (!xy || xy.length !== 2) return;
+      //     const ox = xy[0][0] * SCALE;
+      //     const oy = xy[0][1] * SCALE;
+      //     const w  = (xy[1][0] - xy[0][0]) * SCALE;
+      //     const h  = (xy[1][1] - xy[0][1]) * SCALE;
+
+      //     rectList.push([ox, -oy, w, -h, color, label, true, kind, meta]);
+      //     // 라벨
+      //     labelList.push({
+      //       x: ox + 2, y: -(oy) - 2, text: label,
+      //       font: "11px sans-serif", fill: "#222",
+      //       align: "left", baseline: "top", z: 50
+      //     });
+      //   }
+
+      //   // 0) bbox (셀 외곽)
+      //   if (Array.isArray(cellObj.bbox) && cellObj.bbox.length === 2) {
+      //     const [p0, p1] = cellObj.bbox;
+      //     const ox = p0[0] * SCALE, oy = p0[1] * SCALE;
+      //     const w  = (p1[0] - p0[0]) * SCALE;
+      //     const h  = (p1[1] - p0[1]) * SCALE;
+      //     rectList.push([ox, -oy, w, -h, "rgba(128,128,128,0.12)", "bbox", true, "bbox", {kind:"bbox"}]);
+      //   }
+
+      //   // 1) metals
+      //   if (Array.isArray(cellObj.metals)) {
+      //     cellObj.metals.forEach((m, i) => {
+      //       const color = metalColor(m.layer);
+      //       const label = `${m.layer || "Metal"} #${i}`;
+      //       pushRectFromXY(m.xy, color, label, "metal", { layer: m.layer || "" });
+      //     });
+      //   }
+
+      //   // 2) pins
+      //   if (Array.isArray(cellObj.pins)) {
+      //     cellObj.pins.forEach((p) => {
+      //       const name = p.name || p.netname || "pin";
+      //       pushRectFromXY(p.xy, "rgba(0,200,0,0.55)", String(name), "pin", {
+      //         layer: p.layer || "", netname: p.netname || ""
+      //       });
+      //     });
+      //   }
+
+      //   // 3) subblocks
+      //   if (Array.isArray(cellObj.subblocks)) {
+      //     cellObj.subblocks.forEach((sb) => {
+      //       const instName = sb.name || "(inst)";
+      //       const instLib  = sb.libname || "";
+      //       const instCell = sb.cellname || "";
+      //       const xy       = sb.xy || [0,0];
+      //       const tr       = sb.transform || "R0";
+
+      //       // subblock 크기 추정: microtemplates는 내부적으로 size가 있으니,
+      //       // YAML에 바로 size가 없으면 라이브러리 bbox를 백엔드에서 붙여오게 하는 게 가장 정확.
+      //       // 일단 여기서는 gpdk045_microtemplates_dense는 대개 bbox가 라이브러리 정의에 있음 → 백엔드가 병합해 내려주길 권장.
+      //       const bbox = sb.bbox || cellObj.__libBBoxes?.[`${instLib}:${instCell}`]; // (옵션) 백엔드가 합쳐서 내려준 경우
+      //       if (!bbox || bbox.length !== 2) {
+      //         console.warn("subblock bbox missing; skip:", sb);
+      //         return;
+      //       }
+
+      //       const w = (bbox[1][0] - bbox[0][0]) * SCALE;
+      //       const h = (bbox[1][1] - bbox[0][1]) * SCALE;
+
+      //       let ox = xy[0] * SCALE;
+      //       let oy = xy[1] * SCALE;
+      //       if (tr === "MX") oy -= h;
+
+      //       // 사각형
+      //       rectList.push([ox, -oy, w, -h, "rgba(0,0,0,1.0)", instName, true, "subblock", {
+      //         kind:"subblock", instName, instLib, instCell, transform: tr
+      //       }]);
+
+      //       // 라벨(두 줄)
+      //       labelList.push({ x: ox+2, y: -(oy)-2,  text: `Inst: ${instName}`, font: "12px sans-serif", fill:"#000", align:"left", baseline:"top", z: 70 });
+      //       labelList.push({ x: ox+2, y: -(oy)-16, text: `Lib: ${instLib}, Cell: ${instCell}`, font: "11px sans-serif", fill:"#444", align:"left", baseline:"top", z: 70 });
+      //     });
+      //   }
+
+      //   // 4) 상단 오버레이: cell/lib
+      //   labelList.push({ x: 10, y: 10, text: `cellname: ${cellname}`, font: "bold 14px sans-serif", fill: "#111", align: "left", baseline: "top", z: 1000 });
+      //   labelList.push({ x: 10, y: 28, text: `libname: ${libname}`,   font: "12px sans-serif",       fill: "#333", align: "left", baseline: "top", z: 1000 });
+      // };
+
       window.buildMap_ver2 = function(cellObj) {
         const SCALE = 5;
-        // window.rectList = [];
-        // window.labelList = [];
-        const rectList  = (window.rectList  = []);
-        const labelList = (window.labelList = []);
+
+        // ✅ 전역 배열을 보존하면서 비우기 (참조 유지)
+        // window.rectList  ??= [];
+        // window.labelList ??= [];
+        // const rectList  = window.rectList;
+        // const labelList = window.labelList;
+        rectList.length = 0;
+        labelList.length = 0;
 
         const cellname = cellObj.cellname || "(unknown)";
         const libname  = cellObj.libname  || "(unknown)";
+
+        // z 레벨 정의 (낮을수록 뒤에=바닥, 높을수록 위)
+        // 추후 레이어별 분 on/off 개발시 사용 예정
+        const Z = {
+          bbox: 0,
+          subblock: 10,
+          mask: 20,
+          metal: 30,
+          pin: 40,
+          label: 1000,
+        };
 
         const metalColor = (layer) => {
           if (!layer) return "rgba(0,0,255,0.35)";
@@ -260,29 +378,33 @@
           return "rgba(0,0,255,0.35)";
         };
 
-        function pushRectFromXY(xy, color, label, kind, meta={}) {
+        function pushRectFromXY(xy, color, label, kind, meta = {}) {
           if (!xy || xy.length !== 2) return;
           const ox = xy[0][0] * SCALE;
           const oy = xy[0][1] * SCALE;
           const w  = (xy[1][0] - xy[0][0]) * SCALE;
           const h  = (xy[1][1] - xy[0][1]) * SCALE;
 
+          // ✅ 기본 z 주입
+          if (meta.z == null) meta.z = Z[kind] ?? 0;
+
           rectList.push([ox, -oy, w, -h, color, label, true, kind, meta]);
-          // 라벨
+
+          // 라벨은 따로 labelList에 z로 관리
           labelList.push({
             x: ox + 2, y: -(oy) - 2, text: label,
             font: "11px sans-serif", fill: "#222",
-            align: "left", baseline: "top", z: 50
+            align: "left", baseline: "top", z: Z.label
           });
         }
 
-        // 0) bbox (셀 외곽)
+        // 0) bbox
         if (Array.isArray(cellObj.bbox) && cellObj.bbox.length === 2) {
           const [p0, p1] = cellObj.bbox;
           const ox = p0[0] * SCALE, oy = p0[1] * SCALE;
           const w  = (p1[0] - p0[0]) * SCALE;
           const h  = (p1[1] - p0[1]) * SCALE;
-          rectList.push([ox, -oy, w, -h, "rgba(128,128,128,0.12)", "bbox", true, "bbox", {kind:"bbox"}]);
+          rectList.push([ox, -oy, w, -h, "rgba(128,128,128,0.12)", "bbox", true, "bbox", { kind: "bbox", z: Z.bbox }]);
         }
 
         // 1) metals
@@ -290,7 +412,7 @@
           cellObj.metals.forEach((m, i) => {
             const color = metalColor(m.layer);
             const label = `${m.layer || "Metal"} #${i}`;
-            pushRectFromXY(m.xy, color, label, "metal", { layer: m.layer || "" });
+            pushRectFromXY(m.xy, color, label, "metal", { layer: m.layer || "", z: Z.metal });
           });
         }
 
@@ -299,7 +421,7 @@
           cellObj.pins.forEach((p) => {
             const name = p.name || p.netname || "pin";
             pushRectFromXY(p.xy, "rgba(0,200,0,0.55)", String(name), "pin", {
-              layer: p.layer || "", netname: p.netname || ""
+              layer: p.layer || "", netname: p.netname || "", z: Z.pin
             });
           });
         }
@@ -313,10 +435,7 @@
             const xy       = sb.xy || [0,0];
             const tr       = sb.transform || "R0";
 
-            // subblock 크기 추정: microtemplates는 내부적으로 size가 있으니,
-            // YAML에 바로 size가 없으면 라이브러리 bbox를 백엔드에서 붙여오게 하는 게 가장 정확.
-            // 일단 여기서는 gpdk045_microtemplates_dense는 대개 bbox가 라이브러리 정의에 있음 → 백엔드가 병합해 내려주길 권장.
-            const bbox = sb.bbox || cellObj.__libBBoxes?.[`${instLib}:${instCell}`]; // (옵션) 백엔드가 합쳐서 내려준 경우
+            const bbox = sb.bbox || cellObj.__libBBoxes?.[`${instLib}:${instCell}`];
             if (!bbox || bbox.length !== 2) {
               console.warn("subblock bbox missing; skip:", sb);
               return;
@@ -329,21 +448,20 @@
             let oy = xy[1] * SCALE;
             if (tr === "MX") oy -= h;
 
-            // 사각형
             rectList.push([ox, -oy, w, -h, "rgba(0,0,0,1.0)", instName, true, "subblock", {
-              kind:"subblock", instName, instLib, instCell, transform: tr
+              kind: "subblock", instName, instLib, instCell, transform: tr, z: Z.subblock
             }]);
 
-            // 라벨(두 줄)
-            labelList.push({ x: ox+2, y: -(oy)-2,  text: `Inst: ${instName}`, font: "12px sans-serif", fill:"#000", align:"left", baseline:"top", z: 70 });
-            labelList.push({ x: ox+2, y: -(oy)-16, text: `Lib: ${instLib}, Cell: ${instCell}`, font: "11px sans-serif", fill:"#444", align:"left", baseline:"top", z: 70 });
+            labelList.push({ x: ox+2, y: -(oy)-2,  text: `Inst: ${instName}`,            font: "12px sans-serif", fill:"#000", align:"left", baseline:"top", z: Z.label });
+            labelList.push({ x: ox+2, y: -(oy)-16, text: `Lib: ${instLib}, Cell: ${instCell}`, font: "11px sans-serif", fill:"#444", align:"left", baseline:"top", z: Z.label });
           });
         }
 
-        // 4) 상단 오버레이: cell/lib
-        labelList.push({ x: 10, y: 10, text: `cellname: ${cellname}`, font: "bold 14px sans-serif", fill: "#111", align: "left", baseline: "top", z: 1000 });
-        labelList.push({ x: 10, y: 28, text: `libname: ${libname}`,   font: "12px sans-serif",       fill: "#333", align: "left", baseline: "top", z: 1000 });
+        // 4) 상단 오버레이
+        labelList.push({ x: 10, y: 10, text: `cellname: ${cellname}`, font: "bold 14px sans-serif", fill: "#111", align: "left", baseline: "top", z: Z.label });
+        labelList.push({ x: 10, y: 28, text: `libname: ${libname}`,   font: "12px sans-serif",       fill: "#333", align: "left", baseline: "top", z: Z.label });
       };
+
 
 
       const view = { scale: 1, offsetX: 0, offsetY: 0 };
@@ -402,12 +520,12 @@
         ctx.restore();
       }
 
-      function redraw() {
-        const canvas = document.getElementById("layoutCanvas");
-        const ctx = canvas.getContext("2d");
-        zoomToFit(canvas);   // ⭐ 한번만 맞춰도 화면에 뜸
-        drawScene(ctx);
-      }
+      // function redraw() {
+      //   const canvas = document.getElementById("layoutCanvas");
+      //   const ctx = canvas.getContext("2d");
+      //   zoomToFit(canvas);   // ⭐ 한번만 맞춰도 화면에 뜸
+      //   drawScene(ctx);
+      // }
 
 
 
@@ -458,12 +576,14 @@
     
       // 캔버스 재렌더링 함수
       function redraw() {
+        // (A) 이전 프레임 클리어
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.restore();
 
-          // === origin 축 표시 ===
+        // === origin 축 표시 ===
+        // (B) 좌표축 그리기 (trackTransforms(ctx)로 확장된 API 전제)
         ctx.save();
         ctx.beginPath();
         ctx.lineWidth = 1;
@@ -471,12 +591,17 @@
         const pt0 = ctx.transformedPoint(0, 0);
         const ptX1 = ctx.transformedPoint(canvas.width, 0);
         const ptY1 = ctx.transformedPoint(0, canvas.height);
-
         drawOriginAxes(); 
         
-        rectList.forEach(rect => {
+        // (C) 전역 rectList를 순회하며 실제 사각형/텍스트를 그림
+        const rects = Array.isArray(rectList) ? rectList.slice().sort((a, b) => ((a?.[8]?.z ?? 0) - (b?.[8]?.z ?? 0))) : [];
+        // console.log(rects);
+        // console.log(rectList);
+        rects.forEach(rect => {
           if (rect[6]) {
             if (rect[7] === 'subblock') {
+              ctx.fillStyle = 'rgba(135, 206, 235, 0.35)'; // skyblue
+              ctx.fillRect(rect[0], rect[1], rect[2], rect[3]);  // 내부 채우기
               ctx.lineWidth = 10;
               ctx.strokeStyle = rect[4];
               ctx.fillStyle = rect[4];
@@ -495,8 +620,73 @@
             }
           }
         });
+        drawLabels(ctx);
       }
       redraw();
+
+
+      // 라벨 표시하기
+      function drawLabels(ctx) {
+        const labels = Array.isArray(labelList) ? labelList : [];
+        // console.log(labels);
+        if (!labels.length) return;
+
+        // z 기준 정렬
+        const sorted = labels.slice().sort((a,b) => (a.z ?? 0) - (b.z ?? 0));
+        // console.log(sorted);
+        // 화면 고정(HUD)과 월드 라벨 분리
+        const screenLabels = [];
+        const worldLabels  = [];
+        for (const l of sorted) {
+          // 1) l.screen === true 이거나
+          // 2) 텍스트가 cellname/libname으로 시작하면 HUD로 취급
+          if (l?.screen || /^cellname:\s|^libname:\s/i.test(l.text)) {
+            // console.log(l);
+            screenLabels.push(l);
+          }
+          else worldLabels.push(l);
+        }
+
+        // -------- 월드 라벨: 현재 변환 유지 ----------
+        // for (const l of worldLabels) {
+        //   if (!l?.text) continue;
+        //   ctx.save();
+        //   ctx.font = l.font || "11px sans-serif";
+        //   ctx.fillStyle = l.fill || "#222";
+        //   ctx.textAlign = l.align || "left";
+        //   ctx.textBaseline = l.baseline || "top";
+        //   // 가독성 높이려면 얇은 외곽선(옵션)
+        //   ctx.lineWidth = 3;
+        //   ctx.strokeStyle = "rgba(255,255,255,0.8)";
+        //   ctx.strokeText(l.text, l.x, l.y);
+        //   ctx.fillText(l.text, l.x, l.y);
+        //   ctx.restore();
+        // }
+
+        // -------- 화면 고정 라벨: 변환 무시(아이덴티티) ----------
+        if (screenLabels.length) {
+          ctx.save();
+          ctx.setTransform(1,0,0,1,0,0); // 화면 좌표계로 고정
+          for (const l of screenLabels) {
+            if (!l?.text) continue;
+            ctx.font = l.font || "11px sans-serif";
+            ctx.fillStyle = l.fill || "#222";
+            ctx.textAlign = l.align || "left";
+            ctx.textBaseline = l.baseline || "top";
+            // 배경 박스(옵션)
+            const pad = 4;
+            const metrics = ctx.measureText(l.text);
+            const w = metrics.width + pad*2;
+            const h = parseInt((l.font||"11px").match(/\d+/)?.[0] || "11", 10) + pad*2;
+            ctx.fillStyle = l.bg || "rgba(255,255,255,0.7)";
+            ctx.fillRect((l.x||10)-pad, (l.y||10)-pad, w, h);
+            ctx.fillStyle = l.fill || "#111";
+            ctx.fillText(l.text, l.x || 10, l.y || 10);
+          }
+          ctx.restore();
+        }
+      }
+
     
       // 캔버스 드래그 및 줌 인터랙션 처리
       let lastX = canvas.width / 2, lastY = canvas.height / 2;
@@ -730,7 +920,7 @@
       // });
 
 
-      // 신규 buildMap_ver2 전용
+      // 신규 buildMap_ver2 전용 -> 얘가 문젠가부다
       document.getElementById("layoutDrawBtn").addEventListener("click", async function () {
         const form = document.getElementById("editForm");
         const urlObj = new URL(form.action, window.location.origin);
@@ -756,7 +946,7 @@
           const response = await fetch(drawUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body,
+            body: body,
             credentials: 'include'
           });
 
@@ -766,7 +956,7 @@
           // ✅ 신규 포맷: drawObjectDoc는 "단일 셀 오브젝트"
           if (response.ok && result.success && result.drawObjectDoc) {
             const cellObj = result.drawObjectDoc; // { bbox, metals, pins, subblocks, ... }
-            const libName  = cellObj.libname  || result.resolvedLibname  || '(unknown lib)';
+            const libName  = cellObj.libname  || result.resolvedLibname  || 'logic_generated';
             const cellName = cellObj.cellname || result.resolvedCellname || '(unknown cell)';
 
             // 화면 메시지
@@ -776,8 +966,14 @@
             window.rectList  = [];
             window.labelList = [];
             buildMap_ver2(cellObj);   // ⬅️ 변경 포인트: (cellObj) 단일 인자
-            console.log('rect count:', window.rectList.length); // 디버그
             redraw();            // 네가 쓰는 기존 렌더 함수 호출
+            // drawLabels();
+            // console.log('[rects]', window.rectList.length, '[labels]', window.labelList.length);
+            // console.log('[bbox]', result.drawObjectDoc.bbox);
+            // console.log('[metals]', result.drawObjectDoc.metals.length);
+            // console.log('[pins]', result.drawObjectDoc.pins.length);
+            // console.log('[subblocks]', result.drawObjectDoc.subblocks.length);
+
           } else {
             msgEl.innerText = result?.message || '⚠️ Layout Draw 실패';
           }
