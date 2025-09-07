@@ -172,4 +172,3 @@ laygo2.export_template(nat_temp, filename=export_path+libname+'_templates.yaml',
 
 - laygo2.interface.yaml.import_template() 수정
     + Webconsole 환경에서는 DB에서 template 읽어오도록 수정
-
