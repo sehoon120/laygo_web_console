@@ -6,6 +6,7 @@ FILENAME: test
 RUNDIR: /mnt/c/For_english_only_directories/LaygoWebConsole/laygo_web_console/jeyun/testbed
 Load templates
 webconsole mode
+mongodb+srv://testjy:SkLXpEKwxl7uaQKc@cluster0.y07fyca.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 Load grids
 --------------------
 Creating inv_2x

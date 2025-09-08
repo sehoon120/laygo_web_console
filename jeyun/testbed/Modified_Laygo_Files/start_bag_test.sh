@@ -6,6 +6,7 @@
 export PYTHONPATH="/mnt/c/For_english_only_directories/LaygoWebConsole/bag_workspace_gpdk045:$PYTHONPATH"
 export PYTHONPATH="/mnt/c/For_english_only_directories/LaygoWebConsole/bag_workspace_gpdk045/laygo2:$PYTHONPATH"
 export WC="/mnt/c/For_english_only_directories/LaygoWebConsole/laygo_web_console/jeyun/temp_yaml"
+export DB_CONNECT="mongodb+srv://testjy:SkLXpEKwxl7uaQKc@cluster0.y07fyca.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 unset SESSION_MANAGER
 
 # 우분투 콘다 Laygo 경로

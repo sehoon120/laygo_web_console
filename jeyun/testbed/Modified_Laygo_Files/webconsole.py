@@ -5,6 +5,7 @@ This module implements interfaces with webconsole server
 """
 
 import yaml
+import os
 import os.path
 import laygo2
 from pymongo import MongoClient     #Modified for webconsole
@@ -33,7 +34,8 @@ def export(
     """
 
     #Change on operation
-    client = MongoClient('mongodb+srv://testjy:SkLXpEKwxl7uaQKc@cluster0.y07fyca.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+    DB_CONNECT = os.environ['DB_CONNECT']
+    client = MongoClient(DB_CONNECT)
     testdb = client.test
     collection = testdb['files']
 
