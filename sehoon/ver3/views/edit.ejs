@@ -69,6 +69,8 @@
           <!-- 기존 이미지 대신 캔버스 추가 -->
           <canvas id="canvas" width="770" height="1080" style="border:1px solid #ccc; background:#fff;"></canvas>
         </div>
+        <!-- 레이어 토글 버튼들이 들어갈 자리 -->
+        <div id="layerToggles" class="layer-toggles"></div>
       </div>
 
     </div>
@@ -85,927 +87,517 @@
   <!-- ==================================================================================================== -->
 
   <!-- 캔버스 기능 관련 스크립트 추가 -->
-
-
   <script>
-    document.addEventListener("DOMContentLoaded", function() {
+  document.addEventListener("DOMContentLoaded", function() {
 
-      // ================================================================================
+    // ===================== 전역 상태 네임스페이스 =====================
+    window.layoutState = window.layoutState || {
+      rectList: [],
+      labelList: [],
+      hiddenZ: new Set(),
+      canvas: null,
+      ctx: null,
+      inited: false,
+    };
 
-      // 서버에서 전달된 drawObjectDoc을 전역 변수로 설정 (빈 객체면 {})
-      var drawObjectDoc = (<%- JSON.stringify(drawObjectDoc || {}) %>);
-      // console.log("drawObjectDoc:", drawObjectDoc);
-    
-      // 캔버스 및 전역 변수 선언
-      var rectList = [];
-      var labelList = [];
-      const canvas = document.getElementById('canvas');
-      const ctx = canvas.getContext('2d');
-      zoomToFit(canvas);   // ← 바운딩 박스로 맞춤
-      drawScene(ctx);      // ← setTransform 적용해서 그리기
-    
-      // 캔버스의 변환 상태를 추적하는 함수
-      function trackTransforms(ctx) {
-        var svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
-        var xform = svg.createSVGMatrix();
-        ctx.getTransform = function () { return xform; };
-    
-        var savedTransforms = [];
-        var save = ctx.save;
-        ctx.save = function () {
-          savedTransforms.push(xform.translate(0, 0));
-          return save.call(ctx);
-        };
-        var restore = ctx.restore;
-        ctx.restore = function () {
-          xform = savedTransforms.pop();
-          return restore.call(ctx);
-        };
-    
-        var scale = ctx.scale;
-        ctx.scale = function (sx, sy) {
-          xform = xform.scaleNonUniform(sx, sy);
-          return scale.call(ctx, sx, sy);
-        };
-        var rotate = ctx.rotate;
-        ctx.rotate = function (radians) {
-          xform = xform.rotate(radians * 180 / Math.PI);
-          return rotate.call(ctx, radians);
-        };
-        var translate = ctx.translate;
-        ctx.translate = function (dx, dy) {
-          xform = xform.translate(dx, dy);
-          return translate.call(ctx, dx, dy);
-        };
-        var transform = ctx.transform;
-        ctx.transform = function (a, b, c, d, e, f) {
-          var m2 = svg.createSVGMatrix();
-          m2.a = a; m2.b = b; m2.c = c; m2.d = d; m2.e = e; m2.f = f;
-          xform = xform.multiply(m2);
-          return transform.call(ctx, a, b, c, d, e, f);
-        };
-        var setTransform = ctx.setTransform;
-        ctx.setTransform = function (a, b, c, d, e, f) {
-          xform.a = a;
-          xform.b = b;
-          xform.c = c;
-          xform.d = d;
-          xform.e = e;
-          xform.f = f;
-          return setTransform.call(ctx, a, b, c, d, e, f);
-        };
-        var pt = svg.createSVGPoint();
-        ctx.transformedPoint = function (x, y) {
-          pt.x = x; pt.y = y;
-          return pt.matrixTransform(xform.inverse());
-        }
-      }
-      trackTransforms(ctx);
-      // ctx.translate(-385, 540);
-      ctx.translate(-385 * 0.05, 1080 - 540 * 0.05);
-      ctx.scale(0.05, 0.05);
+    // ---------- 안전 헬퍼 ----------
+    function R(){ return Array.isArray(layoutState.rectList) ? layoutState.rectList : (layoutState.rectList=[]); }
+    function L(){ return Array.isArray(layoutState.labelList) ? layoutState.labelList : (layoutState.labelList=[]); }
+
+    // ===================== 캔버스 초기화 & 변환 추적 =====================
+    function ensureInit() {
+      if (layoutState.inited) return;
+      layoutState.canvas = document.getElementById('canvas');
+      if (!layoutState.canvas) return;
+      layoutState.ctx = layoutState.canvas.getContext('2d');
+      trackTransforms(layoutState.ctx);
+      layoutState.inited = true;
+    }
+
+    function trackTransforms(ctx) {
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", 'svg');
+      let xform = svg.createSVGMatrix();
+      ctx.getTransform = () => xform;
+
+      const saved = [];
+      const save = ctx.save; ctx.save = function(){ saved.push(xform.translate(0,0)); return save.call(ctx); };
+      const restore = ctx.restore; ctx.restore = function(){ xform = saved.pop() || svg.createSVGMatrix(); return restore.call(ctx); };
+
+      const scale = ctx.scale; ctx.scale = function(sx,sy){ xform = xform.scaleNonUniform(sx,sy); return scale.call(ctx,sx,sy); };
+      const rotate = ctx.rotate; ctx.rotate = function(rad){ xform = xform.rotate(rad*180/Math.PI); return rotate.call(ctx,rad); };
+      const translate = ctx.translate; ctx.translate = function(dx,dy){ xform = xform.translate(dx,dy); return translate.call(ctx,dx,dy); };
+      const transform = ctx.transform; ctx.transform = function(a,b,c,d,e,f){
+        const m = svg.createSVGMatrix(); m.a=a;m.b=b;m.c=c;m.d=d;m.e=e;m.f=f;
+        xform = xform.multiply(m); return transform.call(ctx,a,b,c,d,e,f);
+      };
+      const setTransform = ctx.setTransform; ctx.setTransform = function(a,b,c,d,e,f){
+        xform.a=a;xform.b=b;xform.c=c;xform.d=d;xform.e=e;xform.f=f; return setTransform.call(ctx,a,b,c,d,e,f);
+      };
+
+      const pt = svg.createSVGPoint();
+      ctx.transformedPoint = function(x,y){ pt.x=x; pt.y=y; return pt.matrixTransform(xform.inverse()); }
+    }
+
+    // ===================== 좌표축(가이드) =====================
+    function drawOriginAxes() {
+      const ctx = layoutState.ctx; if (!ctx) return;
+      ctx.save();
+      ctx.strokeStyle = '#0077cc';
+      ctx.lineWidth = 20;
+      const LONG = 100000;
+
       ctx.beginPath();
-    
-      // 전역 함수 buildMap 등록 (window.buildMap)
-      window.buildMap = function(docs, cellname, libname) {
-        const parent_obj = docs[libname] && docs[libname][cellname];
-        if (!parent_obj) {
-          console.error("buildMap: docs[" + libname + "][" + cellname + "] is undefined.");
-          return;
+      ctx.moveTo(385 - LONG, 540);
+      ctx.lineTo(385 + LONG, 540);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(385, 540 - LONG);
+      ctx.lineTo(385, 540 + LONG);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // ===================== 바운딩 박스 기반 줌-투-핏 =====================
+    function canonicalRect(r){ const [x,y,w,h] = r; return {left:x, top:y+h, width:w, height:-h}; }
+    function computeBounds(rects){
+      if (!rects || !rects.length) return null;
+      let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+      for (const r of rects){
+        const c=canonicalRect(r); const right=c.left+c.width, bottom=c.top+c.height;
+        if (c.left<minX) minX=c.left; if (c.top<minY) minY=c.top;
+        if (right>maxX) maxX=right;  if (bottom>maxY) maxY=bottom;
+      }
+      return {minX,minY,maxX,maxY,width:maxX-minX,height:maxY-minY};
+    }
+    function zoomToFit(margin=20){
+      const ctx = layoutState.ctx, canvas = layoutState.canvas; if (!ctx||!canvas) return;
+      const b = computeBounds(R()); if (!b) return;
+      const sx = (canvas.width - margin*2)/Math.max(b.width,1);
+      const sy = (canvas.height- margin*2)/Math.max(b.height,1);
+      const s  = Math.max(0.1, Math.min(sx,sy));
+      ctx.setTransform(1,0,0,1,0,0);
+      // 좌상단을 margin으로 옮기고 s로 스케일
+      ctx.translate(margin - b.minX*s, margin - b.minY*s);
+      ctx.scale(s,s);
+    }
+
+    // ===================== 레이어 토글 UI =====================
+    function scanSceneForLayers(){
+      const byKind = new Map(), metals = new Map();
+      for (const r of R()){
+        const kind = r?.[7] || 'unknown';
+        const meta = r?.[8] || {};
+        const z = meta.z ?? 0;
+        if (!byKind.has(kind)) byKind.set(kind,new Set());
+        byKind.get(kind).add(z);
+        if (kind==='metal'){
+          const lname = (meta.layer||'').toString();
+          if (lname) metals.set(lname, z);
         }
-        for (let child_obj_key in parent_obj) {
-          if (child_obj_key === 'masks') {
-            const masks = parent_obj[child_obj_key];
-            for (let mask_layer_name in masks) {
-              const mask_layer = masks[mask_layer_name];
-              mask_layer.forEach(mask => {
-                let originX = mask[0][0] * 5;
-                let originY = mask[0][1] * 5;
-                let width = (mask[1][0] - mask[0][0]) * 5;
-                let height = (mask[1][1] - mask[0][1]) * 5;
-                rectList.push([originX, -originY, width, -height, "rgba(255, 0, 0, 0.5)", mask_layer_name, true, 'mask']);
-              });
-            }
-          } else if (child_obj_key === 'pins') {
-            const pins = parent_obj[child_obj_key];
-            for (let pin_name in pins) {
-              let pin = pins[pin_name];
-              let originX = pin['xy'][0][0] * 5;
-              let originY = pin['xy'][0][1] * 5;
-              let width = (pin['xy'][1][0] - pin['xy'][0][0]) * 5;
-              let height = (pin['xy'][1][1] - pin['xy'][0][1]) * 5;
-              rectList.push([originX, -originY, width, -height, "rgba(0,255,0, 0.5)", pin_name, true, 'pin']);
-            }
-          } else if (child_obj_key === 'subblocks') {
-            const subblocks = parent_obj[child_obj_key];
-            for (let subblock_name in subblocks) {
-              let subblock = subblocks[subblock_name];
-              if(subblock['libname'] == 'gpdk045_microtemplates_dense'){        //GPDK045가 아닌 경우에 대해 나중에 수정. 타 라이브러리에서도 "*microtempates*" 형태의 이름인지 확인 필요
-                if(subblock['transform']=='MX'){
-                  let originX = subblock['xy'][0] * 5;
-                  let originY = subblock['xy'][1] * 5 - subblock['size'][1] * 5;
-                  let width = subblock['size'][0] * 5;
-                  let height = subblock['size'][1] * 5;
-                  rectList.push([originX, -originY, width, -height, "rgba(0, 0, 0, 1.0)", subblock_name, true, 'subblock']);
-                }else{
-                  let originX = subblock['xy'][0] * 5;
-                  let originY = subblock['xy'][1] * 5;
-                  let width = subblock['size'][0] * 5;
-                  let height = subblock['size'][1] * 5;
-                  rectList.push([originX, -originY, width, -height, "rgba(0, 0, 0, 1.0)", subblock_name, true, 'subblock']);
-                }
-              }else{
-                if(subblock['transform']=='MX'){
-                  let subblock_called = docs['logic_generated'][subblock['cellname']];
-                  let originX = subblock['xy'][0] * 5;
-                  let originY = subblock['xy'][1] * 5 - subblock_called['bbox'][1][1] * 5;
-                  let width = subblock_called['bbox'][1][0] * 5;
-                  let height = subblock_called['bbox'][1][1] * 5;
-                  rectList.push([originX, -originY, width, -height, "rgba(0, 0, 0, 1.0)", subblock_name, true, 'subblock']);
-                }else{
-                  let subblock_called = docs['logic_generated'][subblock['cellname']];
-                  let originX = subblock['xy'][0] * 5;
-                  let originY = subblock['xy'][1] * 5;
-                  let width = subblock_called['bbox'][1][0] * 5;
-                  let height = subblock_called['bbox'][1][1] * 5;
-                  rectList.push([originX, -originY, width, -height, "rgba(0, 0, 0, 1.0)", subblock_name, true, 'subblock']);
-                }
-                
-              }               
-            }
-          }
-        }
+      }
+      return { byKind, metals };
+    }
+
+    function makeBtn(title, zValues){
+      const btn = document.createElement('button');
+      btn.className = 'layer-btn on';
+      btn.textContent = title;
+      btn.title = `toggle ${title}`;
+      const anyHidden = zValues.some(z => layoutState.hiddenZ.has(z));
+      if (anyHidden) btn.classList.replace('on','off');
+
+      btn.onclick = () => {
+        const allHidden = zValues.every(z => layoutState.hiddenZ.has(z));
+        if (allHidden) zValues.forEach(z => layoutState.hiddenZ.delete(z));
+        else zValues.forEach(z => layoutState.hiddenZ.add(z));
+        const nowAnyHidden = zValues.some(z => layoutState.hiddenZ.has(z));
+        btn.classList.toggle('on', !nowAnyHidden);
+        btn.classList.toggle('off', nowAnyHidden);
+        redraw();
       };
-
-      // ====================================================================================================
-      // yaml format 변경 후 예상 빌드맵
-
-      // 전역: rectList, labelList 사용 (필요 시 초기화)
-      // window.buildMap_ver2 = function(cellObj) {
-      //   const SCALE = 5;
-      //   // const rectList  = (window.rectList  = []);
-      //   // const labelList = (window.labelList = []);
-
-      //   const cellname = cellObj.cellname || "(unknown)";
-      //   const libname  = cellObj.libname  || "(unknown)";
-
-      //   const metalColor = (layer) => {
-      //     if (!layer) return "rgba(0,0,255,0.35)";
-      //     const L = String(layer).toLowerCase();
-      //     if (L.includes('metal1')) return "rgba(0,128,255,0.35)";
-      //     if (L.includes('metal2')) return "rgba(255,128,0,0.35)";
-      //     if (L.includes('metal3')) return "rgba(160,32,240,0.35)";
-      //     return "rgba(0,0,255,0.35)";
-      //   };
-      //   const DEBUG_DRAW = true;
-
-      //   function pushRectFromXY(xy, color, label, kind, meta={}) {
-      //     if (!xy || xy.length !== 2) return;
-      //     const ox = xy[0][0] * SCALE;
-      //     const oy = xy[0][1] * SCALE;
-      //     const w  = (xy[1][0] - xy[0][0]) * SCALE;
-      //     const h  = (xy[1][1] - xy[0][1]) * SCALE;
-
-      //     rectList.push([ox, -oy, w, -h, color, label, true, kind, meta]);
-      //     // 라벨
-      //     labelList.push({
-      //       x: ox + 2, y: -(oy) - 2, text: label,
-      //       font: "11px sans-serif", fill: "#222",
-      //       align: "left", baseline: "top", z: 50
-      //     });
-      //   }
-
-      //   // 0) bbox (셀 외곽)
-      //   if (Array.isArray(cellObj.bbox) && cellObj.bbox.length === 2) {
-      //     const [p0, p1] = cellObj.bbox;
-      //     const ox = p0[0] * SCALE, oy = p0[1] * SCALE;
-      //     const w  = (p1[0] - p0[0]) * SCALE;
-      //     const h  = (p1[1] - p0[1]) * SCALE;
-      //     rectList.push([ox, -oy, w, -h, "rgba(128,128,128,0.12)", "bbox", true, "bbox", {kind:"bbox"}]);
-      //   }
-
-      //   // 1) metals
-      //   if (Array.isArray(cellObj.metals)) {
-      //     cellObj.metals.forEach((m, i) => {
-      //       const color = metalColor(m.layer);
-      //       const label = `${m.layer || "Metal"} #${i}`;
-      //       pushRectFromXY(m.xy, color, label, "metal", { layer: m.layer || "" });
-      //     });
-      //   }
-
-      //   // 2) pins
-      //   if (Array.isArray(cellObj.pins)) {
-      //     cellObj.pins.forEach((p) => {
-      //       const name = p.name || p.netname || "pin";
-      //       pushRectFromXY(p.xy, "rgba(0,200,0,0.55)", String(name), "pin", {
-      //         layer: p.layer || "", netname: p.netname || ""
-      //       });
-      //     });
-      //   }
-
-      //   // 3) subblocks
-      //   if (Array.isArray(cellObj.subblocks)) {
-      //     cellObj.subblocks.forEach((sb) => {
-      //       const instName = sb.name || "(inst)";
-      //       const instLib  = sb.libname || "";
-      //       const instCell = sb.cellname || "";
-      //       const xy       = sb.xy || [0,0];
-      //       const tr       = sb.transform || "R0";
-
-      //       // subblock 크기 추정: microtemplates는 내부적으로 size가 있으니,
-      //       // YAML에 바로 size가 없으면 라이브러리 bbox를 백엔드에서 붙여오게 하는 게 가장 정확.
-      //       // 일단 여기서는 gpdk045_microtemplates_dense는 대개 bbox가 라이브러리 정의에 있음 → 백엔드가 병합해 내려주길 권장.
-      //       const bbox = sb.bbox || cellObj.__libBBoxes?.[`${instLib}:${instCell}`]; // (옵션) 백엔드가 합쳐서 내려준 경우
-      //       if (!bbox || bbox.length !== 2) {
-      //         console.warn("subblock bbox missing; skip:", sb);
-      //         return;
-      //       }
-
-      //       const w = (bbox[1][0] - bbox[0][0]) * SCALE;
-      //       const h = (bbox[1][1] - bbox[0][1]) * SCALE;
-
-      //       let ox = xy[0] * SCALE;
-      //       let oy = xy[1] * SCALE;
-      //       if (tr === "MX") oy -= h;
-
-      //       // 사각형
-      //       rectList.push([ox, -oy, w, -h, "rgba(0,0,0,1.0)", instName, true, "subblock", {
-      //         kind:"subblock", instName, instLib, instCell, transform: tr
-      //       }]);
-
-      //       // 라벨(두 줄)
-      //       labelList.push({ x: ox+2, y: -(oy)-2,  text: `Inst: ${instName}`, font: "12px sans-serif", fill:"#000", align:"left", baseline:"top", z: 70 });
-      //       labelList.push({ x: ox+2, y: -(oy)-16, text: `Lib: ${instLib}, Cell: ${instCell}`, font: "11px sans-serif", fill:"#444", align:"left", baseline:"top", z: 70 });
-      //     });
-      //   }
-
-      //   // 4) 상단 오버레이: cell/lib
-      //   labelList.push({ x: 10, y: 10, text: `cellname: ${cellname}`, font: "bold 14px sans-serif", fill: "#111", align: "left", baseline: "top", z: 1000 });
-      //   labelList.push({ x: 10, y: 28, text: `libname: ${libname}`,   font: "12px sans-serif",       fill: "#333", align: "left", baseline: "top", z: 1000 });
-      // };
-
-      window.buildMap_ver2 = function(cellObj) {
-        const SCALE = 5;
-
-        // ✅ 전역 배열을 보존하면서 비우기 (참조 유지)
-        // window.rectList  ??= [];
-        // window.labelList ??= [];
-        // const rectList  = window.rectList;
-        // const labelList = window.labelList;
-        rectList.length = 0;
-        labelList.length = 0;
-
-        const cellname = cellObj.cellname || "(unknown)";
-        const libname  = cellObj.libname  || "(unknown)";
-
-        // z 레벨 정의 (낮을수록 뒤에=바닥, 높을수록 위)
-        // 추후 레이어별 분 on/off 개발시 사용 예정
-        const Z = {
-          bbox: 0,
-          subblock: 10,
-          mask: 20,
-          metal: 30,
-          pin: 40,
-          label: 1000,
-        };
-
-        const metalColor = (layer) => {
-          if (!layer) return "rgba(0,0,255,0.35)";
-          const L = String(layer).toLowerCase();
-          if (L.includes('metal1')) return "rgba(0,128,255,0.35)";
-          if (L.includes('metal2')) return "rgba(255,128,0,0.35)";
-          if (L.includes('metal3')) return "rgba(160,32,240,0.35)";
-          return "rgba(0,0,255,0.35)";
-        };
-
-        function pushRectFromXY(xy, color, label, kind, meta = {}) {
-          if (!xy || xy.length !== 2) return;
-          const ox = xy[0][0] * SCALE;
-          const oy = xy[0][1] * SCALE;
-          const w  = (xy[1][0] - xy[0][0]) * SCALE;
-          const h  = (xy[1][1] - xy[0][1]) * SCALE;
-
-          // ✅ 기본 z 주입
-          if (meta.z == null) meta.z = Z[kind] ?? 0;
-
-          rectList.push([ox, -oy, w, -h, color, label, true, kind, meta]);
-
-          // 라벨은 따로 labelList에 z로 관리
-          labelList.push({
-            x: ox + 2, y: -(oy) - 2, text: label,
-            font: "11px sans-serif", fill: "#222",
-            align: "left", baseline: "top", z: Z.label
-          });
-        }
-
-        // 0) bbox
-        if (Array.isArray(cellObj.bbox) && cellObj.bbox.length === 2) {
-          const [p0, p1] = cellObj.bbox;
-          const ox = p0[0] * SCALE, oy = p0[1] * SCALE;
-          const w  = (p1[0] - p0[0]) * SCALE;
-          const h  = (p1[1] - p0[1]) * SCALE;
-          rectList.push([ox, -oy, w, -h, "rgba(128,128,128,0.12)", "bbox", true, "bbox", { kind: "bbox", z: Z.bbox }]);
-        }
-
-        // 1) metals
-        if (Array.isArray(cellObj.metals)) {
-          cellObj.metals.forEach((m, i) => {
-            const color = metalColor(m.layer);
-            const label = `${m.layer || "Metal"} #${i}`;
-            pushRectFromXY(m.xy, color, label, "metal", { layer: m.layer || "", z: Z.metal });
-          });
-        }
-
-        // 2) pins
-        if (Array.isArray(cellObj.pins)) {
-          cellObj.pins.forEach((p) => {
-            const name = p.name || p.netname || "pin";
-            pushRectFromXY(p.xy, "rgba(0,200,0,0.55)", String(name), "pin", {
-              layer: p.layer || "", netname: p.netname || "", z: Z.pin
-            });
-          });
-        }
-
-        // 3) subblocks
-        if (Array.isArray(cellObj.subblocks)) {
-          cellObj.subblocks.forEach((sb) => {
-            const instName = sb.name || "(inst)";
-            const instLib  = sb.libname || "";
-            const instCell = sb.cellname || "";
-            const xy       = sb.xy || [0,0];
-            const tr       = sb.transform || "R0";
-
-            const bbox = sb.bbox || cellObj.__libBBoxes?.[`${instLib}:${instCell}`];
-            if (!bbox || bbox.length !== 2) {
-              console.warn("subblock bbox missing; skip:", sb);
-              return;
-            }
-
-            const w = (bbox[1][0] - bbox[0][0]) * SCALE;
-            const h = (bbox[1][1] - bbox[0][1]) * SCALE;
-
-            let ox = xy[0] * SCALE;
-            let oy = xy[1] * SCALE;
-            if (tr === "MX") oy -= h;
-
-            rectList.push([ox, -oy, w, -h, "rgba(0,0,0,1.0)", instName, true, "subblock", {
-              kind: "subblock", instName, instLib, instCell, transform: tr, z: Z.subblock
-            }]);
-
-            labelList.push({ x: ox+2, y: -(oy)-2,  text: `Inst: ${instName}`,            font: "12px sans-serif", fill:"#000", align:"left", baseline:"top", z: Z.label });
-            labelList.push({ x: ox+2, y: -(oy)-16, text: `Lib: ${instLib}, Cell: ${instCell}`, font: "11px sans-serif", fill:"#444", align:"left", baseline:"top", z: Z.label });
-          });
-        }
-
-        // 4) 상단 오버레이
-        labelList.push({ x: 10, y: 10, text: `cellname: ${cellname}`, font: "bold 14px sans-serif", fill: "#111", align: "left", baseline: "top", z: Z.label });
-        labelList.push({ x: 10, y: 28, text: `libname: ${libname}`,   font: "12px sans-serif",       fill: "#333", align: "left", baseline: "top", z: Z.label });
-      };
-
-
-
-      const view = { scale: 1, offsetX: 0, offsetY: 0 };
-
-      function canonicalRect(r) {
-        const [x, y, w, h] = r;
-        return { left: x, top: y + h, width: w, height: -h };
-      }
-
-      function computeBounds(rects) {
-        if (!rects || rects.length === 0) return null;
-        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-        for (const r of rects) {
-          const { left, top, width, height } = canonicalRect(r);
-          const right = left + width, bottom = top + height;
-          if (left < minX) minX = left;
-          if (top  < minY) minY = top;
-          if (right > maxX) maxX = right;
-          if (bottom > maxY) maxY = bottom;
-        }
-        return { minX, minY, maxX, maxY, width: maxX - minX, height: maxY - minY };
-      }
-
-      function zoomToFit(canvas, margin = 20) {
-        const b = computeBounds(window.rectList);
-        if (!b) return;
-        const sx = (canvas.width  - margin * 2) / Math.max(b.width, 1);
-        const sy = (canvas.height - margin * 2) / Math.max(b.height, 1);
-        const s  = Math.max(0.1, Math.min(sx, sy));
-        view.scale   = s;
-        view.offsetX = margin - b.minX * s;
-        view.offsetY = margin - b.minY * s;
-      }
-
-      function drawScene(ctx) {
-        const { width, height } = ctx.canvas;
-        ctx.clearRect(0, 0, width, height);
-
-        ctx.save();
-        ctx.setTransform(view.scale, 0, 0, view.scale, view.offsetX, view.offsetY);
-
-        for (const [x, y, w, h, color] of window.rectList) {
-          ctx.fillStyle = color || 'rgba(0,0,0,0.3)';
-          ctx.fillRect(x, y, w, h);
-        }
-
-        if (window.labelList) {
-          for (const l of window.labelList) {
-            ctx.font         = l.font || "12px sans-serif";
-            ctx.fillStyle    = l.fill || "#000";
-            ctx.textAlign    = l.align || "left";
-            ctx.textBaseline = l.baseline || "alphabetic";
-            ctx.fillText(l.text, l.x, l.y);
-          }
-        }
-        ctx.restore();
-      }
-
-      // function redraw() {
-      //   const canvas = document.getElementById("layoutCanvas");
-      //   const ctx = canvas.getContext("2d");
-      //   zoomToFit(canvas);   // ⭐ 한번만 맞춰도 화면에 뜸
-      //   drawScene(ctx);
-      // }
-
-
-
-
-      // 그리기 예시
-      function drawScene(ctx) {
-        // rect 그리기 (순서대로)
-        rectList.forEach(([x, y, w, h, color]) => {
-          ctx.fillStyle = color;
-          ctx.fillRect(x, y, w, h);
-        });
-
-        // 라벨은 z 정렬 후 그리기
-        const sorted = [...labelList].sort((a,b) => (a.z||0) - (b.z||0));
-        sorted.forEach(l => {
-          ctx.font = l.font || "12px sans-serif";
-          ctx.fillStyle = l.fill || "#000";
-          ctx.textAlign = l.align || "left";
-          ctx.textBaseline = l.baseline || "alphabetic";
-          ctx.fillText(l.text, l.x, l.y);
-        });
-      }
-
-
-      // ====================================================================================================
-
-      function drawOriginAxes() {
-        ctx.save();
-        ctx.strokeStyle = '#0077cc';
-        ctx.lineWidth = 20;
-
-        const LONG = 100000;
-
-        // X축: y=0, 좌우 전체 그리기
-        ctx.beginPath();
-        ctx.moveTo(385 - LONG, 540);  // 시작점: 왼쪽으로
-        ctx.lineTo(385 + LONG, 540);   // 끝점: 오른쪽으로
-        ctx.stroke();
-
-        // Y축: x=0, 위아래 전체 그리기
-        ctx.beginPath();
-        ctx.moveTo(385, 540 - LONG);  // 시작점: 위쪽으로
-        ctx.lineTo(385, 540 + LONG);   // 끝점: 아래쪽으로
-        ctx.stroke();
-
-        ctx.restore();
-      }
-    
-      // 캔버스 재렌더링 함수
-      function redraw() {
-        // (A) 이전 프레임 클리어
-        ctx.save();
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.restore();
-
-        // === origin 축 표시 ===
-        // (B) 좌표축 그리기 (trackTransforms(ctx)로 확장된 API 전제)
-        ctx.save();
-        ctx.beginPath();
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = "#444";  // 연한 회색
-        const pt0 = ctx.transformedPoint(0, 0);
-        const ptX1 = ctx.transformedPoint(canvas.width, 0);
-        const ptY1 = ctx.transformedPoint(0, canvas.height);
-        drawOriginAxes(); 
-        
-        // (C) 전역 rectList를 순회하며 실제 사각형/텍스트를 그림
-        const rects = Array.isArray(rectList) ? rectList.slice().sort((a, b) => ((a?.[8]?.z ?? 0) - (b?.[8]?.z ?? 0))) : [];
-        // console.log(rects);
-        // console.log(rectList);
-        rects.forEach(rect => {
-          if (rect[6]) {
-            if (rect[7] === 'subblock') {
-              ctx.fillStyle = 'rgba(135, 206, 235, 0.35)'; // skyblue
-              ctx.fillRect(rect[0], rect[1], rect[2], rect[3]);  // 내부 채우기
-              ctx.lineWidth = 10;
-              ctx.strokeStyle = rect[4];
-              ctx.fillStyle = rect[4];
-              ctx.strokeRect(rect[0], rect[1], rect[2], rect[3]);
-              ctx.font = "400px Verdana";
-              ctx.fillText(rect[5], rect[0] + rect[2] / 2 - 200, rect[1] + rect[3] / 2 - 200);
-            } else if (rect[7] === 'pin') {
-              ctx.fillStyle = rect[4];
-              ctx.fillRect(rect[0], rect[1], rect[2], rect[3]);
-              ctx.fillStyle = 'rgba(255, 0, 0, 1.0)';
-              ctx.font = "400px Verdana";
-              ctx.fillText(rect[5], rect[0] + rect[2] / 2 - 200, rect[1] + rect[3] / 2 - 200);
-            } else { // mask
-              ctx.fillStyle = rect[4];
-              ctx.fillRect(rect[0], rect[1], rect[2], rect[3]);
-            }
-          }
-        });
-        drawLabels(ctx);
-      }
-      redraw();
-
-
-      // 라벨 표시하기
-      function drawLabels(ctx) {
-        const labels = Array.isArray(labelList) ? labelList : [];
-        // console.log(labels);
-        if (!labels.length) return;
-
-        // z 기준 정렬
-        const sorted = labels.slice().sort((a,b) => (a.z ?? 0) - (b.z ?? 0));
-        // console.log(sorted);
-        // 화면 고정(HUD)과 월드 라벨 분리
-        const screenLabels = [];
-        const worldLabels  = [];
-        for (const l of sorted) {
-          // 1) l.screen === true 이거나
-          // 2) 텍스트가 cellname/libname으로 시작하면 HUD로 취급
-          if (l?.screen || /^cellname:\s|^libname:\s/i.test(l.text)) {
-            // console.log(l);
-            screenLabels.push(l);
-          }
-          else worldLabels.push(l);
-        }
-
-        // -------- 월드 라벨: 현재 변환 유지 ----------
-        // for (const l of worldLabels) {
-        //   if (!l?.text) continue;
-        //   ctx.save();
-        //   ctx.font = l.font || "11px sans-serif";
-        //   ctx.fillStyle = l.fill || "#222";
-        //   ctx.textAlign = l.align || "left";
-        //   ctx.textBaseline = l.baseline || "top";
-        //   // 가독성 높이려면 얇은 외곽선(옵션)
-        //   ctx.lineWidth = 3;
-        //   ctx.strokeStyle = "rgba(255,255,255,0.8)";
-        //   ctx.strokeText(l.text, l.x, l.y);
-        //   ctx.fillText(l.text, l.x, l.y);
-        //   ctx.restore();
-        // }
-
-        // -------- 화면 고정 라벨: 변환 무시(아이덴티티) ----------
-        if (screenLabels.length) {
-          ctx.save();
-          ctx.setTransform(1,0,0,1,0,0); // 화면 좌표계로 고정
-          for (const l of screenLabels) {
-            if (!l?.text) continue;
-            ctx.font = l.font || "11px sans-serif";
-            ctx.fillStyle = l.fill || "#222";
-            ctx.textAlign = l.align || "left";
-            ctx.textBaseline = l.baseline || "top";
-            // 배경 박스(옵션)
-            const pad = 4;
-            const metrics = ctx.measureText(l.text);
-            const w = metrics.width + pad*2;
-            const h = parseInt((l.font||"11px").match(/\d+/)?.[0] || "11", 10) + pad*2;
-            ctx.fillStyle = l.bg || "rgba(255,255,255,0.7)";
-            ctx.fillRect((l.x||10)-pad, (l.y||10)-pad, w, h);
-            ctx.fillStyle = l.fill || "#111";
-            ctx.fillText(l.text, l.x || 10, l.y || 10);
-          }
-          ctx.restore();
-        }
-      }
-
-    
-      // 캔버스 드래그 및 줌 인터랙션 처리
-      let lastX = canvas.width / 2, lastY = canvas.height / 2;
-      let dragStart, dragged;
-      canvas.addEventListener('mousedown', function (evt) {
-        document.body.style.userSelect = 'none';
-        lastX = evt.offsetX;
-        lastY = evt.offsetY;
-        dragStart = ctx.transformedPoint(lastX, lastY);
-        dragged = false;
+      return btn;
+    }
+
+    function buildLayerToggles(containerId='layerToggles'){
+      const el = document.getElementById(containerId); if (!el) return;
+      el.innerHTML = '';
+      const { byKind, metals } = scanSceneForLayers();
+
+      const order = ['bbox','subblock','mask','pin'];  // ,'metal'
+      order.forEach(kind=>{
+        if (!byKind.has(kind)) return;
+        const zs = Array.from(byKind.get(kind));
+        const titleEl = document.createElement('span');
+        titleEl.className='layer-group-title';
+        titleEl.textContent=kind;
+        el.appendChild(titleEl);
+
+        const allBtn = makeBtn('All', zs);
+        allBtn.classList.add('small');
+        el.appendChild(allBtn);
+        el.appendChild(document.createTextNode(' '));
       });
-      canvas.addEventListener('mousemove', function (evt) {
-        lastX = evt.offsetX;
-        lastY = evt.offsetY;
-        dragged = true;
-        if (dragStart) {
-          let pt = ctx.transformedPoint(lastX, lastY);
+
+      el.appendChild(document.createElement('div'));
+
+      if (metals.size){
+        const titleEl = document.createElement('span');
+        titleEl.className='layer-group-title';
+        titleEl.textContent='metals';
+        el.appendChild(titleEl);
+
+        const allZ = Array.from(metals.values());
+        const allBtn = makeBtn('All metals', allZ);
+        allBtn.classList.add('small');
+        el.appendChild(allBtn);
+
+        const entries = Array.from(metals.entries()).sort((a,b)=>{
+          const na = parseInt(String(a[0]).match(/\d+/)?.[0]||'0',10);
+          const nb = parseInt(String(b[0]).match(/\d+/)?.[0]||'0',10);
+          return na-nb || String(a[0]).localeCompare(String(b[0]));
+        });
+        for (const [lname,z] of entries){
+          el.appendChild(makeBtn(lname,[z]));
+        }
+      }
+    }
+
+    // ===================== 그리기 =====================
+    function redraw(){
+      ensureInit();
+      const ctx = layoutState.ctx, canvas = layoutState.canvas; if (!ctx||!canvas) return;
+
+      // 클리어
+      ctx.save();
+      ctx.setTransform(1,0,0,1,0,0);
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.restore();
+
+      // 좌표축
+      drawOriginAxes();
+
+      // rect 그리기 (z 정렬 + hidden 적용)
+      const rects = R().slice().sort((a,b)=>((a?.[8]?.z??0)-(b?.[8]?.z??0)));
+      for (const rect of rects){
+        const meta = rect?.[8] || {};
+        const z = meta.z ?? 0;
+        if (layoutState.hiddenZ.has(z)) continue;
+        if (!rect[6]) continue;
+
+        const kind = rect[7];
+        if (kind === 'subblock') {
+          ctx.fillStyle = 'rgba(135, 206, 235, 0.35)';
+          ctx.fillRect(rect[0], rect[1], rect[2], rect[3]);
+          ctx.lineWidth = 10;
+          ctx.strokeStyle = rect[4];
+          ctx.fillStyle = rect[4];
+          ctx.strokeRect(rect[0], rect[1], rect[2], rect[3]);
+          ctx.font = "400px Verdana";
+          ctx.fillText(rect[5], rect[0]+rect[2]/2-200, rect[1]+rect[3]/2-200);
+        } else if (kind === 'pin') {
+          ctx.fillStyle = rect[4];
+          ctx.fillRect(rect[0], rect[1], rect[2], rect[3]);
+          ctx.fillStyle = 'rgba(255, 0, 0, 1.0)';
+          ctx.font = "400px Verdana";
+          ctx.fillText(rect[5], rect[0]+rect[2]/2-200, rect[1]+rect[3]/2-200);
+        } else {
+          ctx.fillStyle = rect[4];
+          ctx.fillRect(rect[0], rect[1], rect[2], rect[3]);
+        }
+      }
+
+      drawLabels();
+    }
+
+    function drawLabels(){
+      const ctx = layoutState.ctx; if (!ctx) return;
+      const labels = L(); if (!labels.length) return;
+
+      const sorted = labels.slice().sort((a,b)=>(a.z??0)-(b.z??0));
+      const screenLabels = [], worldLabels = [];
+      for (const l of sorted){
+        const checkZ = (l.lz != null ? l.lz : l.z);
+        if (layoutState.hiddenZ.has(checkZ)) continue;
+        if (l?.screen || /^cellname:\s|^libname:\s/i.test(l.text)) screenLabels.push(l);
+        else worldLabels.push(l);
+      }
+
+      // worldLabels를 그리고 싶으면 여기에 구현 가능
+
+      if (screenLabels.length){
+        ctx.save();
+        ctx.setTransform(1,0,0,1,0,0);
+        for (const l of screenLabels){
+          if (!l?.text) continue;
+          ctx.font = l.font || "11px sans-serif";
+          ctx.fillStyle = l.fill || "#222";
+          ctx.textAlign = l.align || "left";
+          ctx.textBaseline = l.baseline || "top";
+          const pad = 4;
+          const metrics = ctx.measureText(l.text);
+          const w = metrics.width + pad*2;
+          const h = parseInt((l.font||"11px").match(/\d+/)?.[0] || "11", 10) + pad*2;
+          ctx.fillStyle = l.bg || "rgba(255,255,255,0.7)";
+          ctx.fillRect((l.x||10)-pad, (l.y||10)-pad, w, h);
+          ctx.fillStyle = l.fill || "#111";
+          ctx.fillText(l.text, l.x||10, l.y||10);
+        }
+        ctx.restore();
+      }
+    }
+
+    // ===================== buildMap_ver2 (단일 cellObj) =====================
+    window.buildMap_ver2 = function(cellObj){
+      const rectList = R(), labelList = L();
+      const SCALE = 5;
+
+      rectList.length = 0;
+      labelList.length = 0;
+
+      const cellname = cellObj.cellname || "(unknown)";
+      const libname  = cellObj.libname  || "(unknown)";
+
+      const Z = { bbox:0, subblock:10, mask:20, metal:30, pin:40, label:1000 };
+
+      function parseMetalIndex(layer=""){
+        const L = String(layer).toLowerCase().replace(/\s+/g,"");
+        let m = L.match(/metal\s*([0-9]+)/); if (m && m[1]) return parseInt(m[1],10);
+        m = L.match(/^m\s*([0-9]+)$/);       if (m && m[1]) return parseInt(m[1],10);
+        return null;
+      }
+      function metalZ(layer){
+        const idx = parseMetalIndex(layer);
+        const base = Z.metal, step = 2;
+        return (idx != null) ? base + (idx-1)*step : base;
+      }
+      function metalColor(layer){
+        if (!layer) return "rgba(0,0,255,0.35)";
+        const L = String(layer).toLowerCase();
+        if (L.includes('metal1')) return "rgba(0,128,255,0.35)";
+        if (L.includes('metal2')) return "rgba(255,128,0,0.35)";
+        if (L.includes('metal3')) return "rgba(160,32,240,0.35)";
+        return "rgba(0,0,255,0.35)";
+      }
+      function pushRectFromXY(xy,color,label,kind,meta={}){
+        if (!xy || xy.length!==2) return;
+        const ox = xy[0][0]*SCALE, oy=xy[0][1]*SCALE;
+        const w  = (xy[1][0]-xy[0][0])*SCALE;
+        const h  = (xy[1][1]-xy[0][1])*SCALE;
+        if (meta.z == null) meta.z = Z[kind] ?? 0;
+        rectList.push([ox, -oy, w, -h, color, label, true, kind, meta]);
+        labelList.push({
+          x:ox+2, y:-(oy)-2, text:label,
+          font:"11px sans-serif", fill:"#222",
+          align:"left", baseline:"top",
+          z:Z.label, lz:meta.z, kind
+        });
+      }
+
+      // 0) bbox
+      if (Array.isArray(cellObj.bbox) && cellObj.bbox.length===2){
+        const [p0,p1] = cellObj.bbox;
+        const ox=p0[0]*SCALE, oy=p0[1]*SCALE;
+        const w=(p1[0]-p0[0])*SCALE, h=(p1[1]-p0[1])*SCALE;
+        rectList.push([ox,-oy,w,-h,"rgba(128,128,128,0.12)","bbox",true,"bbox",{kind:"bbox",z:Z.bbox}]);
+      }
+
+      // 1) metals
+      if (Array.isArray(cellObj.metals)){
+        cellObj.metals.forEach((m,i)=>{
+          const color = metalColor(m.layer);
+          const label = `${m.layer || "Metal"} #${i}`;
+          pushRectFromXY(m.xy, color, label, "metal", {layer:m.layer||"", z:metalZ(m.layer)});
+        });
+      }
+
+      // 2) pins
+      if (Array.isArray(cellObj.pins)){
+        cellObj.pins.forEach(p=>{
+          const name = p.name || p.netname || "pin";
+          pushRectFromXY(p.xy, "rgba(0,200,0,0.55)", String(name), "pin", {
+            layer:p.layer||"", netname:p.netname||"", z:Z.pin
+          });
+        });
+      }
+
+      // 3) subblocks
+      if (Array.isArray(cellObj.subblocks)){
+        cellObj.subblocks.forEach(sb=>{
+          const instName = sb.name || "(inst)";
+          const instLib  = sb.libname || "";
+          const instCell = sb.cellname || "";
+          const xy       = sb.xy || [0,0];
+          const tr       = sb.transform || "R0";
+
+          const bbox = sb.bbox || cellObj.__libBBoxes?.[`${instLib}:${instCell}`];
+          if (!bbox || bbox.length!==2){ console.warn("subblock bbox missing; skip:", sb); return; }
+
+          const w=(bbox[1][0]-bbox[0][0])*SCALE, h=(bbox[1][1]-bbox[0][1])*SCALE;
+          let ox=xy[0]*SCALE, oy=xy[1]*SCALE; if (tr==="MX") oy -= h;
+
+          rectList.push([ox,-oy,w,-h,"rgba(0,0,0,1.0)",instName,true,"subblock",{
+            kind:"subblock", instName, instLib, instCell, transform:tr, z:Z.subblock
+          }]);
+
+          L().push({ x:ox+2, y:-(oy)-2,  text:`Inst: ${instName}`, font:"12px sans-serif", fill:"#000",
+            align:"left", baseline:"top", z:Z.label, lz:Z.subblock, kind:"subblock" });
+          L().push({ x:ox+2, y:-(oy)-16, text:`Lib: ${instLib}, Cell: ${instCell}`, font:"11px sans-serif", fill:"#444",
+            align:"left", baseline:"top", z:Z.label, lz:Z.subblock, kind:"subblock" });
+        });
+      }
+
+      // 4) HUD 라벨
+      L().push({ x:10, y:10, text:`cellname: ${cellname}`, font:"bold 14px sans-serif", fill:"#111", align:"left", baseline:"top", z:Z.label });
+      L().push({ x:10, y:28, text:`libname: ${libname}`,   font:"12px sans-serif",      fill:"#333", align:"left", baseline:"top", z:Z.label });
+
+      // === 모두 채웠다면: 줌-투-핏 후 이벤트 알림 ===
+      ensureInit();
+      zoomToFit(20);
+      window.dispatchEvent(new CustomEvent('layout:ready'));
+    };
+
+    // ===================== 재렌더 트리거 =====================
+    window.addEventListener('layout:ready', ()=>{
+      buildLayerToggles('layerToggles');
+      redraw();
+    });
+
+    // ===================== 드래그/휠 인터랙션 =====================
+    (function attachPanZoom(){
+      ensureInit(); const canvas=layoutState.canvas, ctx=layoutState.ctx; if (!canvas||!ctx) return;
+      let lastX = canvas.width/2, lastY = canvas.height/2;
+      let dragStart=null, dragged=false;
+      canvas.addEventListener('mousedown', (e)=>{
+        document.body.style.userSelect='none';
+        lastX=e.offsetX; lastY=e.offsetY;
+        dragStart = ctx.transformedPoint(lastX,lastY);
+        dragged=false;
+      });
+      canvas.addEventListener('mousemove', (e)=>{
+        lastX=e.offsetX; lastY=e.offsetY; dragged=true;
+        if (dragStart){
+          const pt = ctx.transformedPoint(lastX,lastY);
           ctx.translate(pt.x - dragStart.x, pt.y - dragStart.y);
           redraw();
         }
       });
-      canvas.addEventListener('mouseup', function (evt) {
-        dragStart = null;
-        if (!dragged) zoom(evt.shiftKey ? -1 : 1);
+      canvas.addEventListener('mouseup', ()=>{
+        dragStart=null;
       });
-      const scaleFactor = 1.1;
-      function zoom(clicks) {
-        let pt = ctx.transformedPoint(lastX, lastY);
-        ctx.translate(pt.x, pt.y);
-        let factor = Math.pow(scaleFactor, clicks);
-        ctx.scale(factor, factor);
-        ctx.translate(-pt.x, -pt.y);
+      const scaleFactor=1.1;
+      function zoom(clicks){
+        const pt = ctx.transformedPoint(lastX,lastY);
+        ctx.translate(pt.x,pt.y);
+        const factor = Math.pow(scaleFactor, clicks);
+        ctx.scale(factor,factor);
+        ctx.translate(-pt.x,-pt.y);
         redraw();
       }
-      function handleScroll(evt) {
-        let delta = evt.wheelDelta ? evt.wheelDelta / 40 : evt.detail ? -evt.detail : 0;
-        if (delta) zoom(delta);
-        evt.preventDefault();
+      function handleScroll(evt){
+        const delta = evt.wheelDelta ? evt.wheelDelta/40 : (evt.detail ? -evt.detail : 0);
+        if (delta){ zoom(delta); evt.preventDefault(); }
         return false;
       }
       canvas.addEventListener('DOMMouseScroll', handleScroll, false);
       canvas.addEventListener('mousewheel', handleScroll, false);
-    
-      // 폼 제출 이벤트 핸들러 (AJAX)
-      document.getElementById("editForm").addEventListener("submit", async function (e) {
-        e.preventDefault();
-        console.log("폼 제출 이벤트 핸들러 실행됨");
-        // 폼 제출 시 최신 입력값 읽기
-        const cellname = document.getElementById("cellNameInput").value || 'cellname';
-        const libname = document.getElementById("yamlFileInput").value || 'logic_generated';
-        // console.log("Submitted cellname:", cellname);
-        // console.log("Submitted libname:", libname);
-    
-        const form = e.target;
-        const formData = new FormData(form);
-        const data = new URLSearchParams();
-        for (const pair of formData) {
-          data.append(pair[0], pair[1]);
+    })();
+
+    // ===================== Layout Draw 버튼: 서버 호출 후 렌더 =====================
+    document.getElementById("layoutDrawBtn").addEventListener("click", async function () {
+      const form = document.getElementById("editForm");
+      const urlObj = new URL(form.action, window.location.origin);
+      const basePath = urlObj.pathname; // "/main/:id/edit"
+      const pathParam = urlObj.searchParams.get('path') || '/';
+      const drawUrl = `${basePath}/draw?path=${encodeURIComponent(pathParam)}`;
+
+      const formData = new FormData(form);
+      const cellFromInput = (document.getElementById("cellNameInput").value || '').trim();
+      const libFromInput  = (document.getElementById("yamlFileInput").value  || '').trim();
+      formData.set('cellname', cellFromInput);
+      formData.set('libname',  libFromInput);
+
+      const body = new URLSearchParams(); for (const p of formData) body.append(p[0], p[1]);
+
+      const msgEl = document.getElementById("message");
+      try {
+        const response = await fetch(drawUrl, {
+          method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+          body, credentials:'include'
+        });
+        const result = await response.json();
+        console.log("🎯 Layout Draw 응답:", result);
+
+        if (response.ok && result.success && result.drawObjectDoc){
+          const cellObj = result.drawObjectDoc;
+          const libName  = cellObj.libname  || result.resolvedLibname  || 'logic_generated';
+          const cellName = cellObj.cellname || result.resolvedCellname || '(unknown cell)';
+          msgEl.innerText = `✅ Layout Draw 성공: ${libName} / ${cellName}`;
+
+          // 캔버스 데이터 초기화 후 build & draw
+          layoutState.rectList.length = 0;
+          layoutState.labelList.length = 0;
+          buildMap_ver2(cellObj);   // 내부에서 zoomToFit + layout:ready 발생
+        } else {
+          msgEl.innerText = result?.message || '⚠️ Layout Draw 실패';
         }
-        try {
-          const response = await fetch(form.action, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: data,
-            credentials: 'include'
-          });
-          const result = await response.json();
-          console.log("AJAX 응답:", result);
-          let messageDiv = document.getElementById("message");
-          // if (response.ok && result.success) {
-          //   messageDiv.innerText = "저장되었습니다.";
-          //   if (result.drawObjectDoc) {
-          //     rectList = [];
-          //     buildMap(result.drawObjectDoc, cellname, libname);
-          //     redraw();
-          //   }
-          // } 
-          if (response.ok && result.success) {    // switch에 따라 다른 응답
-            const generateSwitch = document.getElementById("generateSwitch");
-            if (generateSwitch && generateSwitch.checked) {
-              messageDiv.innerText = "Generate 완료되었습니다.";
-            } else {
-              messageDiv.innerText = "저장되었습니다.";
-            }
-
-            // if (result.drawObjectDoc) {
-            //   rectList = [];
-            //   buildMap(result.drawObjectDoc, cellname, libname);
-            //   redraw();
-            // }
-            // Save에선 layout을 절대 그리지 않도록
-            // if (result.drawObjectDoc && result.libname && result.cellname) {
-            //   rectList = [];
-            //   buildMap(result.drawObjectDoc, result.cellname, result.libname);
-            //   redraw();
-            // }
-          } 
-          else {
-            messageDiv.innerText = "저장에 실패했습니다.";
-          }
-          messageDiv.style.opacity = 1;
-          setTimeout(() => {
-            messageDiv.style.transition = "opacity 0.5s ease-out";
-            messageDiv.style.opacity = 0;
-          }, 2000);
-        } catch (error) {
-          let messageDiv = document.getElementById("message");
-          messageDiv.innerText = "오류가 발생했습니다.";
-          messageDiv.style.opacity = 1;
-          setTimeout(() => {
-            messageDiv.style.transition = "opacity 0.5s ease-out";
-            messageDiv.style.opacity = 0;
-          }, 2000);
-          console.error(error);
-        }
-      });
-    
-      // default layout function
-      // document.getElementById("layoutDrawBtn").addEventListener("click", async function () {
-      //   console.log("📐 Layout Draw 버튼 클릭됨");
-
-      //   // 필요한 입력값 추출
-      //   const cellname = document.getElementById("cellNameInput").value || 'cellname';
-      //   const libname = document.getElementById("yamlFileInput").value || 'logic_generated';
-
-      //   const form = document.getElementById("editForm");
-      //   const formData = new FormData(form);
-
-      //   const data = new URLSearchParams();
-      //   for (const pair of formData) {
-      //     data.append(pair[0], pair[1]);
-      //   }
-
-      //   try {
-      //     const response = await fetch(`${form.action}/draw`, {   // ✅ draw 전용 라우터 호출
-      //       method: 'POST',
-      //       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      //       body: data,
-      //       credentials: 'include'
-      //     });
-
-      //     const result = await response.json();
-      //     console.log("🎯 Layout Draw 응답:", result);
-
-      //     const messageDiv = document.getElementById("message");
-      //     if (response.ok && result.drawObjectDoc) {
-      //       const { drawObjectDoc, cellname, libname } = result;
-      //       const messageDiv = document.getElementById("message");
-
-      //       if (
-      //         drawObjectDoc.hasOwnProperty(libname) &&
-      //         drawObjectDoc[libname].hasOwnProperty(cellname)
-      //       ) {
-      //         setTimeout(() => {
-      //           messageDiv.innerText = '✅ Layout Draw 성공';
-      //         }, 2000); // 2초 후에 메시지 제거
-
-      //         // messageDiv.innerText = "✅ Layout Draw 성공";
-      //         rectList = [];
-      //         buildMap(drawObjectDoc, cellname, libname);
-      //         redraw();
-      //       } else {
-      //         setTimeout(() => {
-      //           messageDiv.innerText = `⚠️ Layout Draw 실패: ${libname} / ${cellname} 없음`;
-      //         }, 2000);
-      //         // messageDiv.innerText = `⚠️ Layout Draw 실패: ${libname} / ${cellname} 없음`;
-      //         console.warn(`drawObjectDoc[${libname}][${cellname}] is undefined`);
-      //       }
-      //     }
-      //   } catch (error) {
-      //     console.error("❌ Layout Draw 오류:", error);
-      //     document.getElementById("message").innerText = "서버 오류로 Layout을 그릴 수 없습니다.";
-      //   }
-      // });
-
-
-      // 터미널 영역 폴링 (2초 간격)
-      
-      // 기존 buildMap 전용
-      // document.getElementById("layoutDrawBtn").addEventListener("click", async function () {
-      //   const form = document.getElementById("editForm");
-      //   const urlObj = new URL(form.action, window.location.origin);
-      //   const basePath = urlObj.pathname; // "/main/:id/edit"
-      //   const pathParam = urlObj.searchParams.get('path') || '/';
-
-      //   // ✅ 진짜 draw 경로로 보냄 (쿼리 앞에 /draw를 붙인다)
-      //   const drawUrl = `${basePath}/draw?path=${encodeURIComponent(pathParam)}`;
-
-      //   const formData = new FormData(form);
-      //   // 사용자가 입력한 lib/cell 비면 빈 문자열로 보내서 서버가 추론하도록
-      //   const cellFromInput = (document.getElementById("cellNameInput").value || '').trim();
-      //   const libFromInput  = (document.getElementById("yamlFileInput").value || '').trim();
-      //   formData.set('cellname', cellFromInput);
-      //   formData.set('libname', libFromInput);
-
-      //   const data = new URLSearchParams();
-      //   for (const pair of formData) data.append(pair[0], pair[1]);
-
-      //   try {
-      //     const response = await fetch(drawUrl, {
-      //       method: 'POST', // draw는 POST로
-      //       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      //       body: data,
-      //       credentials: 'include'
-      //     });
-
-      //     const result = await response.json();
-      //     console.log("🎯 Layout Draw 응답:", result);
-
-      //     const msg = document.getElementById("message");
-      //     if (response.ok && result.drawObjectDoc) {
-      //       const lib  = result.resolvedLibname || libFromInput || 'logic_generated';
-      //       const cell = result.resolvedCellname || cellFromInput || 'cellname';
-
-      //       if (result.drawObjectDoc?.[lib]?.[cell]) {
-      //         msg.innerText = '✅ Layout Draw 성공';
-      //         rectList = [];
-      //         buildMap(result.drawObjectDoc, cell, lib);
-      //         redraw();
-      //       } else {
-      //         msg.innerText = `⚠️ Layout Draw 실패: ${lib} / ${cell} 없음`;
-      //         console.warn(`drawObjectDoc[${lib}][${cell}] is undefined`);
-      //       }
-      //     } else {
-      //       msg.innerText = result?.message || '⚠️ Layout Draw 실패';
-      //     }
-      //   } catch (err) {
-      //     console.error("❌ Layout Draw 오류:", err);
-      //     document.getElementById("message").innerText = "서버 오류로 Layout을 그릴 수 없습니다.";
-      //   }
-      // });
-
-
-      // 신규 buildMap_ver2 전용 -> 얘가 문젠가부다
-      document.getElementById("layoutDrawBtn").addEventListener("click", async function () {
-        const form = document.getElementById("editForm");
-        const urlObj = new URL(form.action, window.location.origin);
-        const basePath = urlObj.pathname; // "/main/:id/edit"
-        const pathParam = urlObj.searchParams.get('path') || '/';
-
-        // ✅ draw 전용 경로
-        const drawUrl = `${basePath}/draw?path=${encodeURIComponent(pathParam)}`;
-
-        const formData = new FormData(form);
-        // 사용자가 입력한 lib/cell(비워도 백엔드가 추출 시도)
-        const cellFromInput = (document.getElementById("cellNameInput").value || '').trim();
-        const libFromInput  = (document.getElementById("yamlFileInput").value || '').trim();
-        formData.set('cellname', cellFromInput);
-        formData.set('libname',  libFromInput);
-
-        const body = new URLSearchParams();
-        for (const pair of formData) body.append(pair[0], pair[1]);
-
-        const msgEl = document.getElementById("message");
-
-        try {
-          const response = await fetch(drawUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: body,
-            credentials: 'include'
-          });
-
-          const result = await response.json();
-          console.log("🎯 Layout Draw 응답:", result);
-
-          // ✅ 신규 포맷: drawObjectDoc는 "단일 셀 오브젝트"
-          if (response.ok && result.success && result.drawObjectDoc) {
-            const cellObj = result.drawObjectDoc; // { bbox, metals, pins, subblocks, ... }
-            const libName  = cellObj.libname  || result.resolvedLibname  || 'logic_generated';
-            const cellName = cellObj.cellname || result.resolvedCellname || '(unknown cell)';
-
-            // 화면 메시지
-            msgEl.innerText = `✅ Layout Draw 성공: ${libName} / ${cellName}`;
-
-            // 캔버스 데이터 초기화 후 그리기
-            window.rectList  = [];
-            window.labelList = [];
-            buildMap_ver2(cellObj);   // ⬅️ 변경 포인트: (cellObj) 단일 인자
-            redraw();            // 네가 쓰는 기존 렌더 함수 호출
-            // drawLabels();
-            // console.log('[rects]', window.rectList.length, '[labels]', window.labelList.length);
-            // console.log('[bbox]', result.drawObjectDoc.bbox);
-            // console.log('[metals]', result.drawObjectDoc.metals.length);
-            // console.log('[pins]', result.drawObjectDoc.pins.length);
-            // console.log('[subblocks]', result.drawObjectDoc.subblocks.length);
-
-          } else {
-            msgEl.innerText = result?.message || '⚠️ Layout Draw 실패';
-          }
-        } catch (err) {
-          console.error("❌ Layout Draw 오류:", err);
-          msgEl.innerText = "서버 오류로 Layout을 그릴 수 없습니다.";
-        }
-      });
-
-      
-      setInterval(async () => {
-        try {
-          const fileId = "<%= file._id %>";
-          const response = await fetch(`/main/${fileId}/edit/logs`, { credentials: 'include' });
-          if (!response.ok) {
-            console.error("로그 파일 요청 실패:", response.status);
-          }
-          const text = await response.text();
-          try {
-            const result = JSON.parse(text);
-            document.getElementById("terminal").innerText = result.log;
-          } catch (parseError) {
-            console.error("JSON 파싱 에러:", parseError);
-          }
-        } catch (error) {
-          console.error("로그 파일을 불러오는 중 에러 발생:", error);
-        }
-      }, 2000);
+      } catch (err) {
+        console.error("❌ Layout Draw 오류:", err);
+        msgEl.innerText = "서버 오류로 Layout을 그릴 수 없습니다.";
+      }
     });
-    </script>
-    
 
+    // ===================== Save(저장) AJAX는 기존 로직 유지 =====================
+    document.getElementById("editForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = new URLSearchParams(); for (const p of formData) data.append(p[0], p[1]);
+
+      const msg = document.getElementById("message");
+      try{
+        const response = await fetch(form.action, {
+          method:'PUT', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+          body:data, credentials:'include'
+        });
+        const result = await response.json();
+        if (response.ok && result.success){
+          const generateSwitch = document.getElementById("generateSwitch");
+          msg.innerText = (generateSwitch && generateSwitch.checked) ? "Generate 완료되었습니다." : "저장되었습니다.";
+        }else{
+          msg.innerText = "저장에 실패했습니다.";
+        }
+        msg.style.opacity=1;
+        setTimeout(()=>{ msg.style.transition="opacity 0.5s"; msg.style.opacity=0;}, 2000);
+      }catch(err){
+        console.error(err);
+        msg.innerText="오류가 발생했습니다.";
+        msg.style.opacity=1;
+        setTimeout(()=>{ msg.style.transition="opacity 0.5s"; msg.style.opacity=0;}, 2000);
+      }
+    });
+
+    // ===================== 로그 폴링 (기존 유지) =====================
+    setInterval(async () => {
+      try {
+        const fileId = "<%= file._id %>";
+        const res = await fetch(`/main/${fileId}/edit/logs`, { credentials:'include' });
+        if (!res.ok) return;
+        const text = await res.text();
+        try{
+          const result = JSON.parse(text);
+          document.getElementById("terminal").innerText = result.log;
+        }catch(e){ console.error("JSON 파싱 에러:", e); }
+      } catch (e) { console.error("로그 폴링 에러:", e); }
+    }, 2000);
+
+  });
+  </script>
+
+
+
+
+  
 
   <!-- ==================================================================================================== -->
 
