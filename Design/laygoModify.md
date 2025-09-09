@@ -1,4 +1,4 @@
-# LAYGO 수정사항 / 수정중(2025-08-07)
+# LAYGO 수정사항
 
 ## 개요
 - Web console 수정을 위한 laygo 코드 수정 내용 정리
@@ -25,6 +25,12 @@
     + Web console에서 layout의 생성을 위해 실행하는 script
     + Pseudocode
     ```
+    # webconsole 환경 환경변수 설정
+    export WC="webconsole" #WC가 정의되어 있는 경우 webconsole 환경으로 판단하고 동작하도록 laygo 수정
+    export DB_CONNECT = "MongoDB URL"
+    export LAYGO_USERNAME="$USERNAME"
+    export LAYGO_BASENAME="$FILENAME"
+    
     # $PYTHONPATH 설정 -> Laygo pakage들 import 위함
     export PYHONPATH = "서버내 bag_workspace_gpdk45 경로 : $PYTHONPATH"
     export PYHONPATH = "서버내 bag_workspace_gpdk45/laygo2 경로 : $PYTHONPATH"
@@ -43,10 +49,6 @@
     
     # 스크립트 실행 및 로그 저장
     {BAG_PYTHON or python3} CODE_PATH >> LOG_FILE
-
-    # webconsole 환경 환경변수 설정
-    export WC="webconsole"
-    WC가 정의되어 있는 경우 webconsole 환경으로 판단하고 동작하도록 laygo 수정
     ```
 
 ## Laygo에 web console용 출력 함수 추가
@@ -80,21 +82,19 @@
 - 기존 YAML로의 export로 출력된 export data는 두께 데이터를 포함하고 있지 않으며, 따라서 draw를 위해 추가가 필요하다.
 - 수정 함수 1: laygo2.interface.yaml.export_template()
     + MongoDB에 저장된 template database 파일로 출력되도록 해야 함(Local directory가 아니라) 
-    + Issue 1) Web console에서의 접근과 단순 local에서의 접근을 어떻게 구분하지?
-        + 아래 import와 마찬가지: Laygo 환경변수에 WebConsole 환경 여부를 포함시키고, import_template 함수에서는 이 환경변수를 확인해 webconsole 환경인 경우 DB에서 정보를 읽어옴
+    + Issue 1) Web console에서의 접근과 단순 local에서의 접근의 구분방법: Laygo 환경변수에 WebConsole 환경 여부를 포함시키고, import_template 함수에서는 이 환경변수를 확인해 webconsole 환경인 경우 DB에서 정보를 읽어옴
     + Issue 2) MongoDB atlas 접근: https://ohnyong.tistory.com/35
-    + 수정 진행중...
 - 수정 함수 2: laygo2.interface.core.export()
-    + Export target에 webconsole 추가: webconsole.py의 export(추가 함수 1) 호출, username/filename을 환경변수에서 추출
+    + Export target에 webconsole 추가: webconsole.py의 export(추가 함수 1) 호출, username을 환경변수에서 추출
     + 추가 내용
     ```
     elif target == 'webconsole':  # webconsole export
         consoleUsername = os.environ['LAYGO_USERNAME']
-        consoleFilepath = os.environ['LAYGO_BASENAME']
-        path = consoleUsername + '/' + consoleFilepath          #path for temporary file which is from a specific file for an user
+        
         return webconsole.export(
             db=db,
-            path=path
+            username = consoleUsername,
+            tech = tech
         )
     ```
 
