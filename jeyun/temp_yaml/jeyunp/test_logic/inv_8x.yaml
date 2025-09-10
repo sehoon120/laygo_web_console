@@ -177,27 +177,35 @@ metals:
   - [-120, 1880]
   - [2170, 2120]
 pins:
-- layer: Metal2
+- bbox:
+  - [0, -120]
+  - [2050, 120]
+  layer: Metal2
   name: 'VSS:'
-  netname: 'VSS:'
   xy:
   - [0, -120]
   - [2050, 120]
-- layer: Metal2
+- bbox:
+  - [0, 1880]
+  - [2050, 2120]
+  layer: Metal2
   name: 'VDD:'
-  netname: 'VDD:'
   xy:
   - [0, 1880]
   - [2050, 2120]
-- layer: Metal3
+- bbox:
+  - [165, 790]
+  - [245, 1210]
+  layer: Metal3
   name: I
-  netname: I
   xy:
   - [165, 790]
   - [245, 1210]
-- layer: Metal3
+- bbox:
+  - [1600, 490]
+  - [1680, 1510]
+  layer: Metal3
   name: O
-  netname: O
   xy:
   - [1600, 490]
   - [1680, 1510]
@@ -209,9 +217,21 @@ subblocks:
   libname: gpdk045_microtemplates_dense
   name: MN0
   pins:
-    D: {netname: null, termName: D}
-    G: {netname: null, termName: G}
-    RAIL: {netname: null, termName: RAIL}
+    D:
+      bbox:
+      - [410, 490]
+      - [1640, 490]
+      termName: D
+    G:
+      bbox:
+      - [410, 790]
+      - [1640, 790]
+      termName: G
+    RAIL:
+      bbox:
+      - [0, 0]
+      - [2050, 0]
+      termName: RAIL
   transform: R0
   xy: [0, 0]
 - bbox:
@@ -221,9 +241,21 @@ subblocks:
   libname: gpdk045_microtemplates_dense
   name: MP0
   pins:
-    D: {netname: null, termName: D}
-    G: {netname: null, termName: G}
-    RAIL: {netname: null, termName: RAIL}
+    D:
+      bbox:
+      - [410, 1510]
+      - [1640, 1510]
+      termName: D
+    G:
+      bbox:
+      - [410, 1210]
+      - [1640, 1210]
+      termName: G
+    RAIL:
+      bbox:
+      - [0, 2000]
+      - [2050, 2000]
+      termName: RAIL
   transform: MX
   xy: [0, 2000]
 vias:

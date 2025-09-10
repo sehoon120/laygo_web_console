@@ -1,0 +1,478 @@
+bbox:
+- [0, 0]
+- [4100, 2000]
+cellname: nand_8x
+flatten:
+  metals:
+  - layer: Metal2
+    xy:
+    - [370, 750]
+    - [1680, 830]
+  - layer: Metal2
+    xy:
+    - [370, 450]
+    - [1680, 530]
+  - layer: Metal2
+    xy:
+    - [-120, -120]
+    - [2170, 120]
+  - layer: Metal1
+    xy:
+    - [165, -40]
+    - [245, 530]
+  - layer: Metal1
+    xy:
+    - [575, -40]
+    - [655, 530]
+  - layer: Metal1
+    xy:
+    - [985, -40]
+    - [1065, 530]
+  - layer: Metal1
+    xy:
+    - [1395, -40]
+    - [1475, 530]
+  - layer: Metal1
+    xy:
+    - [1805, -40]
+    - [1885, 530]
+  - layer: Metal2
+    xy:
+    - [85, -120]
+    - [1965, 120]
+  - layer: Metal2
+    xy:
+    - [370, 1170]
+    - [1680, 1250]
+  - layer: Metal2
+    xy:
+    - [370, 1470]
+    - [1680, 1550]
+  - layer: Metal2
+    xy:
+    - [-120, 1880]
+    - [2170, 2120]
+  - layer: Metal1
+    xy:
+    - [165, 1470]
+    - [245, 2040]
+  - layer: Metal1
+    xy:
+    - [575, 1470]
+    - [655, 2040]
+  - layer: Metal1
+    xy:
+    - [985, 1470]
+    - [1065, 2040]
+  - layer: Metal1
+    xy:
+    - [1395, 1470]
+    - [1475, 2040]
+  - layer: Metal1
+    xy:
+    - [1805, 1470]
+    - [1885, 2040]
+  - layer: Metal2
+    xy:
+    - [85, 1880]
+    - [1965, 2120]
+  - layer: Metal2
+    xy:
+    - [2420, 750]
+    - [3730, 830]
+  - layer: Metal2
+    xy:
+    - [2420, 300]
+    - [3730, 380]
+  - layer: Metal2
+    xy:
+    - [2215, 450]
+    - [3935, 530]
+  - layer: Metal2
+    xy:
+    - [1930, -120]
+    - [4220, 120]
+  - layer: Metal2
+    xy:
+    - [2420, 1170]
+    - [3730, 1250]
+  - layer: Metal2
+    xy:
+    - [2420, 1470]
+    - [3730, 1550]
+  - layer: Metal2
+    xy:
+    - [1930, 1880]
+    - [4220, 2120]
+  - layer: Metal1
+    xy:
+    - [2215, 1470]
+    - [2295, 2040]
+  - layer: Metal1
+    xy:
+    - [2625, 1470]
+    - [2705, 2040]
+  - layer: Metal1
+    xy:
+    - [3035, 1470]
+    - [3115, 2040]
+  - layer: Metal1
+    xy:
+    - [3445, 1470]
+    - [3525, 2040]
+  - layer: Metal1
+    xy:
+    - [3855, 1470]
+    - [3935, 2040]
+  - layer: Metal2
+    xy:
+    - [2135, 1880]
+    - [4015, 2120]
+  subblocks:
+  - cellname: nmos4_fast_boundary
+    libname: gpdk045_microtemplates_dense
+    name: bndl
+    pins: {}
+    transform: R0
+    xy: [0, 0]
+  - cellname: nmos4_fast_boundary
+    libname: gpdk045_microtemplates_dense
+    name: bndr
+    pins: {}
+    transform: R0
+    xy: [0, 1845]
+  - cellname: nmos4_fast_center_nf2
+    libname: gpdk045_microtemplates_dense
+    name: core
+    pins:
+      D0: {netname: null, termName: D0}
+      G0: {netname: null, termName: G0}
+      S0: {netname: null, termName: S0}
+      S1: {netname: null, termName: S1}
+    transform: R0
+    xy: [0, 205]
+  - cellname: pmos4_fast_boundary
+    libname: gpdk045_microtemplates_dense
+    name: bndl
+    pins: {}
+    transform: MX
+    xy: [0, 2000]
+  - cellname: pmos4_fast_boundary
+    libname: gpdk045_microtemplates_dense
+    name: bndr
+    pins: {}
+    transform: MX
+    xy: [0, 155]
+  - cellname: pmos4_fast_center_nf2
+    libname: gpdk045_microtemplates_dense
+    name: core
+    pins:
+      D0: {netname: null, termName: D0}
+      G0: {netname: null, termName: G0}
+      S0: {netname: null, termName: S0}
+      S1: {netname: null, termName: S1}
+    transform: MX
+    xy: [0, 1795]
+  - cellname: nmos4_fast_boundary
+    libname: gpdk045_microtemplates_dense
+    name: bndl
+    pins: {}
+    transform: R0
+    xy: [2050, 0]
+  - cellname: nmos4_fast_boundary
+    libname: gpdk045_microtemplates_dense
+    name: bndr
+    pins: {}
+    transform: R0
+    xy: [2050, 1845]
+  - cellname: nmos4_fast_center_nf2
+    libname: gpdk045_microtemplates_dense
+    name: core
+    pins:
+      D0: {netname: null, termName: D0}
+      G0: {netname: null, termName: G0}
+      S0: {netname: null, termName: S0}
+      S1: {netname: null, termName: S1}
+    transform: R0
+    xy: [2050, 205]
+  - cellname: pmos4_fast_boundary
+    libname: gpdk045_microtemplates_dense
+    name: bndl
+    pins: {}
+    transform: MX
+    xy: [2050, 2000]
+  - cellname: pmos4_fast_boundary
+    libname: gpdk045_microtemplates_dense
+    name: bndr
+    pins: {}
+    transform: MX
+    xy: [2050, 155]
+  - cellname: pmos4_fast_center_nf2
+    libname: gpdk045_microtemplates_dense
+    name: core
+    pins:
+      D0: {netname: null, termName: D0}
+      G0: {netname: null, termName: G0}
+      S0: {netname: null, termName: S0}
+      S1: {netname: null, termName: S1}
+    transform: MX
+    xy: [2050, 1795]
+  vias:
+  - layer: &id001 [Metal2, Metal1]
+    xy: [410, 790]
+  - layer: *id001
+    xy: [410, 490]
+  - layer: &id002 [Metal2, Metal1]
+    xy: [0, 205]
+  - layer: *id002
+    xy: [0, 615]
+  - layer: *id002
+    xy: [0, 1025]
+  - layer: *id002
+    xy: [0, 1435]
+  - layer: *id002
+    xy: [0, 1845]
+  - layer: *id001
+    xy: [410, 1210]
+  - layer: *id001
+    xy: [410, 1510]
+  - layer: *id002
+    xy: [0, 1795]
+  - layer: *id002
+    xy: [0, 1385]
+  - layer: *id002
+    xy: [0, 975]
+  - layer: *id002
+    xy: [0, 565]
+  - layer: *id002
+    xy: [0, 155]
+  - layer: *id001
+    xy: [2460, 790]
+  - layer: *id001
+    xy: [2390, 410]
+  - layer: *id001
+    xy: [2255, 490]
+  - layer: *id001
+    xy: [2460, 1210]
+  - layer: *id001
+    xy: [2460, 1510]
+  - layer: *id002
+    xy: [2050, 1795]
+  - layer: *id002
+    xy: [2050, 1385]
+  - layer: *id002
+    xy: [2050, 975]
+  - layer: *id002
+    xy: [2050, 565]
+  - layer: *id002
+    xy: [2050, 155]
+libname: test_logic
+metals:
+- layer: Metal2
+  xy:
+  - [2420, 750]
+  - [3115, 830]
+- layer: Metal2
+  xy:
+  - [2420, 1170]
+  - [3115, 1250]
+- layer: Metal3
+  xy:
+  - [2420, 750]
+  - [2500, 1250]
+- layer: Metal2
+  xy:
+  - [370, 750]
+  - [1065, 830]
+- layer: Metal2
+  xy:
+  - [370, 1170]
+  - [1065, 1250]
+- layer: Metal3
+  xy:
+  - [370, 750]
+  - [450, 1250]
+- layer: Metal2
+  xy:
+  - [985, 1470]
+  - [3115, 1550]
+- layer: Metal2
+  xy:
+  - [985, 450]
+  - [3115, 530]
+- layer: Metal2
+  xy:
+  - [3035, 300]
+  - [3730, 380]
+- layer: Metal2
+  xy:
+  - [3035, 1470]
+  - [3730, 1550]
+- layer: Metal3
+  xy:
+  - [3650, 300]
+  - [3730, 1550]
+- layer: Metal2
+  xy:
+  - [-120, -120]
+  - [4220, 120]
+- layer: Metal2
+  xy:
+  - [-120, 1880]
+  - [4220, 2120]
+pins:
+- bbox:
+  - [370, 790]
+  - [450, 1210]
+  layer: Metal3
+  name: B
+  xy:
+  - [370, 790]
+  - [450, 1210]
+- bbox:
+  - [2420, 790]
+  - [2500, 1210]
+  layer: Metal3
+  name: A
+  xy:
+  - [2420, 790]
+  - [2500, 1210]
+- bbox:
+  - [3650, 340]
+  - [3730, 1510]
+  layer: Metal3
+  name: O
+  xy:
+  - [3650, 340]
+  - [3730, 1510]
+- bbox:
+  - [0, -120]
+  - [4100, 120]
+  layer: Metal2
+  name: 'VSS:'
+  xy:
+  - [0, -120]
+  - [4100, 120]
+- bbox:
+  - [0, 1880]
+  - [4100, 2120]
+  layer: Metal2
+  name: 'VDD:'
+  xy:
+  - [0, 1880]
+  - [4100, 2120]
+subblocks:
+- bbox:
+  - [0, 0]
+  - [2050, 1000]
+  cellname: myvcell_MN0
+  libname: gpdk045_microtemplates_dense
+  name: MN0
+  pins:
+    D:
+      bbox:
+      - [410, 490]
+      - [1640, 490]
+      termName: D
+    G:
+      bbox:
+      - [410, 790]
+      - [1640, 790]
+      termName: G
+    RAIL:
+      bbox:
+      - [0, 0]
+      - [2050, 0]
+      termName: RAIL
+  transform: R0
+  xy: [0, 0]
+- bbox:
+  - [0, 1000]
+  - [2050, 2000]
+  cellname: myvcell_MP0
+  libname: gpdk045_microtemplates_dense
+  name: MP0
+  pins:
+    D:
+      bbox:
+      - [410, 1510]
+      - [1640, 1510]
+      termName: D
+    G:
+      bbox:
+      - [410, 1210]
+      - [1640, 1210]
+      termName: G
+    RAIL:
+      bbox:
+      - [0, 2000]
+      - [2050, 2000]
+      termName: RAIL
+  transform: MX
+  xy: [0, 2000]
+- bbox:
+  - [2050, 0]
+  - [4100, 1000]
+  cellname: myvcell_MN1
+  libname: gpdk045_microtemplates_dense
+  name: MN1
+  pins:
+    D:
+      bbox:
+      - [2460, 340]
+      - [3690, 340]
+      termName: D
+    G:
+      bbox:
+      - [2460, 790]
+      - [3690, 790]
+      termName: G
+    RAIL:
+      bbox:
+      - [2050, 0]
+      - [4100, 0]
+      termName: RAIL
+    S:
+      bbox:
+      - [2255, 490]
+      - [3895, 490]
+      termName: S
+  transform: R0
+  xy: [2050, 0]
+- bbox:
+  - [2050, 1000]
+  - [4100, 2000]
+  cellname: myvcell_MP1
+  libname: gpdk045_microtemplates_dense
+  name: MP1
+  pins:
+    D:
+      bbox:
+      - [2460, 1510]
+      - [3690, 1510]
+      termName: D
+    G:
+      bbox:
+      - [2460, 1210]
+      - [3690, 1210]
+      termName: G
+    RAIL:
+      bbox:
+      - [2050, 2000]
+      - [4100, 2000]
+      termName: RAIL
+  transform: MX
+  xy: [2050, 2000]
+vias:
+- layer: &id003 [Metal2, Metal3]
+  xy: [2460, 790]
+- layer: *id003
+  xy: [2460, 1210]
+- layer: *id003
+  xy: [410, 790]
+- layer: *id003
+  xy: [410, 1210]
+- layer: *id003
+  xy: [3690, 340]
+- layer: *id003
+  xy: [3690, 1510]

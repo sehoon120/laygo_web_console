@@ -41,6 +41,7 @@ def export_to_webconsole(self, grids:list=[]):
                 # export via
                 _via = dict()
                 _via["xy"] = _inst.xy.tolist()
+                _via["bbox"] = _inst.bbox.tolist()
                 _via["layer"] = via_table[_inst.cellname]
                 dsn_dict["vias"].append(_via)
             else: 
