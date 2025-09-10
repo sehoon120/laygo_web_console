@@ -56,7 +56,7 @@ def export_to_webconsole(self, grids:list=[]):
                 _sub_block['pins'] = dict()
                 for _pinName, pin in _inst.pins.items():
                     _sub_block['pins'][_pinName] = dict()
-                    _sub_block['pins'][_pinName]['termName'] = _pinName # maybe changed or overwrited by thr netname defined in sub-block json
+                    _sub_block['pins'][_pinName]['termName'] = _pinName 
                     _sub_block['pins'][_pinName]['bbox'] = pin.bbox.tolist()
                 dsn_dict['subblocks'].append(_sub_block)
         
@@ -74,7 +74,7 @@ def export_to_webconsole(self, grids:list=[]):
             _sub_block['pins'] = dict()
             for _pinName, pin in _inst.pins.items():
                 _sub_block['pins'][_pinName] = dict()
-                _sub_block['pins'][_pinName]['termName'] = _pinName # maybe changed or overwrited by thr netname defined in sub-block json
+                _sub_block['pins'][_pinName]['termName'] = _pinName 
                 _sub_block['pins'][_pinName]['bbox'] = pin.bbox.tolist()
             dsn_dict['subblocks'].append(_sub_block)
 
@@ -88,12 +88,10 @@ def export_to_webconsole(self, grids:list=[]):
                 _xy[0][1], _xy[1][1] = _xy[1][1], _xy[0][1]
             _xy = [[_xy[0][0]-int(_m.hextension), _xy[0][1] - int(_m.vextension)],[_xy[1][0]+int(_m.hextension), _xy[1][1]+int(_m.vextension)]]
             _metal = dict(xy=_xy, layer=_m.layer[0])
-            if _m.netname is not None:
-                _metal["netname"] = _m.netname
             dsn_dict["metals"].append(_metal)
         # export top pins
         for pin in self.pins.values():
-            _pin = dict(name = pin.name, xy = pin.xy.tolist(), layer=pin.layer[0], netname = pin.netname, bbox=pin.bbox.tolist())
+            _pin = dict(name = pin.name, xy = pin.xy.tolist(), layer=pin.layer[0], bbox=pin.bbox.tolist())
             dsn_dict['pins'].append(_pin)
 
         # flatten virtual instances and add it to dict -> To show expanded circuit at console
