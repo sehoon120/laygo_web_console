@@ -1,4 +1,5 @@
 # C:\For_english_only_directories\LaygoWebConsole\bag_workspace_gpdk045\laygo3\laygo2\object\database.py Design 객체에 member function으로 추가
+# 바로 아래 Instance의 Pin 위치가 확인가능하도록 해야 함 => 수정되었지만 검증필요
 def export_to_webconsole(self, grids:list=[]):
         """
         Return data for drawing layout(libname, cellname, subblocks, vias, pins, metals)
@@ -32,12 +33,7 @@ def export_to_webconsole(self, grids:list=[]):
             for tvia in _grid.viamap.elements[0]:
                 via_table[tvia.cellname] = [_grid.hlayer[0][0], _grid.vlayer[0][0]]
 
-        libname = self.libname
-        cellname = self.cellname
-        xy = self.bbox
         pins = self.pins
-
-        #print(self)
 
         # export top via & subblocks(Physical instance)
         for _instName, _inst in self.instances.items():
@@ -61,7 +57,7 @@ def export_to_webconsole(self, grids:list=[]):
                 for _pinName, pin in _inst.pins.items():
                     _sub_block['pins'][_pinName] = dict()
                     _sub_block['pins'][_pinName]['termName'] = _pinName # maybe changed or overwrited by thr netname defined in sub-block json
-                    _sub_block['pins'][_pinName]['netname'] = pin.netname
+                    _sub_block['pins'][_pinName]['bbox'] = pin.bbox.tolist()
                 dsn_dict['subblocks'].append(_sub_block)
         
         #Extract virtual instances
@@ -79,7 +75,7 @@ def export_to_webconsole(self, grids:list=[]):
             for _pinName, pin in _inst.pins.items():
                 _sub_block['pins'][_pinName] = dict()
                 _sub_block['pins'][_pinName]['termName'] = _pinName # maybe changed or overwrited by thr netname defined in sub-block json
-                _sub_block['pins'][_pinName]['netname'] = pin.netname
+                _sub_block['pins'][_pinName]['bbox'] = pin.bbox.tolist()
             dsn_dict['subblocks'].append(_sub_block)
 
         # export top metals
@@ -97,7 +93,7 @@ def export_to_webconsole(self, grids:list=[]):
             dsn_dict["metals"].append(_metal)
         # export top pins
         for pin in self.pins.values():
-            _pin = dict(name = pin.name, xy = pin.xy.tolist(), layer=pin.layer[0], netname = pin.netname)
+            _pin = dict(name = pin.name, xy = pin.xy.tolist(), layer=pin.layer[0], netname = pin.netname, bbox=pin.bbox.tolist())
             dsn_dict['pins'].append(_pin)
 
         # flatten virtual instances and add it to dict -> To show expanded circuit at console
