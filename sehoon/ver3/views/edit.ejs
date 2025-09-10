@@ -287,6 +287,9 @@
 
         const kind = rect[7];
         if (kind === 'subblock') {
+          libn = "libname: " + rect[8].instLib;
+          celln = "cellname: " + rect[8].instCell;
+          // console.log(libncell);
           ctx.fillStyle = 'rgba(135, 206, 235, 0.35)';
           ctx.fillRect(rect[0], rect[1], rect[2], rect[3]);
           ctx.lineWidth = 10;
@@ -295,6 +298,20 @@
           ctx.strokeRect(rect[0], rect[1], rect[2], rect[3]);
           ctx.font = "400px Verdana";
           ctx.fillText(rect[5], rect[0]+rect[2]/2-200, rect[1]+rect[3]/2-200);
+          // 좌상단에 lib/cell 표시
+          ctx.font = "200px Verdana";
+          // ctx.textAlign = "left";
+          // ctx.textBaseline = "top";
+          // 확대/축소 보정용 외곽선 두께
+          // const k = (typeof ctx.getTransform === 'function') ? ctx.getTransform().a : 1;
+          // const halo = Math.max(1, 6 / Math.max(k, 0.0001));
+          ctx.lineWidth = 30; // halo;
+          ctx.strokeStyle = "black";
+          ctx.fillStyle   = "yellow";
+          ctx.strokeText(celln,  rect[0] + 6, rect[1]-20);
+          ctx.fillText(celln,  rect[0] + 6, rect[1]-20);
+          ctx.strokeText(libn,  rect[0] + 6, rect[1]-20 - 250);
+          ctx.fillText(libn,  rect[0] + 6, rect[1]-20 - 250);
         } else if (kind === 'pin') {
           ctx.fillStyle = rect[4];
           ctx.fillRect(rect[0], rect[1], rect[2], rect[3]);
@@ -323,8 +340,34 @@
         else worldLabels.push(l);
       }
 
-      // worldLabels를 그리고 싶으면 여기에 구현 가능
+      // // worldLabels를 그리고 싶으면 여기에 구현 가능
+      // if (worldLabels.length) {
+      //   ctx.save();
+      //   // 현재 변환 유지 (확대/이동과 같이 움직이게)
+      //   for (const l of worldLabels) {
+      //     if (!l?.text) continue;
 
+      //     // 확대율에 관계없이 적당한 외곽선 두께 유지
+      //     const k = (typeof ctx.getTransform === 'function') ? ctx.getTransform().a : 1;
+      //     const outline = Math.max(1, 2 / Math.max(k, 0.0001));
+
+      //     ctx.font = l.font || "11px sans-serif";
+      //     ctx.textAlign = l.align || "left";
+      //     ctx.textBaseline = l.baseline || "top";
+
+      //     // 밝은 외곽선(halo)
+      //     ctx.lineWidth = outline;
+      //     ctx.strokeStyle = "rgba(255,255,255,0.85)";
+      //     ctx.strokeText(l.text, l.x, l.y);
+
+      //     // 본문
+      //     ctx.fillStyle = l.fill || "#222";
+      //     ctx.fillText(l.text, l.x, l.y);
+      //   }
+      //   ctx.restore();
+      // }
+
+      // -------- 화면 고정 라벨(HUD) ----------
       if (screenLabels.length){
         ctx.save();
         ctx.setTransform(1,0,0,1,0,0);
