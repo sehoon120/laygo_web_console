@@ -141,27 +141,35 @@ metals:
   - [-120, 1880]
   - [940, 2120]
 pins:
-- layer: Metal2
+- bbox:
+  - [0, -120]
+  - [820, 120]
+  layer: Metal2
   name: 'VSS:'
-  netname: 'VSS:'
   xy:
   - [0, -120]
   - [820, 120]
-- layer: Metal2
+- bbox:
+  - [0, 1880]
+  - [820, 2120]
+  layer: Metal2
   name: 'VDD:'
-  netname: 'VDD:'
   xy:
   - [0, 1880]
   - [820, 2120]
-- layer: Metal3
+- bbox:
+  - [165, 790]
+  - [245, 1210]
+  layer: Metal3
   name: I
-  netname: I
   xy:
   - [165, 790]
   - [245, 1210]
-- layer: Metal3
+- bbox:
+  - [370, 490]
+  - [450, 1510]
+  layer: Metal3
   name: O
-  netname: O
   xy:
   - [370, 490]
   - [450, 1510]
@@ -173,9 +181,26 @@ subblocks:
   libname: gpdk045_microtemplates_dense
   name: MN0
   pins:
-    D: {netname: null, termName: D}
-    G: {netname: null, termName: G}
-    RAIL: {netname: null, termName: RAIL}
+    D0:
+      bbox:
+      - [370, 235]
+      - [450, 595]
+      termName: D0
+    G0:
+      bbox:
+      - [320, 730]
+      - [500, 850]
+      termName: G0
+    S0:
+      bbox:
+      - [165, 235]
+      - [245, 595]
+      termName: S0
+    S1:
+      bbox:
+      - [575, 235]
+      - [655, 595]
+      termName: S1
   transform: R0
   xy: [0, 0]
 - bbox:
@@ -185,17 +210,46 @@ subblocks:
   libname: gpdk045_microtemplates_dense
   name: MP0
   pins:
-    D: {netname: null, termName: D}
-    G: {netname: null, termName: G}
-    RAIL: {netname: null, termName: RAIL}
+    D0:
+      bbox:
+      - [370, 235]
+      - [450, 595]
+      termName: D0
+    G0:
+      bbox:
+      - [320, 730]
+      - [500, 850]
+      termName: G0
+    S0:
+      bbox:
+      - [165, 235]
+      - [245, 595]
+      termName: S0
+    S1:
+      bbox:
+      - [575, 235]
+      - [655, 595]
+      termName: S1
   transform: MX
   xy: [0, 2000]
 vias:
-- layer: &id003 [Metal2, Metal3]
+- bbox:
+  - [205, 790]
+  - [205, 790]
+  layer: &id003 [Metal2, Metal3]
   xy: [205, 790]
-- layer: *id003
+- bbox:
+  - [205, 1210]
+  - [205, 1210]
+  layer: *id003
   xy: [205, 1210]
-- layer: *id003
+- bbox:
+  - [410, 490]
+  - [410, 490]
+  layer: *id003
   xy: [410, 490]
-- layer: *id003
+- bbox:
+  - [410, 1510]
+  - [410, 1510]
+  layer: *id003
   xy: [410, 1510]
