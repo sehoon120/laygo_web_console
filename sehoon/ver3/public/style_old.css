@@ -1,4 +1,7 @@
-
+/*
+ * 기존 CSS와 새로운 버튼 스타일을 합친 파일입니다.
+ * 전체 레이아웃에 영향을 주지 않도록 스타일을 병합했습니다.
+ */
 
 /* ====================================================================== */
 /* 기본 리셋 및 공통 스타일 (기존 코드)                    */
@@ -227,7 +230,7 @@ hr {
   font-size: 15px;
   border: none;
   outline: none;
-  border-bottom: 1px solid #eee;
+  border-bottom: 2px solid #eee;
   flex: 1;
 }
 
@@ -264,8 +267,7 @@ hr {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 20px;
-  height: 38px; /* 높이 고정 */
+  padding: 10px 20px;
   font-size: 14px;
   font-weight: 600;
   border: none;
@@ -308,19 +310,4 @@ hr {
     box-shadow: 0 6px 15px rgba(63, 81, 181, 0.3);
   }
 }
-.layer-btn.wide-btn {
-  width: auto;
-  flex-grow: 0;
-  flex-shrink: 0;
-}
 
-/* 새로 추가된 스타일 */
-.layer-group-title {
-    font-weight: 700;
-    font-size: 16px;
-    color: #444;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding-right: 8px;
-    align-self: center; /* Flexbox 내에서 세로 중앙 정렬 */
-}
