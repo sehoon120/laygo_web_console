@@ -324,3 +324,64 @@ hr {
     padding-right: 8px;
     align-self: center; /* Flexbox 내에서 세로 중앙 정렬 */
 }
+
+
+/* Save and Layout Draw 버튼을 위한 스타일 */
+.btn-primary,
+.btn-secondary {
+  border-radius: 50px;
+  font-weight: 600;
+  padding: 10px 24px;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-primary {
+  background-color: #4a90e2;
+  border: none;
+  color: #333;
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.25);
+}
+
+.btn-primary:hover {
+  background-color: #357ab8;
+  box-shadow: 0 6px 18px rgba(74, 144, 226, 0.35);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  color: #333;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.btn-secondary:hover {
+  background-color: #f0f0f0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+
+/* 세련된 텍스트 영역을 위한 스타일 */
+textarea.form-control {
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  padding: 12px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  min-height: 250px; /* 적당한 최소 높이 설정 */
+}
+
+textarea.form-control:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.15);
+}
+
+textarea.form-control::placeholder {
+  color: #aaa;
+  font-style: italic;
+}

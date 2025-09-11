@@ -18,6 +18,7 @@
             <textarea name="content" class="form-control" rows="43"
               placeholder="Write your code here"><%= file.content %></textarea>
           </div>
+          
           <div class="form-check form-switch mb-3">
             <input class="form-check-input" type="checkbox" id="generateSwitch" name="generate" value="on" form="editForm">
             <label class="form-check-label" for="generateSwitch">Generate (Save 후 실행)</label>
@@ -118,7 +119,7 @@
     function drawOriginAxes() {
       const ctx = layoutState.ctx; if (!ctx) return;
       ctx.save();
-      ctx.strokeStyle = '#0077cc';
+      ctx.strokeStyle = '#000033'; // '#0077cc';
       ctx.lineWidth = 20;
       const LONG = 100000;
 

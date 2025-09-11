@@ -183,42 +183,21 @@
     }
 
     // ===================== 레이어 토글 UI =====================
-    // function scanSceneForLayers(){
-    //   const byKind = new Map(), metals = new Map();
-    //   for (const r of R()){
-    //     const kind = r?.[7] || 'unknown';
-    //     const meta = r?.[8] || {};
-    //     const z = meta.z ?? 0;
-    //     if (!byKind.has(kind)) byKind.set(kind,new Set());
-    //     byKind.get(kind).add(z);
-    //     if (kind==='metal'){
-    //       const lname = (meta.layer||'').toString();
-    //       if (lname) metals.set(lname, z);
-    //     }
-    //   }
-    //   return { byKind, metals };
-    // }
-    function scanSceneForLayers() {
-      const byKind = new Map(), metals = new Map(), vias = new Map();
-      for (const r of R()) {
+    function scanSceneForLayers(){
+      const byKind = new Map(), metals = new Map();
+      for (const r of R()){
         const kind = r?.[7] || 'unknown';
         const meta = r?.[8] || {};
         const z = meta.z ?? 0;
-
-        if (!byKind.has(kind)) byKind.set(kind, new Set());
+        if (!byKind.has(kind)) byKind.set(kind,new Set());
         byKind.get(kind).add(z);
-
-        if (kind === 'metal' && meta.layer) {
-          metals.set(String(meta.layer), z);
-        }
-        if (kind === 'via') {
-          const k = meta.layerPair || 'via';
-          vias.set(String(k), z);
+        if (kind==='metal'){
+          const lname = (meta.layer||'').toString();
+          if (lname) metals.set(lname, z);
         }
       }
-      return { byKind, metals, vias };
+      return { byKind, metals };
     }
-
 
     function makeBtn(title, zValues){
       const btn = document.createElement('button');
@@ -243,7 +222,7 @@
     function buildLayerToggles(containerId='layerToggles'){
       const el = document.getElementById(containerId); if (!el) return;
       el.innerHTML = '';
-      const { byKind, metals, vias } = scanSceneForLayers();
+      const { byKind, metals } = scanSceneForLayers();
 
       const order = ['bbox','subblock','mask','pin'];  // ,'metal'
       order.forEach(kind=>{
@@ -280,32 +259,6 @@
         });
         for (const [lname,z] of entries){
           el.appendChild(makeBtn(lname,[z]));
-        }
-      }
-
-      // === 새로 추가: vias 섹션 ===
-      if (vias.size) {
-        const titleEl = document.createElement('span');
-        titleEl.className = 'layer-group-title';
-        titleEl.textContent = 'vias';
-        el.appendChild(titleEl);
-
-        const allViaZ = Array.from(vias.values());
-        const allViasBtn = makeBtn('All vias', allViaZ);
-        allViasBtn.classList.add('small');
-        el.appendChild(allViasBtn);
-
-        // 쌍 키 정렬: M1-M2, M2-M3, ...
-        const entries = Array.from(vias.entries()).sort((a,b)=>{
-          const pa = a[0].match(/M(\d+)-M(\d+)/i);
-          const pb = b[0].match(/M(\d+)-M(\d+)/i);
-          const ka = pa ? [parseInt(pa[1],10), parseInt(pa[2],10)] : [999,999];
-          const kb = pb ? [parseInt(pb[1],10), parseInt(pb[2],10)] : [999,999];
-          return (ka[0]-kb[0]) || (ka[1]-kb[1]) || a[0].localeCompare(b[0]);
-        });
-
-        for (const [pairKey, z] of entries) {
-          el.appendChild(makeBtn(pairKey, [z]));  // 예: "M2-M3"
         }
       }
     }
@@ -448,14 +401,7 @@
       const cellname = cellObj.cellname || "(unknown)";
       const libname  = cellObj.libname  || "(unknown)";
 
-      const Z = { 
-      bbox:0, 
-      subblock:10, 
-      mask:20, 
-      metal:30, 
-      via: 50,
-      pin:100, 
-      label:1000 };
+      const Z = { bbox:0, subblock:10, mask:20, metal:30, pin:40, label:1000 };
 
       function parseMetalIndex(layer=""){
         const L = String(layer).toLowerCase().replace(/\s+/g,"");
@@ -491,86 +437,6 @@
         });
       }
 
-      
-      // via 레이어(배열/문자열)에서 낮은/높은 metal 번호 추출
-      function parseViaPair(layer){
-        // layer 가 ["Metal2","Metal3"] 또는 "Metal2,Metal3" 등일 수 있음
-        let a = [], s = layer;
-        if (Array.isArray(layer)) a = layer;
-        else if (typeof layer === 'string') a = layer.split(/[,\s/+-]+/);
-        else return null;
-
-        const nums = a.map(parseMetalIndex).filter(n => Number.isInteger(n));
-        if (nums.length < 2) return null;
-        nums.sort((x,y)=>x-y);
-        return [nums[0], nums[1]];  // [lo, hi]
-      }
-
-      // via 쌍 표시용 키/라벨
-      function viaKey(layer){
-        const p = parseViaPair(layer);
-        return p ? `M${p[0]}-M${p[1]}` : 'via';
-      }
-
-      // via z: 금속 z 사이에 끼우기 (metalZ가 30,32,34… 식이라면 중간값)
-      function viaZ(layer){
-        const p = parseViaPair(layer);
-        if (!p) return Z.via;  // fallback
-        const zLo = metalZ(`metal${p[0]}`);
-        const zHi = metalZ(`metal${p[1]}`);
-        return Math.min(zLo, zHi) + (Math.abs(zHi - zLo) / 2); // 두 metal z의 중간
-      }
-
-      // via 색상: 쌍마다 다른 톤
-      function viaColor(layer){
-        const p = parseViaPair(layer);
-        if (!p) return "rgba(80,80,80,0.8)";
-        const [lo, hi] = p;
-        // 간단 팔레트 예시
-        const palette = {
-          'M1-M2': 'rgba(255,0,0,0.8)',
-          'M2-M3': 'rgba(0,0,255,0.8)',
-          'M3-M4': 'rgba(0,255,0,0.8)',
-          'M4-M5': 'rgba(255,51,153,0.8)'
-        };
-        return palette[`M${lo}-M${hi}`] || 'rgba(80,80,80,0.8)';
-      }
-
-      // via 크기(셀 좌표 단위) — 필요 시 쌍별로 다르게
-      function viaSize(layer){
-        const base = 60;
-        const p = parseViaPair(layer);
-        if (!p) return base;
-        const [lo, hi] = p;
-        // 예: 더 높은 레벨일수록 약간 크게
-        return base * (1 + (Math.max(lo,hi)-1)*0.1);
-      }
-
-      // 포인트 중심 사각형 via 추가
-      function pushViaAtPoint(pt, label, layer){
-        if (!Array.isArray(pt) || pt.length<2) return;
-        const size = viaSize(layer);
-        const ox = (pt[0] - size/2) * SCALE;
-        const oy = (pt[1] - size/2) * SCALE;
-        const w  = size * SCALE;
-        const h  = size * SCALE;
-
-        const meta = {
-          kind: "via",
-          layerPair: viaKey(layer),     // "M2-M3"
-          rawLayer: layer,              // 원본(배열/문자열)
-          z: viaZ(layer)
-        };
-        rectList.push([ox, -oy, w, -h, viaColor(layer), label, true, "via", meta]);
-        labelList.push({
-          x: ox+2, y: -(oy)-2, text: label,
-          font: "11px sans-serif", fill:"#111",
-          align:"left", baseline:"top",
-          z: Z.label, lz: meta.z, kind:"via"
-        });
-      }
-
-
       // 0) bbox
       if (Array.isArray(cellObj.bbox) && cellObj.bbox.length===2){
         const [p0,p1] = cellObj.bbox;
@@ -585,16 +451,6 @@
           const color = metalColor(m.layer);
           const label = `${m.layer || "Metal"} #${i}`;
           pushRectFromXY(m.xy, color, label, "metal", {layer:m.layer||"", z:metalZ(m.layer)});
-        });
-      }
-
-      // 1.5) vias  (예: [{xy:[x,y], layer:'via1', name:'V1'} ...])
-      // vias — YAML에서 layer가 ["Metal2","Metal3"] 형태
-      if (Array.isArray(cellObj.vias)) {
-        cellObj.vias.forEach((v, i) => {
-          const key = viaKey(v.layer);               // "M2-M3"
-          const name = v.name || key || `via#${i}`;  // 라벨
-          pushViaAtPoint(v.xy, name, v.layer);
         });
       }
 
