@@ -193,21 +193,26 @@ subblocks:
   libname: gpdk045_microtemplates_dense
   name: MN0
   pins:
-    D:
+    D0:
       bbox:
-      - [410, 490]
-      - [820, 490]
-      termName: D
-    G:
+      - [370, 235]
+      - [450, 595]
+      termName: D0
+    G0:
       bbox:
-      - [410, 790]
-      - [820, 790]
-      termName: G
-    RAIL:
+      - [320, 730]
+      - [500, 850]
+      termName: G0
+    S0:
       bbox:
-      - [0, 0]
-      - [1230, 0]
-      termName: RAIL
+      - [165, 235]
+      - [245, 595]
+      termName: S0
+    S1:
+      bbox:
+      - [575, 235]
+      - [655, 595]
+      termName: S1
   transform: R0
   xy: [0, 0]
 - bbox:
@@ -217,29 +222,46 @@ subblocks:
   libname: gpdk045_microtemplates_dense
   name: MP0
   pins:
-    D:
+    D0:
       bbox:
-      - [410, 1510]
-      - [820, 1510]
-      termName: D
-    G:
+      - [370, 235]
+      - [450, 595]
+      termName: D0
+    G0:
       bbox:
-      - [410, 1210]
-      - [820, 1210]
-      termName: G
-    RAIL:
+      - [320, 730]
+      - [500, 850]
+      termName: G0
+    S0:
       bbox:
-      - [0, 2000]
-      - [1230, 2000]
-      termName: RAIL
+      - [165, 235]
+      - [245, 595]
+      termName: S0
+    S1:
+      bbox:
+      - [575, 235]
+      - [655, 595]
+      termName: S1
   transform: MX
   xy: [0, 2000]
 vias:
-- layer: &id003 [Metal2, Metal3]
+- bbox:
+  - [205, 790]
+  - [205, 790]
+  layer: &id003 [Metal2, Metal3]
   xy: [205, 790]
-- layer: *id003
+- bbox:
+  - [205, 1210]
+  - [205, 1210]
+  layer: *id003
   xy: [205, 1210]
-- layer: *id003
+- bbox:
+  - [820, 490]
+  - [820, 490]
+  layer: *id003
   xy: [820, 490]
-- layer: *id003
+- bbox:
+  - [820, 1510]
+  - [820, 1510]
+  layer: *id003
   xy: [820, 1510]

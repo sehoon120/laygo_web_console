@@ -62,21 +62,31 @@ def export_to_webconsole(self, grids:list=[]):
                 dsn_dict['subblocks'].append(_sub_block)
         
         #Extract virtual instances
-        for _instName, _inst in self.virtual_instances.items():
-            if "NoName" in _instName: # via or other instances which is not sub-block -> maybe omitted in future
+        for vinst_name, vinst in self.virtual_instances.items():
+            if "NoName" in vinst_name: # via or other instances which is not sub-block -> maybe omitted in future
                 continue
             _sub_block = dict()
-            _sub_block['name'] = _instName
-            _sub_block['cellname'] = _inst.cellname
-            _sub_block['libname'] = _inst.libname
-            _sub_block['xy'] = _inst.xy.tolist()
-            _sub_block['bbox'] = _inst.bbox.tolist()
-            _sub_block['transform'] = _inst.transform
+            _sub_block['name'] = vinst_name
+            _sub_block['cellname'] = vinst.cellname
+            _sub_block['libname'] = vinst.libname
+            _sub_block['xy'] = vinst.xy.tolist()
+            _sub_block['bbox'] = vinst.bbox.tolist()
+            _sub_block['transform'] = vinst.transform
             _sub_block['pins'] = dict()
-            for _pinName, pin in _inst.pins.items():
-                _sub_block['pins'][_pinName] = dict()
-                _sub_block['pins'][_pinName]['termName'] = _pinName 
-                _sub_block['pins'][_pinName]['bbox'] = pin.bbox.tolist()
+            if vinst.libname == 'gpdk045_microtemplates_dense':
+                for _instName, velem in vinst.native_elements.items():
+                    if not isinstance(velem, Rect) and not isinstance(velem, Pin) and not velem.cellname in via_table:
+                        if "NoName" in _instName:
+                            continue
+                        _sub_block['pins'][_pinName] = dict()
+                        for _pinName, pin in velem.pins.items():
+                            _sub_block['pins'][_pinName]['termName'] = _pinName 
+                            _sub_block['pins'][_pinName]['bbox'] = pin.bbox.tolist()
+            else: 
+                for _pinName, pin in vinst.pins.items():
+                    _sub_block['pins'][_pinName] = dict()
+                    _sub_block['pins'][_pinName]['termName'] = _pinName 
+                    _sub_block['pins'][_pinName]['bbox'] = pin.bbox.tolist()
             dsn_dict['subblocks'].append(_sub_block)
 
         # export top metals

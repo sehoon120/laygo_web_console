@@ -6,6 +6,7 @@ FILENAME: test
 RUNDIR: /mnt/c/For_english_only_directories/LaygoWebConsole/laygo_web_console/jeyun/testbed
 Load templates
 webconsole mode
+/templates/test_logic_templates.yaml
 Load grids
 --------------------
 Creating inv_2x
