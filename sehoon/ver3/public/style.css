@@ -49,6 +49,26 @@ header nav a {
   font-weight: bold;
 }
 
+/* 전체 h2에 적용 */
+h2 {
+  font-family: "Arial", sans-serif;
+  font-weight: bold;   /* 글씨 두께 */
+  font-size: 20px;     /* 크기 */
+  color: #333;         /* 색상 */
+}
+
+span {
+  font-family: "Arial", sans-serif;
+  font-weight: bold;   /* 글씨 두께 */
+  font-size: 20px;     /* 크기 */
+  color: #333;         /* 색상 */
+}
+
+body {
+  font-family: "Arial", "Noto Sans KR", sans-serif;
+}
+
+
 /* ====================================================================== */
 /* 리스트 및 버튼 섹션 (기존 코드)                  */
 /* ====================================================================== */
