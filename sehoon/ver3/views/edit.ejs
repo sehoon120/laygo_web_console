@@ -652,13 +652,55 @@
         });
       }
 
-      // 1.5) vias  (예: [{xy:[x,y], layer:'via1', name:'V1'} ...])
-      // vias — YAML에서 layer가 ["Metal2","Metal3"] 형태
+      // // 1.5) vias  (예: [{xy:[x,y], layer:'via1', name:'V1'} ...])
+      // // vias — YAML에서 layer가 ["Metal2","Metal3"] 형태
+      // if (Array.isArray(cellObj.vias)) {
+      //   cellObj.vias.forEach((v, i) => {
+      //     const key = viaKey(v.layer);              // "M2-M3"
+      //     const name = v.name || key || `via#${i}`;  // 라벨
+      //     pushViaAtPoint(v.xy, name, v.layer);
+      //   });
+      // }
+
+      // - 새 형식: bbox가 점(= [pt]==[pt])이고 xy가 있음 → 점 중심 정사각형 via
+      // - 구 형식: bbox가 면적이 있는 직사각형 → 그 박스 그대로 렌더
+      // - 예외: bbox는 점인데 xy가 없을 때 → bbox의 점을 사용
       if (Array.isArray(cellObj.vias)) {
         cellObj.vias.forEach((v, i) => {
-          const key = viaKey(v.layer);              // "M2-M3"
-          const name = v.name || key || `via#${i}`;  // 라벨
-          pushViaAtPoint(v.xy, name, v.layer);
+          const key   = viaKey(v.layer);                   // "M2-M3" 또는 'via'
+          const label = v.name || key || `via#${i}`;
+
+          const hasBBox = Array.isArray(v.bbox) && v.bbox.length === 2
+                      && Array.isArray(v.bbox[0]) && Array.isArray(v.bbox[1]);
+          const hasXY   = Array.isArray(v.xy) && v.xy.length >= 2;
+
+          if (hasBBox) {
+            const [b0, b1] = v.bbox;
+            const dx = Math.abs(Number(b1[0]) - Number(b0[0]));
+            const dy = Math.abs(Number(b1[1]) - Number(b0[1]));
+
+            if (dx === 0 && dy === 0) {
+              // 점 via: xy가 있으면 xy를, 없으면 bbox의 점을 사용
+              const pt = hasXY ? v.xy : b0;
+              pushViaAtPoint(pt, label, v.layer);
+            } else {
+              // 구형: 직사각형 bbox 그대로 렌더 (kind='via', z는 금속 사이 중간값)
+              const meta = {
+                kind: "via",
+                layerPair: viaKey(v.layer),
+                rawLayer: v.layer,
+                z: viaZ(v.layer)
+              };
+              const color = viaColor(v.layer);
+              pushRectFromXY(v.bbox, color, label, "via", meta);
+            }
+          } else if (hasXY) {
+            // bbox가 없고 xy만 있는 경우
+            pushViaAtPoint(v.xy, label, v.layer);
+          } else {
+            // 좌표 정보가 전혀 없으면 스킵
+            console.warn("via skipped (no bbox/xy):", v);
+          }
         });
       }
 
