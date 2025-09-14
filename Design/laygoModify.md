@@ -172,3 +172,5 @@ laygo2.export_template(nat_temp, filename=export_path+libname+'_templates.yaml',
 
 - laygo2.interface.yaml.import_template() 수정
     + Webconsole 환경에서는 DB에서 template 읽어오도록 수정
+
+- start_bag_test.sh 추가(이후 단계에서 start_bag 대체) => 서버 옮기면 변수 WC 꼭 수정!!!

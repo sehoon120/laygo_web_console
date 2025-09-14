@@ -1,0 +1,194 @@
+[INFO] 실행 중: /mnt/c/For_english_only_directories/LaygoWebConsole/laygo_web_console/Implementation/temp_code/jeyunp_test_temp.py
+[DEBUG] 현재실행경로: 
+/mnt/c/For_english_only_directories/LaygoWebConsole/laygo_web_console/Implementation/server
+USERNAME: jeyunp
+FILENAME: test
+RUNDIR: /mnt/c/For_english_only_directories/LaygoWebConsole/laygo_web_console/Implementation/server
+Load templates
+webconsole mode
+/templates/test_logic_templates.yaml
+Load grids
+--------------------
+Creating inv_2x
+Create instances
+Create wires
+=========== SUPPLY RAIL GENERATION START ===========
+
+The number of rails of your design is 1.
+The number of pins of your design is 2.
+
+Name of Iterated net:
+0. "VSS"
+1. "VDD"
+
+============ SUPPLY RAIL GENERATION END ============
+Export design
+
+routing_23_mos
+<class 'laygo2.object.grid.routing.RoutingGrid'>
+[205 790]
+[1 3]
+80
+80
+<class 'list'>
+routing_23_mos
+<class 'laygo2.object.grid.routing.RoutingGrid'>
+[ 205 1210]
+[1 None]
+80
+80
+<class 'list'>
+routing_23_mos
+<class 'laygo2.object.grid.routing.RoutingGrid'>
+[410 490]
+[2 2]
+80
+80
+<class 'list'>
+routing_23_mos
+<class 'laygo2.object.grid.routing.RoutingGrid'>
+[ 410 1510]
+[2 None]
+80
+80
+<class 'list'>
+Output_temp_path/mnt/c/For_english_only_directories/LaygoWebConsole/laygo_web_console/Implementation/temp_yaml/jeyunp/test_logic/inv_2x.yaml
+webconsole mode
+--------------------
+Creating inv_4x
+Create instances
+Create wires
+=========== SUPPLY RAIL GENERATION START ===========
+
+The number of rails of your design is 1.
+The number of pins of your design is 2.
+
+Name of Iterated net:
+0. "VSS"
+1. "VDD"
+
+============ SUPPLY RAIL GENERATION END ============
+Export design
+
+routing_23_mos
+<class 'laygo2.object.grid.routing.RoutingGrid'>
+[205 790]
+[1 3]
+80
+80
+<class 'list'>
+routing_23_mos
+<class 'laygo2.object.grid.routing.RoutingGrid'>
+[ 205 1210]
+[1 None]
+80
+80
+<class 'list'>
+routing_23_mos
+<class 'laygo2.object.grid.routing.RoutingGrid'>
+[820 490]
+[4 2]
+80
+80
+<class 'list'>
+routing_23_mos
+<class 'laygo2.object.grid.routing.RoutingGrid'>
+[ 820 1510]
+[4 None]
+80
+80
+<class 'list'>
+Output_temp_path/mnt/c/For_english_only_directories/LaygoWebConsole/laygo_web_console/Implementation/temp_yaml/jeyunp/test_logic/inv_4x.yaml
+webconsole mode
+--------------------
+Creating inv_6x
+Create instances
+Create wires
+=========== SUPPLY RAIL GENERATION START ===========
+
+The number of rails of your design is 1.
+The number of pins of your design is 2.
+
+Name of Iterated net:
+0. "VSS"
+1. "VDD"
+
+============ SUPPLY RAIL GENERATION END ============
+Export design
+
+routing_23_mos
+<class 'laygo2.object.grid.routing.RoutingGrid'>
+[205 790]
+[1 3]
+80
+80
+<class 'list'>
+routing_23_mos
+<class 'laygo2.object.grid.routing.RoutingGrid'>
+[ 205 1210]
+[1 None]
+80
+80
+<class 'list'>
+routing_23_mos
+<class 'laygo2.object.grid.routing.RoutingGrid'>
+[1230  490]
+[6 2]
+80
+80
+<class 'list'>
+routing_23_mos
+<class 'laygo2.object.grid.routing.RoutingGrid'>
+[1230 1510]
+[6 None]
+80
+80
+<class 'list'>
+Output_temp_path/mnt/c/For_english_only_directories/LaygoWebConsole/laygo_web_console/Implementation/temp_yaml/jeyunp/test_logic/inv_6x.yaml
+webconsole mode
+--------------------
+Creating inv_8x
+Create instances
+Create wires
+=========== SUPPLY RAIL GENERATION START ===========
+
+The number of rails of your design is 1.
+The number of pins of your design is 2.
+
+Name of Iterated net:
+0. "VSS"
+1. "VDD"
+
+============ SUPPLY RAIL GENERATION END ============
+Export design
+
+routing_23_mos
+<class 'laygo2.object.grid.routing.RoutingGrid'>
+[205 790]
+[1 3]
+80
+80
+<class 'list'>
+routing_23_mos
+<class 'laygo2.object.grid.routing.RoutingGrid'>
+[ 205 1210]
+[1 None]
+80
+80
+<class 'list'>
+routing_23_mos
+<class 'laygo2.object.grid.routing.RoutingGrid'>
+[1640  490]
+[8 2]
+80
+80
+<class 'list'>
+routing_23_mos
+<class 'laygo2.object.grid.routing.RoutingGrid'>
+[1640 1510]
+[8 None]
+80
+80
+<class 'list'>
+Output_temp_path/mnt/c/For_english_only_directories/LaygoWebConsole/laygo_web_console/Implementation/temp_yaml/jeyunp/test_logic/inv_8x.yaml
+webconsole mode

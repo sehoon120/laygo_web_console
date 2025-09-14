@@ -1,6 +1,6 @@
 # C:\For_english_only_directories\LaygoWebConsole\bag_workspace_gpdk045\laygo3\laygo2\object\database.py Design 객체에 member function으로 추가
 # 바로 아래 Instance의 Pin 위치가 확인가능하도록 해야 함 => 수정되었지만 검증필요
-def export_to_webconsole(self, grids:list=[]):
+    def export_to_webconsole(self, grids:list=[]):
         """
         Return data for drawing layout(libname, cellname, subblocks, vias, pins, metals)
 
@@ -30,6 +30,7 @@ def export_to_webconsole(self, grids:list=[]):
         # generate via_table from grids
         via_table = dict()
         for _grid in grids:
+            print(_grid)
             for tvia in _grid.viamap.elements[0]:
                 via_table[tvia.cellname] = [_grid.hlayer[0][0], _grid.vlayer[0][0]]
 
@@ -78,8 +79,8 @@ def export_to_webconsole(self, grids:list=[]):
                     if not isinstance(velem, Rect) and not isinstance(velem, Pin) and not velem.cellname in via_table:
                         if "NoName" in _instName:
                             continue
-                        _sub_block['pins'][_pinName] = dict()
                         for _pinName, pin in velem.pins.items():
+                            _sub_block['pins'][_pinName] = dict()
                             _sub_block['pins'][_pinName]['termName'] = _pinName 
                             _sub_block['pins'][_pinName]['bbox'] = pin.bbox.tolist()
             else: 
