@@ -49,6 +49,26 @@ header nav a {
   font-weight: bold;
 }
 
+/* 전체 h2에 적용 */
+h2 {
+  font-family: "Arial", sans-serif;
+  font-weight: bold;   /* 글씨 두께 */
+  font-size: 20px;     /* 크기 */
+  color: #333;         /* 색상 */
+}
+
+span {
+  font-family: "Arial", sans-serif;
+  font-weight: bold;   /* 글씨 두께 */
+  font-size: 20px;     /* 크기 */
+  color: #333;         /* 색상 */
+}
+
+body {
+  font-family: "Arial", "Noto Sans KR", sans-serif;
+}
+
+
 /* ====================================================================== */
 /* 리스트 및 버튼 섹션 (기존 코드)                  */
 /* ====================================================================== */
@@ -361,3 +381,27 @@ hr {
   transform: translateY(-2px);
 }
 
+
+/* 세련된 텍스트 영역을 위한 스타일 */
+textarea.form-control {
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  padding: 12px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  min-height: 250px; /* 적당한 최소 높이 설정 */
+}
+
+textarea.form-control:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.15);
+}
+
+textarea.form-control::placeholder {
+  color: #aaa;
+  font-style: italic;
+}

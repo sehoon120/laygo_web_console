@@ -2,18 +2,12 @@
 
 <%- include('./include/_header') %>
 
-  <!-- 파일 목록으로 돌아가기 버튼 (왼쪽 상단) -->
-
-  <!-- ==================================================================================================== -->
-
-  <!-- Main -->
   <main id="site-main" class="container my-4">
     <a href="/main?path=<%= encodeURIComponent(currentPath) %>" class="back-button">
       <i class="fas fa-arrow-left"></i> 파일 목록
     </a>
     <div class="row">
 
-      <!-- 왼쪽 영역: 글 작성 -->
       <div class="col-md-6">
         <h2>
           <%= file.filename %>
@@ -21,33 +15,26 @@
         <form id="editForm" action="/main/<%= file._id %>/edit?_method=PUT&path=<%= encodeURIComponent(currentPath) %>"
           method="POST">
           <div class="mb-3">
-            <!-- textarea에 기본 file.content 값 채워넣기 -->
-            <textarea name="content" class="form-control" rows="48"
+            <textarea name="content" class="form-control" rows="43"
               placeholder="Write your code here"><%= file.content %></textarea>
           </div>
-          <!-- ✅ Generate 스위치 추가 -->
+          
           <div class="form-check form-switch mb-3">
             <input class="form-check-input" type="checkbox" id="generateSwitch" name="generate" value="on" form="editForm">
             <label class="form-check-label" for="generateSwitch">Generate (Save 후 실행)</label>
           </div>
 
-          <!-- ✅ Save 버튼 수정 -->
           <button type="submit" class="btn btn-primary" form="editForm">Save</button>
 
-          <!-- ✅ Layout Draw 버튼 분리 -->
           <button id="layoutDrawBtn" type="button" class="btn btn-secondary mt-2">Layout Draw</button>
 
-          <!-- <button type="submit" class="btn btn-primary">Save & Generate</button> -->
-        </form>
-        <!-- 저장 결과 메시지 출력 영역 -->
+          </form>
         <div id="message" class="mt-3"></div>
       </div>
 
-      <!-- 오른쪽 영역: 이미지 표시 및 추가 입력란 -->
       <div class="col-md-6">
         <h2>Layout</h2>
 
-        <!-- 오른쪽 상단에 입력란 추가 -->
         <div class="row">
           <div class="col-md-6">
             <div class="mb-3">
@@ -66,27 +53,17 @@
         </div>
 
         <div class="text-center">
-          <!-- 기존 이미지 대신 캔버스 추가 -->
           <canvas id="canvas" width="770" height="1080" style="border:1px solid #ccc; background:#fff;"></canvas>
         </div>
-        <!-- 레이어 토글 버튼들이 들어갈 자리 -->
         <div id="layerToggles" class="layer-toggles"></div>
       </div>
 
     </div>
 
-    <!-- 터미널 영역: 로그 파일 내용을 표시 -->
     <div id="terminal"
       style="background-color: black; color: lime; font-family: monospace; padding: 10px; height: 300px; overflow-y: auto; margin-top: 20px;">
-      <!-- 로그 내용이 여기에 표시됩니다 -->
-    </div>
+      </div>
   </main>
-  <!-- /Main -->
-
-
-  <!-- ==================================================================================================== -->
-
-  <!-- 캔버스 기능 관련 스크립트 추가 -->
   <script>
   document.addEventListener("DOMContentLoaded", function() {
 
@@ -142,7 +119,7 @@
     function drawOriginAxes() {
       const ctx = layoutState.ctx; if (!ctx) return;
       ctx.save();
-      ctx.strokeStyle = '#0077cc';
+      ctx.strokeStyle = '#000033'; // '#0077cc';
       ctx.lineWidth = 20;
       const LONG = 100000;
 
@@ -183,21 +160,27 @@
     }
 
     // ===================== 레이어 토글 UI =====================
-    function scanSceneForLayers(){
-      const byKind = new Map(), metals = new Map();
-      for (const r of R()){
+    function scanSceneForLayers() {
+      const byKind = new Map(), metals = new Map(), vias = new Map();
+      for (const r of R()) {
         const kind = r?.[7] || 'unknown';
         const meta = r?.[8] || {};
         const z = meta.z ?? 0;
-        if (!byKind.has(kind)) byKind.set(kind,new Set());
+
+        if (!byKind.has(kind)) byKind.set(kind, new Set());
         byKind.get(kind).add(z);
-        if (kind==='metal'){
-          const lname = (meta.layer||'').toString();
-          if (lname) metals.set(lname, z);
+
+        if (kind === 'metal' && meta.layer) {
+          metals.set(String(meta.layer), z);
+        }
+        if (kind === 'via') {
+          const k = meta.layerPair || 'via';
+          vias.set(String(k), z);
         }
       }
-      return { byKind, metals };
+      return { byKind, metals, vias };
     }
+
 
     function makeBtn(title, zValues){
       const btn = document.createElement('button');
@@ -218,50 +201,92 @@
       };
       return btn;
     }
-
+    
+    // 이 함수를 수정합니다
     function buildLayerToggles(containerId='layerToggles'){
-      const el = document.getElementById(containerId); if (!el) return;
-      el.innerHTML = '';
-      const { byKind, metals } = scanSceneForLayers();
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        el.innerHTML = '';
+        const { byKind, metals, vias } = scanSceneForLayers();
 
-      const order = ['bbox','subblock','mask','pin'];  // ,'metal'
-      order.forEach(kind=>{
-        if (!byKind.has(kind)) return;
-        const zs = Array.from(byKind.get(kind));
-        const titleEl = document.createElement('span');
-        titleEl.className='layer-group-title';
-        titleEl.textContent=kind;
-        el.appendChild(titleEl);
+        const order = ['bbox','subblock','pin'];
+        order.forEach(kind=>{
+            if (!byKind.has(kind)) return;
+            const zs = Array.from(byKind.get(kind));
+            
+            // 각 버튼 그룹을 위한 새로운 div를 생성합니다.
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'layer-toggles-row';
 
-        const allBtn = makeBtn('All', zs);
-        allBtn.classList.add('small');
-        el.appendChild(allBtn);
-        el.appendChild(document.createTextNode(' '));
-      });
+            const titleEl = document.createElement('span');
+            titleEl.className='layer-group-title';
+            titleEl.textContent=kind;
+            groupDiv.appendChild(titleEl);
 
-      el.appendChild(document.createElement('div'));
-
-      if (metals.size){
-        const titleEl = document.createElement('span');
-        titleEl.className='layer-group-title';
-        titleEl.textContent='metals';
-        el.appendChild(titleEl);
-
-        const allZ = Array.from(metals.values());
-        const allBtn = makeBtn('All metals', allZ);
-        allBtn.classList.add('small');
-        el.appendChild(allBtn);
-
-        const entries = Array.from(metals.entries()).sort((a,b)=>{
-          const na = parseInt(String(a[0]).match(/\d+/)?.[0]||'0',10);
-          const nb = parseInt(String(b[0]).match(/\d+/)?.[0]||'0',10);
-          return na-nb || String(a[0]).localeCompare(String(b[0]));
+            const allBtn = makeBtn('All', zs);
+            allBtn.classList.add('small');
+            allBtn.classList.add('wide-btn');
+            groupDiv.appendChild(allBtn);
+            
+            el.appendChild(groupDiv);
         });
-        for (const [lname,z] of entries){
-          el.appendChild(makeBtn(lname,[z]));
+
+        // "metals" 그룹을 새로운 줄에 추가
+        if (metals.size){
+            const metalsDiv = document.createElement('div');
+            metalsDiv.className = 'layer-toggles-row';
+            
+            const titleEl = document.createElement('span');
+            titleEl.className='layer-group-title';
+            titleEl.textContent='metals';
+            metalsDiv.appendChild(titleEl);
+
+            const allZ = Array.from(metals.values());
+            const allBtn = makeBtn('All metals', allZ);
+            allBtn.classList.add('small');
+            metalsDiv.appendChild(allBtn);
+            
+            const entries = Array.from(metals.entries()).sort((a,b)=>{
+                const na = parseInt(String(a[0]).match(/\d+/)?.[0]||'0',10);
+                const nb = parseInt(String(b[0]).match(/\d+/)?.[0]||'0',10);
+                return na-nb || String(a[0]).localeCompare(String(b[0]));
+            });
+            for (const [lname,z] of entries){
+                metalsDiv.appendChild(makeBtn(lname,[z]));
+            }
+            el.appendChild(metalsDiv);
         }
-      }
+
+        // "vias" 그룹을 새로운 줄에 추가
+        if (vias.size) {
+            const viasDiv = document.createElement('div');
+            viasDiv.className = 'layer-toggles-row';
+
+            const titleEl = document.createElement('span');
+            titleEl.className = 'layer-group-title';
+            titleEl.textContent = 'vias';
+            viasDiv.appendChild(titleEl);
+
+            const allViaZ = Array.from(vias.values());
+            const allViasBtn = makeBtn('All vias', allViaZ);
+            allViasBtn.classList.add('small');
+            viasDiv.appendChild(allViasBtn);
+
+            const entries = Array.from(vias.entries()).sort((a,b)=>{
+                const pa = a[0].match(/M(\d+)-M(\d+)/i);
+                const pb = b[0].match(/M(\d+)-M(\d+)/i);
+                const ka = pa ? [parseInt(pa[1],10), parseInt(pa[2],10)] : [999,999];
+                const kb = pb ? [parseInt(pb[1],10), parseInt(pb[2],10)] : [999,999];
+                return (ka[0]-kb[0]) || (ka[1]-kb[1]) || a[0].localeCompare(b[0]);
+            });
+
+            for (const [pairKey, z] of entries) {
+                viasDiv.appendChild(makeBtn(pairKey, [z]));
+            }
+            el.appendChild(viasDiv);
+        }
     }
+
 
     // ===================== 그리기 =====================
     function redraw(){
@@ -312,6 +337,31 @@
           ctx.fillText(celln,  rect[0] + 6, rect[1]-20);
           ctx.strokeText(libn,  rect[0] + 6, rect[1]-20 - 250);
           ctx.fillText(libn,  rect[0] + 6, rect[1]-20 - 250);
+        } else if (kind === 'subpin') {
+          const meta = rect[8] || {};
+          // 박스: 서브핀 전용 색
+          ctx.fillStyle = rect[4] || "rgba(255,165,0,0.45)";
+          ctx.fillRect(rect[0], rect[1], rect[2], rect[3]);
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = "rgba(0,0,0,0.6)";
+          ctx.strokeRect(rect[0], rect[1], rect[2], rect[3]);
+
+          // 텍스트: 검정 테두리 + 노란 글씨 (작게)
+          const k = (typeof ctx.getTransform === 'function') ? ctx.getTransform().a : 1;
+          const halo = Math.max(1, 2 / Math.max(k, 0.0001));
+          const label = meta.termName ? `${meta.instName}.${meta.termName}` : (rect[5] || "");
+
+          ctx.font = "120px Verdana";  // tti
+          ctx.textAlign = "left";
+          ctx.textBaseline = "top";
+          ctx.lineJoin = "round";
+          ctx.miterLimit = 2;
+          ctx.lineWidth = halo;
+          ctx.strokeStyle = "black";
+          ctx.fillStyle   = "yellow";
+
+          ctx.strokeText(label, rect[0] + 6, rect[1] + 6);
+          ctx.fillText(  label, rect[0] + 6, rect[1] + 6);
         } else if (kind === 'pin') {
           ctx.fillStyle = rect[4];
           ctx.fillRect(rect[0], rect[1], rect[2], rect[3]);
@@ -401,7 +451,15 @@
       const cellname = cellObj.cellname || "(unknown)";
       const libname  = cellObj.libname  || "(unknown)";
 
-      const Z = { bbox:0, subblock:10, mask:20, metal:30, pin:40, label:1000 };
+      const Z = { 
+      bbox:0, 
+      subblock:10, 
+      subpin:10,  // subblock의 pin
+      mask:20, 
+      metal:30, 
+      via: 50,
+      pin:100, 
+      label:1000 };
 
       function parseMetalIndex(layer=""){
         const L = String(layer).toLowerCase().replace(/\s+/g,"");
@@ -437,6 +495,146 @@
         });
       }
 
+      
+      // via 레이어(배열/문자열)에서 낮은/높은 metal 번호 추출
+      function parseViaPair(layer){
+        // layer 가 ["Metal2","Metal3"] 또는 "Metal2,Metal3" 등일 수 있음
+        let a = [], s = layer;
+        if (Array.isArray(layer)) a = layer;
+        else if (typeof layer === 'string') a = layer.split(/[,\s/+-]+/);
+        else return null;
+
+        const nums = a.map(parseMetalIndex).filter(n => Number.isInteger(n));
+        if (nums.length < 2) return null;
+        nums.sort((x,y)=>x-y);
+        return [nums[0], nums[1]];  // [lo, hi]
+      }
+
+      // via 쌍 표시용 키/라벨
+      function viaKey(layer){
+        const p = parseViaPair(layer);
+        return p ? `M${p[0]}-M${p[1]}` : 'via';
+      }
+
+      // via z: 금속 z 사이에 끼우기 (metalZ가 30,32,34… 식이라면 중간값)
+      function viaZ(layer){
+        const p = parseViaPair(layer);
+        if (!p) return Z.via;  // fallback
+        const zLo = metalZ(`metal${p[0]}`);
+        const zHi = metalZ(`metal${p[1]}`);
+        return Math.min(zLo, zHi) + (Math.abs(zHi - zLo) / 2); // 두 metal z의 중간
+      }
+
+      // via 색상: 쌍마다 다른 톤
+      function viaColor(layer){
+        const p = parseViaPair(layer);
+        if (!p) return "rgba(80,80,80,0.8)";
+        const [lo, hi] = p;
+        // 간단 팔레트 예시
+        const palette = {
+          'M1-M2': 'rgba(255,0,0,0.8)',
+          'M2-M3': 'rgba(0,0,255,0.8)',
+          'M3-M4': 'rgba(0,255,0,0.8)',
+          'M4-M5': 'rgba(255,51,153,0.8)'
+        };
+        return palette[`M${lo}-M${hi}`] || 'rgba(80,80,80,0.8)';
+      }
+
+      // via 크기(셀 좌표 단위) — 필요 시 쌍별로 다르게
+      function viaSize(layer){
+        const base = 60;
+        const p = parseViaPair(layer);
+        if (!p) return base;
+        const [lo, hi] = p;
+        // 예: 더 높은 레벨일수록 약간 크게
+        return base * (1 + (Math.max(lo,hi)-1)*0.1);
+      }
+
+      // 포인트 중심 사각형 via 추가
+      function pushViaAtPoint(pt, label, layer){
+        if (!Array.isArray(pt) || pt.length<2) return;
+        const size = viaSize(layer);
+        const ox = (pt[0] - size/2) * SCALE;
+        const oy = (pt[1] - size/2) * SCALE;
+        const w  = size * SCALE;
+        const h  = size * SCALE;
+
+        const meta = {
+          kind: "via",
+          layerPair: viaKey(layer),    // "M2-M3"
+          rawLayer: layer,             // 원본(배열/문자열)
+          z: viaZ(layer)
+        };
+        rectList.push([ox, -oy, w, -h, viaColor(layer), label, true, "via", meta]);
+        labelList.push({
+          x: ox+2, y: -(oy)-2, text: label,
+          font: "11px sans-serif", fill:"#111",
+          align:"left", baseline:"top",
+          z: Z.label, lz: meta.z, kind:"via"
+        });
+      }
+
+
+      // 교체: local XY(BBox) -> placed(absolute) XY(BBox)
+      // localXY: [[lx0,ly0],[lx1,ly1]]  (서브블록 로컬)
+      // instXY:  [tx, ty]               (인스턴스 배치 원점)
+      // instBBox:[[bx0,by0],[bx1,by1]]  (서브블록 bbox; 원점 보정용)
+      // tr: "R0" | "MX"
+      function placeChildBBox(localXY, instXY, instBBox, tr) {
+        if (!Array.isArray(localXY) || localXY.length !== 2) return null;
+
+        const [[lx0, ly0], [lx1, ly1]] = localXY;
+        const tx = +((instXY && instXY[0]) || 0);
+        const ty = +((instXY && instXY[1]) || 0);
+
+        // bbox 원점/높이
+        const bx0 = +((instBBox && instBBox[0] && instBBox[0][0]) || 0);
+        const by0 = +((instBBox && instBBox[0] && instBBox[0][1]) || 0);
+        const by1 = +((instBBox && instBBox[1] && instBBox[1][1]) || 0);
+        const H   = - by1 + by0; // ★ MX 보정에 반드시 필요 -> 더 테스트 필요
+
+        // 로컬을 bbox LL로 정규화
+        const x0n = lx0 - bx0, y0n = ly0 - by0;
+        const x1n = lx1 - bx0, y1n = ly1 - by0;
+
+        let x0w, y0w, x1w, y1w;
+        if (tr === "MX") {
+          // X는 그대로, Y는 'H - y'로 뒤집은 뒤 ty를 더한다.
+          x0w = tx + x0n;  y0w = ty + (H - y0n);  // ★ 기존: ty - y0n  (오류 원인)
+          x1w = tx + x1n;  y1w = ty + (H - y1n);
+        } else { // R0
+          x0w = tx + x0n;  y0w = ty + y0n;
+          x1w = tx + x1n;  y1w = ty + y1n;
+        }
+
+        // ll/ur 정렬
+        const llx = Math.min(x0w, x1w);
+        const lly = Math.min(y0w, y1w);
+        const urx = Math.max(x0w, x1w);
+        const ury = Math.max(y0w, y1w);
+
+        // console.log("llx");
+        // console.log(x0w);
+        // console.log(x1w);
+        // console.log(llx);
+        // console.log("lly");
+        // console.log(y0w);
+        // console.log(y1w);
+        // console.log(lly);
+        // console.log("urx");
+        // console.log(x0w);
+        // console.log(x1w);
+        // console.log(urx);
+        // console.log("ury");
+        // console.log(y0w);
+        // console.log(y1w);
+        // console.log(urx);
+
+        return [[llx, lly], [urx, ury]];
+      }
+
+
+
       // 0) bbox
       if (Array.isArray(cellObj.bbox) && cellObj.bbox.length===2){
         const [p0,p1] = cellObj.bbox;
@@ -451,6 +649,58 @@
           const color = metalColor(m.layer);
           const label = `${m.layer || "Metal"} #${i}`;
           pushRectFromXY(m.xy, color, label, "metal", {layer:m.layer||"", z:metalZ(m.layer)});
+        });
+      }
+
+      // // 1.5) vias  (예: [{xy:[x,y], layer:'via1', name:'V1'} ...])
+      // // vias — YAML에서 layer가 ["Metal2","Metal3"] 형태
+      // if (Array.isArray(cellObj.vias)) {
+      //   cellObj.vias.forEach((v, i) => {
+      //     const key = viaKey(v.layer);              // "M2-M3"
+      //     const name = v.name || key || `via#${i}`;  // 라벨
+      //     pushViaAtPoint(v.xy, name, v.layer);
+      //   });
+      // }
+
+      // - 새 형식: bbox가 점(= [pt]==[pt])이고 xy가 있음 → 점 중심 정사각형 via
+      // - 구 형식: bbox가 면적이 있는 직사각형 → 그 박스 그대로 렌더
+      // - 예외: bbox는 점인데 xy가 없을 때 → bbox의 점을 사용
+      if (Array.isArray(cellObj.vias)) {
+        cellObj.vias.forEach((v, i) => {
+          const key   = viaKey(v.layer);                   // "M2-M3" 또는 'via'
+          const label = v.name || key || `via#${i}`;
+
+          const hasBBox = Array.isArray(v.bbox) && v.bbox.length === 2
+                      && Array.isArray(v.bbox[0]) && Array.isArray(v.bbox[1]);
+          const hasXY   = Array.isArray(v.xy) && v.xy.length >= 2;
+
+          if (hasBBox) {
+            const [b0, b1] = v.bbox;
+            const dx = Math.abs(Number(b1[0]) - Number(b0[0]));
+            const dy = Math.abs(Number(b1[1]) - Number(b0[1]));
+
+            if (dx === 0 && dy === 0) {
+              // 점 via: xy가 있으면 xy를, 없으면 bbox의 점을 사용
+              const pt = hasXY ? v.xy : b0;
+              pushViaAtPoint(pt, label, v.layer);
+            } else {
+              // 구형: 직사각형 bbox 그대로 렌더 (kind='via', z는 금속 사이 중간값)
+              const meta = {
+                kind: "via",
+                layerPair: viaKey(v.layer),
+                rawLayer: v.layer,
+                z: viaZ(v.layer)
+              };
+              const color = viaColor(v.layer);
+              pushRectFromXY(v.bbox, color, label, "via", meta);
+            }
+          } else if (hasXY) {
+            // bbox가 없고 xy만 있는 경우
+            pushViaAtPoint(v.xy, label, v.layer);
+          } else {
+            // 좌표 정보가 전혀 없으면 스킵
+            console.warn("via skipped (no bbox/xy):", v);
+          }
         });
       }
 
@@ -487,12 +737,52 @@
             align:"left", baseline:"top", z:Z.label, lz:Z.subblock, kind:"subblock" });
           L().push({ x:ox+2, y:-(oy)-16, text:`Lib: ${instLib}, Cell: ${instCell}`, font:"11px sans-serif", fill:"#444",
             align:"left", baseline:"top", z:Z.label, lz:Z.subblock, kind:"subblock" });
+
+          
+          if (sb.pins && typeof sb.pins === 'object') {
+            for (const [termName, pinObj] of Object.entries(sb.pins)) {
+              const localXY = pinObj.bbox;
+              if (!Array.isArray(localXY) || localXY.length !== 2) continue;
+
+              // 로컬 → 배치 좌표 변환 (네가 써둔 placeChildBBox 사용)
+              const placedXY = placeChildBBox(localXY, xy, bbox, tr);
+              if (!placedXY) continue;
+
+              // subpin은 서브블록과 같이 토글되도록 z = Z.subpin(=10)
+              const label = `${instName}.${termName}`;
+              pushRectFromXY(
+                placedXY,
+                "rgba(255,165,0,0.45)",        // 박스 색: 주황 반투명 (원하면 바꿔도 됨)
+                label,
+                "subpin",                      // ← kind를 subpin으로
+                {
+                  instName, instLib, instCell,
+                  termName,
+                  z: Z.subpin,
+                  kindHint: "subpin"
+                }
+              );
+
+              // (선택) 라벨 엔트리 별도로도 넣고 싶다면:
+              labelList.push({
+                x: placedXY[0][0]*SCALE + 4,
+                y: -(placedXY[0][1]*SCALE) - 4,
+                text: termName,
+                font: "12px sans-serif",
+                fill: "#111",
+                align: "left",
+                baseline: "bottom",
+                z: Z.label, lz: Z.subpin, kind: "subpin"
+              });
+            }
+          }
+
         });
       }
 
       // 4) HUD 라벨
       L().push({ x:10, y:10, text:`cellname: ${cellname}`, font:"bold 14px sans-serif", fill:"#111", align:"left", baseline:"top", z:Z.label });
-      L().push({ x:10, y:28, text:`libname: ${libname}`,   font:"12px sans-serif",      fill:"#333", align:"left", baseline:"top", z:Z.label });
+      L().push({ x:10, y:28, text:`libname: ${libname}`,   font:"12px sans-serif",       fill:"#333", align:"left", baseline:"top", z:Z.label });
 
       // === 모두 채웠다면: 줌-투-핏 후 이벤트 알림 ===
       ensureInit();
@@ -580,7 +870,7 @@
           // 캔버스 데이터 초기화 후 build & draw
           layoutState.rectList.length = 0;
           layoutState.labelList.length = 0;
-          buildMap_ver2(cellObj);   // 내부에서 zoomToFit + layout:ready 발생
+          buildMap_ver2(cellObj);  // 내부에서 zoomToFit + layout:ready 발생
         } else {
           msgEl.innerText = result?.message || '⚠️ Layout Draw 실패';
         }
@@ -641,7 +931,5 @@
 
 
   
-
-  <!-- ==================================================================================================== -->
 
   <%- include('./include/_footer') %>
