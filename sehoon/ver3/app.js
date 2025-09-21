@@ -35,7 +35,7 @@ app.use(session({
     secret: 'your-secret-key',  // 비밀 키는 임의로 지정
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }   // 실제 운영환경에서는 https 사용 시 secure:true로 변경
+    cookie: { secure: true}  // false }   // 실제 운영환경에서는 https 사용 시 secure:true로 변경
 }));
 
 
@@ -50,25 +50,25 @@ app.use('/main', authenticateJWT);
 app.use('/main', require('./routes/fileRoutes'));
 
 
-app.use((req, res, next) => {       // 에러 페이지
-    res.render('404');
-    next();
-});
-// app.use((req, res, next) => {
-//   if (req.accepts('html')) {
-//     res.status(404).render('404');
-//   } else if (req.accepts('json')) {
-//     res.status(404).json({ success: false, message: 'Not Found' });
-//   } else {
-//     res.status(404).type('txt').send('404 Not Found');
-//   }
+// app.use((req, res, next) => {       // 에러 페이지
+//     res.render('404');
+//     next();
 // });
-
-
-app.listen(3000, () => {
-    console.log('server is running');
+app.use((req, res) => {
+  if (req.accepts('html')) return res.status(404).render('404');
+  if (req.accepts('json')) return res.status(404).json({ success:false, message:'Not Found' });
+  return res.status(404).type('txt').send('404 Not Found');
 });
 
+// app.listen(3000, () => {
+//     console.log('server is running');
+// });
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`server is running on http://0.0.0.0:${PORT}`);
+});
+
+// 헬스체크 (서버 살아있는지 간단 확인)
+app.get('/healthz', (req, res) => res.status(200).send('ok'));
 
 
 // app.get('/', (req, res) => {
