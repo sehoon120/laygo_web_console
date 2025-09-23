@@ -202,7 +202,6 @@ def export(
         )
     elif target == 'webconsole':  # webconsole export
         consoleUsername = os.environ['LAYGO_USERNAME']
-        consoleFilepath = os.environ['LAYGO_BASENAME']
         
         return webconsole.export(
             db=db,
