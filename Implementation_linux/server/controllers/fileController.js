@@ -14,6 +14,7 @@ const os = require('os');
 const tempYamlDir = path.join(__dirname, '../../temp_yaml');
 const yaml = require('js-yaml');
 const { spawn } = require('child_process');
+const { getSystemErrorMap } = require('util');
 
 // ==================================================
 
@@ -32,6 +33,7 @@ const getAllContacts = asyncHandler(async (req, res) => {
         console.error(err);
         res.status(500).send('파일 데이터를 불러오는 중 오류가 발생했습니다.');
     });
+    
 });
 
 // ==================================================
@@ -193,7 +195,7 @@ const saveFile = asyncHandler(async (req, res) => {
 
   // 임시 코드 파일(Ubuntu 경로)
   const tempFile = path.join(tempCodeDir, `${username}_${baseName}_temp.py`);
-  fs.writeFileSync(tempFileWin, content, 'utf8');
+  fs.writeFileSync(tempFile, content, 'utf8');
 
   // YAML 경로 설정
   if (!fs.existsSync(tempYamlRoot)) fs.mkdirSync(tempYamlRoot, { recursive: true });
@@ -208,12 +210,12 @@ const saveFile = asyncHandler(async (req, res) => {
   const runDir = path.join(__dirname, '..');
 
   // 2) 스크립트 실행 (spawn 권장)
-  const scriptWSL = `/WORK_jupiter/jypark/bag_workspace_gpdk045/start_bag_test.sh`;
+  const scriptWSL = process.env.LAYGO_DIR + '/start_bag_test.sh';
   const cmd = 'bash';
   // -lc: 로그인 쉘 + 명령 문자열, 인자에 공백 안전하게 따옴표
   const args = [
     '-lc',
-    `"${scriptWSL}" "${username}" "${baseName}" "${tempFile.replace}" "${runDir}"`
+    `"${scriptWSL}" "${username}" "${baseName}" "${tempFile}" "${runDir}"`
   ];
   const child = spawn(cmd, args, { shell: false });
 
@@ -224,7 +226,7 @@ const saveFile = asyncHandler(async (req, res) => {
 
   child.on('close', async (code) => {
     // 임시 파일 제거 (실패해도 진행)
-    fs.unlink(tempFileWin, () => {});
+    fs.unlink(tempFile, () => {});
     if (code !== 0) {
       console.log(`Process exited with code ${code}`);
       return res.status(500).json({ success: false, error: stderr || `Process exited with code ${code}` });

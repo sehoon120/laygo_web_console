@@ -1,0 +1,63 @@
+[INFO] 실행 중: /WORK/laygo_web_console/Implementation_linux/temp_code/jeyunp_inv_temp.py
+[DEBUG] 현재실행경로: 
+/WORK/laygo_web_console/Implementation_linux/server
+USERNAME: jeyunp
+FILENAME: inv
+RUNDIR: /WORK/laygo_web_console/Implementation_linux/server
+CODE_PATH: /WORK/laygo_web_console/Implementation_linux/temp_code/jeyunp_inv_temp.py
+Load templates
+Load grids
+--------------------
+Creating inv_2x
+Create instances
+Create wires
+=========== SUPPLY RAIL GENERATION START ===========
+
+The number of rails of your design is 1.
+The number of pins of your design is 2.
+
+Iterated nets:
+0. "VSS"
+1. "VDD"
+
+============ SUPPLY RAIL GENERATION END ============
+Export design
+
+webconsole mode
+Database(MongoClient(host=['cluster0-shard-00-00.cpd1e.mongodb.net:27017', 'cluster0-shard-00-01.cpd1e.mongodb.net:27017', 'cluster0-shard-00-02.cpd1e.mongodb.net:27017'], document_class=dict, tz_aware=False, connect=True, authsource='admin', replicaset='atlas-idpcf5-shard-0', tls=True), 'MyContacts')
+Traceback (most recent call last):
+  File "/WORK/laygo_web_console/Implementation_linux/temp_code/jeyunp_inv_temp.py", line 101, in <module>
+    laygo2.export_template(nat_temp, filename=f"{export_path}{libname}_templates.yaml", mode='append')
+  File "/WORK/bag_workspace_gpdk045/laygo2/laygo2/interface/core.py", line 330, in export_template
+    yaml.export_template(template=template, filename=filename, mode=mode, export_mask=export_mask, export_prelvs_info=export_prelvs_info, export_internal_shapes=export_internal_shapes)
+  File "/WORK/bag_workspace_gpdk045/laygo2/laygo2/interface/yaml.py", line 162, in export_template
+    testdb.files.insert_one({'user': username, 'filetype': 'yaml', 'filename': filename, 'filePath': filePath, 'content':""})
+  File "/home/jeyunp/.local/lib/python3.12/site-packages/pymongo/synchronous/collection.py", line 891, in insert_one
+    self._insert_one(
+  File "/home/jeyunp/.local/lib/python3.12/site-packages/pymongo/synchronous/collection.py", line 831, in _insert_one
+    self._database.client._retryable_write(
+  File "/home/jeyunp/.local/lib/python3.12/site-packages/pymongo/synchronous/mongo_client.py", line 2082, in _retryable_write
+    return self._retry_with_session(retryable, func, s, bulk, operation, operation_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jeyunp/.local/lib/python3.12/site-packages/pymongo/synchronous/mongo_client.py", line 1968, in _retry_with_session
+    return self._retry_internal(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jeyunp/.local/lib/python3.12/site-packages/pymongo/_csot.py", line 125, in csot_wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jeyunp/.local/lib/python3.12/site-packages/pymongo/synchronous/mongo_client.py", line 2014, in _retry_internal
+    ).run()
+      ^^^^^
+  File "/home/jeyunp/.local/lib/python3.12/site-packages/pymongo/synchronous/mongo_client.py", line 2765, in run
+    return self._read() if self._is_read else self._write()
+                                              ^^^^^^^^^^^^^
+  File "/home/jeyunp/.local/lib/python3.12/site-packages/pymongo/synchronous/mongo_client.py", line 2897, in _write
+    return self._func(self._session, conn, self._retryable)  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jeyunp/.local/lib/python3.12/site-packages/pymongo/synchronous/collection.py", line 829, in _insert_command
+    _check_write_command_response(result)
+  File "/home/jeyunp/.local/lib/python3.12/site-packages/pymongo/helpers_shared.py", line 322, in _check_write_command_response
+    _raise_last_write_error(write_errors)
+  File "/home/jeyunp/.local/lib/python3.12/site-packages/pymongo/helpers_shared.py", line 293, in _raise_last_write_error
+    raise WriteError(error.get("errmsg"), error.get("code"), error)
+pymongo.errors.WriteError: db already exists with different case already have: [myContacts] trying to create [MyContacts], full error: {'index': 0, 'code': 13297, 'errmsg': 'db already exists with different case already have: [myContacts] trying to create [MyContacts]'}

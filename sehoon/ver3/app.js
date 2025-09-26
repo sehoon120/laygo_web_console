@@ -8,6 +8,9 @@ const cookieParser = require('cookie-parser');
 
 const app = express();
 
+const PORT = parseInt(process.env.PORT || '3000', 10);
+const HOST = process.env.HOST || '0.0.0.0';
+
 // app.use((req, res, next) => {
 //   console.log("🧭 Incoming request:", req.method, req.originalUrl);
 //   next();
@@ -18,6 +21,7 @@ app.set('view engine', 'ejs');
 app.set('views', './views');
 
 app.use(express.static('./public'));
+// app.use('/public', express.static('./public'));
 
 app.use(methodOverride('_method'));
 
@@ -35,7 +39,8 @@ app.use(session({
     secret: 'your-secret-key',  // 비밀 키는 임의로 지정
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: true}  // false }   // 실제 운영환경에서는 https 사용 시 secure:true로 변경
+    // cookie: { secure: true}  // false }   // 실제 운영환경에서는 https 사용 시 secure:true로 변경
+    cookie: { httpOnly: true, sameSite: 'lax', secure: false }
 }));
 
 
@@ -48,6 +53,10 @@ const authenticateJWT = require('./middlewares/JWT');
 app.use('/main', authenticateJWT);
 
 app.use('/main', require('./routes/fileRoutes'));
+
+
+// 헬스체크 (서버 살아있는지 간단 확인)
+app.get('/healthz', (req, res) => res.status(200).send('ok'));
 
 
 // app.use((req, res, next) => {       // 에러 페이지
@@ -63,12 +72,10 @@ app.use((req, res) => {
 // app.listen(3000, () => {
 //     console.log('server is running');
 // });
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`server is running on http://0.0.0.0:${PORT}`);
-});
 
-// 헬스체크 (서버 살아있는지 간단 확인)
-app.get('/healthz', (req, res) => res.status(200).send('ok'));
+app.listen(PORT, HOST, () => {
+  console.log(`server is running on http://${HOST}:${PORT}`);
+});
 
 
 // app.get('/', (req, res) => {
