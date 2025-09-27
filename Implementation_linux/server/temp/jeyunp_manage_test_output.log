@@ -1,10 +1,10 @@
-[INFO] 실행 중: /WORK/laygo_web_console/Implementation_linux/temp_code/jeyunp_inv_temp.py
+[INFO] 실행 중: /WORK/laygo_web_console/Implementation_linux/temp_code/jeyunp_manage_test_temp.py
 [DEBUG] 현재실행경로: 
 /WORK/laygo_web_console/Implementation_linux/server
 USERNAME: jeyunp
-FILENAME: inv
+FILENAME: manage_test
 RUNDIR: /WORK/laygo_web_console/Implementation_linux/server
-CODE_PATH: /WORK/laygo_web_console/Implementation_linux/temp_code/jeyunp_inv_temp.py
+CODE_PATH: /WORK/laygo_web_console/Implementation_linux/temp_code/jeyunp_manage_test_temp.py
 Load templates
 webconsole mode
 /templates/test_logic_templates.yaml

@@ -1,0 +1,83 @@
+전체 시스템은 세 가지로 나누어 생각 가능
+1) 로그인 및 계정 관리 기능
+2) 파일 관리 기능
+3) 스크립트 실행 및 출력 기능
+
+1. 로그인 및 계정 관리 기능: 테스트 완료
+로그인 기능: 잘못된 아이디/비밀번호 입력 및 입력 없이 로그인 시도
+계정 생성 관련: 잘못된 인증코드 넣어보기
+
+로그인테스트
+test1) 입력 없이 로그인 -> 로그인 안 됨: 정상   /  로그인 실패 시 처음 페이지로 리다이렉트되게 수정해도 좋을 것 같다.
+test2) 틀린 아이디+비밀번호 입력 x -> 정상
+test3) 존재하는 아이디+비밀번호 입력 x -> 정상
+test4) 아이디 입력 x + 비밀번호 입력(무작위) -> 정상
+test5) 존재하는 아이디 입력 + 비밀번호 입력 틀림 -> 정상
+
+사용자등록테스트
+test1) 아무 입력 없이 사용자 등록 -> 사용자 등록이 안 되지만, 사용자는 내부 에러가 발생했다고만 표시되는 화면을 보게 됨.
+test2) 아이디만 입력 후 등록 시도 -> 위와 같은 결과
+test3) 비밀번호만 입력 후 등록 시도-> 사용자 등록이 안 되며, Register failed라는 문구 뜸.(좋음)
+test4) 아이디/비번 입력 후 등록 시도-> 사용자 등록이 안 되며, Register failed라는 문구 뜸.(좋음)
+test5) 아이디/비번 비밀번호 확인 입력 후(이메일 인증 x) 등록 시도 -> 사용자 등록이 안 되지만, 사용자는 내부 에러가 발생했다고만 표시되는 화면을 보게 됨.
+test6) 다른 field 채우지 않고 인증만 누름 -> 사용자 입장에서는 아무런 변화 없음(좋음)
+test7) 같은 이메일로 인증 시도  -> 등록 안 됨, 그러나 사용자 입장에서는 internal server error라고만 떠서 뭐가 문제인지 알 수 없음(Server Console에서는 MongoServerError 발생)
+test8) 비밀번호 확인만 틀린 경우 -> Register failed라는 문구 뜸(좋음)
+
+*전반적으로 좋으나 Register 실패 이유를 알려주면 편의성 향상에 도움이 될 것 같다. Internal server error라고만 표시되는 것은 꼭 수정 필요
+
+
+2. 파일 관리 기능
+Input: 페이지 내 버튼 및 입력 폼을 통해 이루어지는 파일 업로드, 삭제, 수정 기능
+Output: 없음
+파일 메타데이터 수정
+test1) filename에 /넣어보기 -> 파일 생성 자체는 잘 됨. 그러나 여기에 스크립트 넣고 실행 시 동작 (당연히)안 됨. 따라서, 수정 페이지에 파일 이름에 /를 넣지 말 것을 적거나 생성을 막아야 할 필요성이 있음
+test2) filetype에 / 넣어보기 -> 저장 잘 됨, generate 동작함(generate) 안 되게 막아야하는거 아닌가?) / log 출력 안 됨
+test3) filepath 지워보기 -> Internal server error 발생: 얘도 사용자는 왜 에러가 발생했는지 모르게 됨
+test4) filetype에 경로 넣기(/asdf.py) -> 저장은 잘 되고, generate 됨  /log 출력 안 됨
+test5) 빈 filetype -> 저장이 되고, generate도 됨.       /log 출력 안 됨
+test6) filename에 경로 넣기(test/test) -> 저장은 잘 되나 generate 안 됨 / log 출력 안 됨(스크립트 경로 자체를 못 찾아서 laygo 실행까지 못 감)
+test7) 빈 filename -> 에러 발생
+test8) 파일이름에 확장자 넣기(test.py) -> 실제로 generate가 됨 / 그러나 log 출력은 안 됨
+
+-add file에서도 메타데이터 수정과 같은 테스트 수행
+test1) 결과 동일
+test2) 결과 동일
+test3) 여기서는 그러한 테스트 불가(filepath 입력 불가능)
+test4) 결과 동일
+test5) 파일 생성 안 됨(이게 좋은건지 나쁜건지?? -> 확장자 없는 파일도 있으니 일단 생성은 되게 해야 하나?)
+test6) 결과 동일
+test7) 결과 동일
+test8) 결과 동일
+
+
+-디렉터리의 파일타입을 python 등으로 바꿔보고, 이때 하위 파일들이 어떻게 되는지, edit 시도 시 어떻게 되는지 확인. 또, 이름 변경해보기.
+test1) 아무것도 없는 디렉터리의 파일 타입 변경 -> 정상
+test2) 뭔가 들어있는 디렉터리의 파일 타입 변경 -> 하위 파일들에 접근할 수 없게 됨 => 애초에 directory와 일반 파일의 전환이 가능하도록 열어놓는게 맞나?
+test3) 일반 파일을 디렉터리 전환 후 다시 일반 파일로 전환 -> 데이터 보존됨(정상)
+test4) 뭔가 들어있는 디렉터리 이름 변경 -> 하위 파일 남아 있음(정상)
+
+-디렉터리 삭제 관련: Implementation 과정에서 이미 확인함
+
+수정 필요 내역
+-filename에 /포함을 막아야 함
+-py 확장자가 아니면 생성이 안 되게 막는게 맞을듯함. 또 이때 사용자에게 파일명에 확장자를 넣으면 안 된다는 사실을 명확히 알려주는게 좋아보임.
+-디렉터리 삭제 시 들어 있는 파일들도 다 삭제되게 하는게 맞는듯함.
+
+3. 스크립트 실행 기능
+I/O: 스크립트 전체. 그러나 여기서 실제로 의미있는 입력은 template import이고, 의미 있는 output은 webconsole로 내보내기, template export라고 볼 수 있음.
+-> import_template(filename = ~~)
+    => Filename에 malfunction한 input 줘보기
+    test1) 존재하지 않는 template file경로 넣기   -> 에러 발생(정상동작)
+    test2) 경로에서 최상위 디렉터리 / 표시 제외하고 수행(예를 들어 root 아래에 templates라는 디렉터리 있을 시 '/templates/file.type'이 아닌 'templates/file.type줌') : 경로 에러 발생(의도한 것은 맞으나 이게 좋은것인지 생각 필요)
+-> export(lib, tech=tech, target='webconsole')
+    => target 수정을 고려할 수 있으나, 원칙적으로 target을 webconsole 이외의 값으로 주었을 경우에는 오류가 발생하는 것이 당연함(webconsole에서 출력물을 보기 위해서 export 하는 것이므로). 따라서 테스트 안함.
+-> export_template(nat_temp, filename=f"{export_path}{libname}_templates.yaml", mode='append')
+    => filename을 잘못된 값으로 줘보기. 근데 잘못된 값이란게 있을 수 있나...? 어쨌거나 새로운 경로가 주어졌을 때 거기가 어디든 파일 생겨야 함
+    test1) "/test_template.yaml" 사용 시 안됨. 반드시 수정 필요!
+
+큰 파일 돌려보기: dff나 and 등 뽑아보자(golden code 가져와서 해보기)
+-> 일단 위에 템플릿 안 생기는 문제부터 해결하고 테스트하겠음
+
+수정 필요 내역
+일단 위에 출력 왠지 모르게 새로운 파일에 안됨. export 해서 generated_drawing_yamls 밑에 생기는건 잘 됨.
