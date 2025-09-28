@@ -68,6 +68,12 @@ body {
   font-family: "Arial", "Noto Sans KR", sans-serif;
 }
 
+/* 공통 메시지 박스는 기본적으로 보이게 */
+.msg-box { opacity: 1; transition: opacity .5s; }
+/* 저장용(#message-save)만 페이드아웃 대상 */
+#message-save.fade-out { opacity: 0; }
+/* 드로우용은 항상 보이게 (혹시 전역 규칙이 있으면 이걸로 덮어쓰기) */
+#message-draw { opacity: 1 !important; }
 
 /* ====================================================================== */
 /* 리스트 및 버튼 섹션 (기존 코드)                  */

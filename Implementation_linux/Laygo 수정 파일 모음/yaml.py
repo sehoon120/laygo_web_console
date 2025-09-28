@@ -149,7 +149,6 @@ def export_template(
 
             if yamlFile is not None:
                 db = yaml.load(yamlFile['content'], Loader=yaml.FullLoader)
-                print("yamlFile not none")
             else:
                 dummy_string = f"{libname}:\n"
                 dummy_string += f"    dummy:\n"
@@ -162,7 +161,6 @@ def export_template(
                 dummy_string += f"        libname: {libname}\n"
                 db = yaml.safe_load(dummy_string)
                 testdb.files.insert_one({'user': username, 'filetype': 'yaml', 'filename': filename, 'filePath': filePath, 'content':"", 'updatedAt': datetime.datetime.now(tz=tz)})
-                print("yamlFile none")
 
         if libname not in db:
             db[libname] = dict()

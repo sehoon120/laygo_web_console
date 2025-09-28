@@ -24,7 +24,7 @@ Iterated nets:
 Export design
 
 webconsole mode
-yamlFile none
+yamlFile not none
 --------------------
 Creating inv_4x
 Create instances

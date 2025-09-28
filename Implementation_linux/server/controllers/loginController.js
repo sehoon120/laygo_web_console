@@ -40,17 +40,31 @@ const getRegister = (req, res) => {
 // POST register user
 const registerUser = asyncHandler(async(req, res) => {
     const {username, password, password2, email, num} = req.body;
-    if (password === password2) {
+    console.log('username: '+username);
+    console.log(password);
+    console.log(password2);
+    console.log(email);
+    if(username == '' || password == '' || password2 == '' || email == '') {
+      res.send("Register Failed: 입력 필드를 모두 채워주세요");
+    } else{
+      if (password === password2) {
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await User.create( { username, password: hashedPassword, email});
+        try{
+          const user = await User.create( { username, password: hashedPassword, email});
+        }
+        catch(err){
+          res.send("Register Failed: 이름 혹은 이메일 중복");
+        }
         // res.json( {message: "Register successed", user});
         // req.session.username = username;
         // req.session.password = hashedPassword;
         // req.session.email = email;
         res.redirect('/');
-    } else {
-        res.send("Register Failed");
+      } else {
+          res.send("Register Failed: 비밀번호 확인 틀림");
+      }
     }
+    
 });
 // alpha    1234
 
@@ -84,28 +98,36 @@ const sendVerificationEmail = async (req, res) => {
 
 
 const verifyEmailCode = (req, res) => {
-    const { email, code } = req.body;
-    
-    // 세션에 저장된 인증 코드와 이메일이 존재하는지 확인합니다.
-    if (req.session.verificationCode && req.session.verificationEmail) {
-      // 세션에 저장된 이메일과 코드가 클라이언트에서 전송된 값과 일치하는지 확인합니다.
-      if (
-        req.session.verificationEmail === email &&
-        req.session.verificationCode.toString() === code
-      ) {
-        // 인증 성공 시 세션에 저장된 인증 정보를 삭제합니다.
-        delete req.session.verificationCode;
-        delete req.session.verificationEmail;
-        return res.json({ success: true, message: '이메일 인증 성공' });
-      } else {
-        // 인증 정보가 일치하지 않을 경우 에러를 반환합니다.
-        return res.status(400).json({ success: false, message: '인증 코드가 올바르지 않습니다.' });
-      }
-    } else {
-      // 세션에 인증 코드가 없거나 만료된 경우
-      return res.status(400).json({ success: false, message: '인증 코드가 만료되었거나 존재하지 않습니다.' });
-    }
-  };
+  let { email, code } = req.body;
+  // console.log(code);
+  // console.log(req.session.verificationCode);
+  email = String(email || '').trim().toLowerCase();
+  code  = String(code  || '').trim();
+
+  if (!req.session.verificationCode || !req.session.verificationEmail) {
+    return res.status(400).json({ success:false, message:'인증 코드가 만료되었거나 존재하지 않습니다.' });
+  }
+  if (req.session.verificationEmail !== email) {
+    return res.status(400).json({ success:false, message:'요청한 이메일과 다릅니다.' });
+  }
+  if (String(req.session.verificationCode) !== code) {
+    return res.status(400).json({ success:false, message:'인증 코드가 올바르지 않습니다.' });
+  }
+
+  // ✅ 인증 성공 → 가입 허용 플래그
+  req.session.emailVerified = true;
+  req.session.verifiedEmail = email;
+
+  // (선택) 일회성 코드 정리
+  delete req.session.verificationCode;
+  delete req.session.verificationEmail;
+
+  // 저장 보장 후 응답
+  return req.session.save(() => {
+    return res.json({ success:true, message:'이메일 인증 성공' });
+  });
+};
+
   
 
 

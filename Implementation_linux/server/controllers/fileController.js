@@ -50,6 +50,10 @@ const createContact = asyncHandler(async (req, res) => {
     if (!filename || !filetype) {
         return res.send('essential data is not written');
     }
+    //잘못된 name 입력 필터링
+    if(/.*\..*/.test(filename) || RegExp('.*\/.*').test(filename)) {
+      return res.send('파일 이름이 잘못되었습니다.');
+    }
     const currentPath = req.query.path || '/';
     // 기본 파일 데이터를 구성합니다.
     let fileData = {
@@ -96,30 +100,75 @@ const updateContact = asyncHandler(async (req, res) => {
         throw new Error('File not found.');
     }
 
-    // 디렉토리일 경우, 하위 파일 및 디렉토리 경로 업데이트 (현재 사용자와 관련된 파일만)
-    if (file.filetype === 'dir') {
-        // 기존 디렉토리의 전체 경로 (예: '/4/train/test_dir/')
-        const oldDirFullPath = file.filePath + file.filename + '/';
-        // 새 이름으로 변경 후 전체 경로 (예: '/4/train/abcd/')
-        const newDirFullPath = file.filePath + name + '/';
-
-        // 현재 로그인한 사용자(req.user.username)에 해당하는 하위 파일/디렉토리만 업데이트
-        const children = await File.find({
-            filePath: { $regex: '^' + oldDirFullPath },
-            user: req.user.username
-        });
-        for (let child of children) {
-            child.filePath = child.filePath.replace(oldDirFullPath, newDirFullPath);
-            await child.save();
+    //path 마지막에 / 안 붙은 경우 붙임.
+    const path_modified = (path[path.length-1] === '/')?path:path+'/';
+    //잘못된 name 입력 필터링
+    if(/.*\..*/.test(name) || RegExp('.*\/.*').test(name)) {
+      res.status(500).send('파일 이름이 잘못되었습니다.');
+    }
+    else {
+      //새로운 경로 입력 시 해당 경로의 dir들 생성
+      const path_chunks = path_modified.split("/");
+      console.log(path_chunks);
+      for (let i =0; i<path_chunks.length-2; i=i+1){
+        let partial_path = '';
+        for(let j = 0; j<=i; j++){
+          if(path_chunks[j] === ''){
+            partial_path += '/';
+          } else{
+            partial_path += path_chunks[j] + '/';
+          }
         }
+        partial_path = (partial_path === '') ? '/' : partial_path;
+        //console.log(partial_path);
+        //console.log(path_chunks[i+1]);
+        let dirExist = null;
+        dirExist = await File.exists({
+          user: req.user.username,
+          filePath: partial_path,
+          filetype: 'dir',
+          filename: path_chunks[i+1]
+        });
+        if(dirExist){
+          //console.log("dir exists");
+        } else {
+          //console.log("no such dir");
+          File.create({
+            user: req.user.username,
+            filePath: partial_path,
+            filetype: 'dir',
+            filename: path_chunks[i+1]
+          })
+        }
+      }
+
+      // 기존 디렉토리의 전체 경로 (예: '/4/train/test_dir/')
+      const oldDirFullPath = file.filePath + file.filename + '/';
+      // 현재 파일 또는 디렉토리 업데이트
+      file.filename = name;
+      file.filetype = type;
+      file.filePath = path_modified;
+      await file.save();
+
+      // 디렉토리일 경우, 하위 파일 및 디렉토리 경로 업데이트 (현재 사용자와 관련된 파일만)
+      if (file.filetype === 'dir') {
+          // 새 이름으로 변경 후 전체 경로 (예: '/4/train/abcd/')
+          const newDirFullPath = file.filePath + name + '/';
+
+          // 현재 로그인한 사용자(req.user.username)에 해당하는 하위 파일/디렉토리만 업데이트
+          const children = await File.find({
+              filePath: { $regex: '^' + oldDirFullPath },
+              user: req.user.username
+          });
+          for (let child of children) {
+              child.filePath = child.filePath.replace(oldDirFullPath, newDirFullPath);
+              await child.save();
+          }
+      }
+      res.redirect('/main?path=' + encodeURIComponent(currentPath));
     }
 
-    // 현재 파일 또는 디렉토리 업데이트
-    file.filename = name;
-    file.filetype = type;
-    file.filePath = path;
-    await file.save();
-    res.redirect('/main?path=' + encodeURIComponent(currentPath));
+    
 });
 
 
@@ -130,6 +179,14 @@ const updateContact = asyncHandler(async (req, res) => {
 // DEL
 const deleteContact = asyncHandler(async (req, res) => {
     const id = req.params.id;
+    const file = await File.findById(id);
+    if(file.filetype === 'dir') {
+      const dirFullPath = file.filePath + file.filename + '/';
+      await File.deleteMany({
+          filePath: { $regex: '^' + dirFullPath },
+          user: req.user.username
+      });
+    }
     await File.findByIdAndDelete(id);
     const currentPath = req.query.path || '/';
     res.redirect('/main?path=' + encodeURIComponent(currentPath));
@@ -183,6 +240,19 @@ const saveFile = asyncHandler(async (req, res) => {
       drawObjectDoc: null,
       cellname: req.body.cellname ?? null,
       libname: null,
+    });
+  }
+
+  // py 아니면 generate 시켜도 저장만 하고 종료
+  if (file.filetype !== 'py') {
+    return res.json({
+      success: true,
+      message: 'Saved only (no generation)',
+      output: '',
+      drawObjectDoc: null,
+      cellname: req.body.cellname ?? null,
+      libname: null,
+      fileTypeIsPy: false
     });
   }
 

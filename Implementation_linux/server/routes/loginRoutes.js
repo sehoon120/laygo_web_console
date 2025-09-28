@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const requireEmailVerified = require('../middlewares/requireEmailVerified');
 
 const {
     getLogin, 
@@ -15,13 +16,13 @@ router.route('/')
     .post(loginUser);
 
 router.route('/register')
-    .get(getRegister)
-    .post(registerUser);
+  .get(getRegister)
+  .post(requireEmailVerified, registerUser);
 
 router.route('/sendVerificationEmail')
     .post(sendVerificationEmail);
 
-router.route('/sendVerificationEmail')
+router.route('/verifyEmailCode')
     .post(verifyEmailCode);
 
 module.exports = router;

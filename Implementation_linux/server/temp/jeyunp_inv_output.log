@@ -7,7 +7,7 @@ RUNDIR: /WORK/laygo_web_console/Implementation_linux/server
 CODE_PATH: /WORK/laygo_web_console/Implementation_linux/temp_code/jeyunp_inv_temp.py
 Load templates
 webconsole mode
-/templates/test_logic_templates.yaml
+/templates/test_big_templates.yaml
 Load grids
 --------------------
 Creating inv_2x

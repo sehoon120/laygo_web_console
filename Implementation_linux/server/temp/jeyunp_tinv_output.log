@@ -8,7 +8,7 @@ CODE_PATH: /WORK/laygo_web_console/Implementation_linux/temp_code/jeyunp_tinv_te
 Load templates
 Load grids
 --------------------
-Creating tinv_small_1x
+Creating tinv_2x
 Create instances
 Create wires
 =========== SUPPLY RAIL GENERATION START ===========
@@ -25,7 +25,75 @@ Export design
 
 webconsole mode
 --------------------
-Creating tinv_small_layvar_prtrackswap_1x
+Creating tinv_4x
+Create instances
+Create wires
+=========== SUPPLY RAIL GENERATION START ===========
+
+The number of rails of your design is 1.
+The number of pins of your design is 2.
+
+Iterated nets:
+0. "VSS"
+1. "VDD"
+
+============ SUPPLY RAIL GENERATION END ============
+Export design
+
+webconsole mode
+--------------------
+Creating tinv_layvar_rtrackswap_2x
+Create instances
+Create wires
+=========== SUPPLY RAIL GENERATION START ===========
+
+The number of rails of your design is 1.
+The number of pins of your design is 2.
+
+Iterated nets:
+0. "VSS"
+1. "VDD"
+
+============ SUPPLY RAIL GENERATION END ============
+Export design
+
+webconsole mode
+--------------------
+Creating tinv_layvar_rtrackswap_4x
+Create instances
+Create wires
+=========== SUPPLY RAIL GENERATION START ===========
+
+The number of rails of your design is 1.
+The number of pins of your design is 2.
+
+Iterated nets:
+0. "VSS"
+1. "VDD"
+
+============ SUPPLY RAIL GENERATION END ============
+Export design
+
+webconsole mode
+--------------------
+Creating tinv_lvs_2x
+Create instances
+Create wires
+=========== SUPPLY RAIL GENERATION START ===========
+
+The number of rails of your design is 1.
+The number of pins of your design is 2.
+
+Iterated nets:
+0. "VSS"
+1. "VDD"
+
+============ SUPPLY RAIL GENERATION END ============
+Export design
+
+webconsole mode
+--------------------
+Creating tinv_lvs_4x
 Create instances
 Create wires
 =========== SUPPLY RAIL GENERATION START ===========

@@ -29,7 +29,8 @@
           <button id="layoutDrawBtn" type="button" class="btn btn-secondary mt-2">Layout Draw</button>
 
           </form>
-        <div id="message" class="mt-3"></div>
+        <div id="message-save" class="msg-box"></div>
+        <div id="message-draw" class="msg-box"></div>
       </div>
 
       <div class="col-md-6">
@@ -441,6 +442,355 @@
     }
 
     // ===================== buildMap_ver2 (단일 cellObj) =====================
+    // window.buildMap_ver2 = function(cellObj){
+    //   const rectList = R(), labelList = L();
+    //   const SCALE = 5;
+
+    //   rectList.length = 0;
+    //   labelList.length = 0;
+
+    //   const cellname = cellObj.cellname || "(unknown)";
+    //   const libname  = cellObj.libname  || "(unknown)";
+
+    //   const Z = { 
+    //   bbox:0, 
+    //   subblock:10, 
+    //   subpin:10,  // subblock의 pin
+    //   mask:20, 
+    //   metal:30, 
+    //   via: 50,
+    //   pin:100, 
+    //   label:1000 };
+
+    //   function parseMetalIndex(layer=""){
+    //     const L = String(layer).toLowerCase().replace(/\s+/g,"");
+    //     let m = L.match(/metal\s*([0-9]+)/); if (m && m[1]) return parseInt(m[1],10);
+    //     m = L.match(/^m\s*([0-9]+)$/);       if (m && m[1]) return parseInt(m[1],10);
+    //     return null;
+    //   }
+    //   function metalZ(layer){
+    //     const idx = parseMetalIndex(layer);
+    //     const base = Z.metal, step = 2;
+    //     return (idx != null) ? base + (idx-1)*step : base;
+    //   }
+    //   function metalColor(layer){
+    //     if (!layer) return "rgba(0,0,255,0.35)";
+    //     const L = String(layer).toLowerCase();
+    //     if (L.includes('metal1')) return "rgba(0,128,255,0.35)";
+    //     if (L.includes('metal2')) return "rgba(255,128,0,0.35)";
+    //     if (L.includes('metal3')) return "rgba(160,32,240,0.35)";
+    //     return "rgba(0,0,255,0.35)";
+    //   }
+    //   function pushRectFromXY(xy,color,label,kind,meta={}){
+    //     if (!xy || xy.length!==2) return;
+    //     const ox = xy[0][0]*SCALE, oy=xy[0][1]*SCALE;
+    //     const w  = (xy[1][0]-xy[0][0])*SCALE;
+    //     const h  = (xy[1][1]-xy[0][1])*SCALE;
+    //     if (meta.z == null) meta.z = Z[kind] ?? 0;
+    //     rectList.push([ox, -oy, w, -h, color, label, true, kind, meta]);
+    //     labelList.push({
+    //       x:ox+2, y:-(oy)-2, text:label,
+    //       font:"11px sans-serif", fill:"#222",
+    //       align:"left", baseline:"top",
+    //       z:Z.label, lz:meta.z, kind
+    //     });
+    //   }
+
+      
+    //   // via 레이어(배열/문자열)에서 낮은/높은 metal 번호 추출
+    //   function parseViaPair(layer){
+    //     // layer 가 ["Metal2","Metal3"] 또는 "Metal2,Metal3" 등일 수 있음
+    //     let a = [], s = layer;
+    //     if (Array.isArray(layer)) a = layer;
+    //     else if (typeof layer === 'string') a = layer.split(/[,\s/+-]+/);
+    //     else return null;
+
+    //     const nums = a.map(parseMetalIndex).filter(n => Number.isInteger(n));
+    //     if (nums.length < 2) return null;
+    //     nums.sort((x,y)=>x-y);
+    //     return [nums[0], nums[1]];  // [lo, hi]
+    //   }
+
+    //   // via 쌍 표시용 키/라벨
+    //   function viaKey(layer){
+    //     const p = parseViaPair(layer);
+    //     return p ? `M${p[0]}-M${p[1]}` : 'via';
+    //   }
+
+    //   // via z: 금속 z 사이에 끼우기 (metalZ가 30,32,34… 식이라면 중간값)
+    //   function viaZ(layer){
+    //     const p = parseViaPair(layer);
+    //     if (!p) return Z.via;  // fallback
+    //     const zLo = metalZ(`metal${p[0]}`);
+    //     const zHi = metalZ(`metal${p[1]}`);
+    //     return Math.min(zLo, zHi) + (Math.abs(zHi - zLo) / 2); // 두 metal z의 중간
+    //   }
+
+    //   // via 색상: 쌍마다 다른 톤
+    //   function viaColor(layer){
+    //     const p = parseViaPair(layer);
+    //     if (!p) return "rgba(80,80,80,0.8)";
+    //     const [lo, hi] = p;
+    //     // 간단 팔레트 예시
+    //     const palette = {
+    //       'M1-M2': 'rgba(255,0,0,0.8)',
+    //       'M2-M3': 'rgba(0,0,255,0.8)',
+    //       'M3-M4': 'rgba(0,255,0,0.8)',
+    //       'M4-M5': 'rgba(255,51,153,0.8)'
+    //     };
+    //     return palette[`M${lo}-M${hi}`] || 'rgba(80,80,80,0.8)';
+    //   }
+
+    //   // via 크기(셀 좌표 단위) — 필요 시 쌍별로 다르게
+    //   function viaSize(layer){
+    //     const base = 60;
+    //     const p = parseViaPair(layer);
+    //     if (!p) return base;
+    //     const [lo, hi] = p;
+    //     // 예: 더 높은 레벨일수록 약간 크게
+    //     return base * (1 + (Math.max(lo,hi)-1)*0.1);
+    //   }
+
+    //   // 포인트 중심 사각형 via 추가
+    //   function pushViaAtPoint(pt, label, layer){
+    //     if (!Array.isArray(pt) || pt.length<2) return;
+    //     const size = viaSize(layer);
+    //     const ox = (pt[0] - size/2) * SCALE;
+    //     const oy = (pt[1] - size/2) * SCALE;
+    //     const w  = size * SCALE;
+    //     const h  = size * SCALE;
+
+    //     const meta = {
+    //       kind: "via",
+    //       layerPair: viaKey(layer),    // "M2-M3"
+    //       rawLayer: layer,             // 원본(배열/문자열)
+    //       z: viaZ(layer)
+    //     };
+    //     rectList.push([ox, -oy, w, -h, viaColor(layer), label, true, "via", meta]);
+    //     labelList.push({
+    //       x: ox+2, y: -(oy)-2, text: label,
+    //       font: "11px sans-serif", fill:"#111",
+    //       align:"left", baseline:"top",
+    //       z: Z.label, lz: meta.z, kind:"via"
+    //     });
+    //   }
+
+
+    //   // 교체: local XY(BBox) -> placed(absolute) XY(BBox)
+    //   // localXY: [[lx0,ly0],[lx1,ly1]]  (서브블록 로컬)
+    //   // instXY:  [tx, ty]               (인스턴스 배치 원점)
+    //   // instBBox:[[bx0,by0],[bx1,by1]]  (서브블록 bbox; 원점 보정용)
+    //   // tr: "R0" | "MX"
+    //   function placeChildBBox(localXY, instXY, instBBox, tr) {
+    //     if (!Array.isArray(localXY) || localXY.length !== 2) return null;
+
+    //     const [[lx0, ly0], [lx1, ly1]] = localXY;
+    //     const tx = +((instXY && instXY[0]) || 0);
+    //     const ty = +((instXY && instXY[1]) || 0);
+
+    //     // bbox 원점/높이
+    //     const bx0 = +((instBBox && instBBox[0] && instBBox[0][0]) || 0);
+    //     const by0 = +((instBBox && instBBox[0] && instBBox[0][1]) || 0);
+    //     const by1 = +((instBBox && instBBox[1] && instBBox[1][1]) || 0);
+    //     const H   = - by1 + by0; // ★ MX 보정에 반드시 필요 -> 더 테스트 필요
+
+    //     // 로컬을 bbox LL로 정규화
+    //     const x0n = lx0 - bx0, y0n = ly0 - by0;
+    //     const x1n = lx1 - bx0, y1n = ly1 - by0;
+
+    //     let x0w, y0w, x1w, y1w;
+    //     if (tr === "MX") {
+    //       // X는 그대로, Y는 'H - y'로 뒤집은 뒤 ty를 더한다.
+    //       x0w = tx + x0n;  y0w = ty + (H - y0n);  // ★ 기존: ty - y0n  (오류 원인)
+    //       x1w = tx + x1n;  y1w = ty + (H - y1n);
+    //     } else { // R0
+    //       x0w = tx + x0n;  y0w = ty + y0n;
+    //       x1w = tx + x1n;  y1w = ty + y1n;
+    //     }
+
+    //     // ll/ur 정렬
+    //     const llx = Math.min(x0w, x1w);
+    //     const lly = Math.min(y0w, y1w);
+    //     const urx = Math.max(x0w, x1w);
+    //     const ury = Math.max(y0w, y1w);
+
+    //     // console.log("llx");
+    //     // console.log(x0w);
+    //     // console.log(x1w);
+    //     // console.log(llx);
+    //     // console.log("lly");
+    //     // console.log(y0w);
+    //     // console.log(y1w);
+    //     // console.log(lly);
+    //     // console.log("urx");
+    //     // console.log(x0w);
+    //     // console.log(x1w);
+    //     // console.log(urx);
+    //     // console.log("ury");
+    //     // console.log(y0w);
+    //     // console.log(y1w);
+    //     // console.log(urx);
+
+    //     return [[llx, lly], [urx, ury]];
+    //   }
+
+
+
+    //   // 0) bbox
+    //   if (Array.isArray(cellObj.bbox) && cellObj.bbox.length===2){
+    //     const [p0,p1] = cellObj.bbox;
+    //     const ox=p0[0]*SCALE, oy=p0[1]*SCALE;
+    //     const w=(p1[0]-p0[0])*SCALE, h=(p1[1]-p0[1])*SCALE;
+    //     rectList.push([ox,-oy,w,-h,"rgba(128,128,128,0.12)","bbox",true,"bbox",{kind:"bbox",z:Z.bbox}]);
+    //   }
+
+    //   // 1) metals
+    //   if (Array.isArray(cellObj.metals)){
+    //     cellObj.metals.forEach((m,i)=>{
+    //       const color = metalColor(m.layer);
+    //       const label = `${m.layer || "Metal"} #${i}`;
+    //       pushRectFromXY(m.xy, color, label, "metal", {layer:m.layer||"", z:metalZ(m.layer)});
+    //     });
+    //   }
+
+    //   // // 1.5) vias  (예: [{xy:[x,y], layer:'via1', name:'V1'} ...])
+    //   // // vias — YAML에서 layer가 ["Metal2","Metal3"] 형태
+    //   // if (Array.isArray(cellObj.vias)) {
+    //   //   cellObj.vias.forEach((v, i) => {
+    //   //     const key = viaKey(v.layer);              // "M2-M3"
+    //   //     const name = v.name || key || `via#${i}`;  // 라벨
+    //   //     pushViaAtPoint(v.xy, name, v.layer);
+    //   //   });
+    //   // }
+
+    //   // - 새 형식: bbox가 점(= [pt]==[pt])이고 xy가 있음 → 점 중심 정사각형 via
+    //   // - 구 형식: bbox가 면적이 있는 직사각형 → 그 박스 그대로 렌더
+    //   // - 예외: bbox는 점인데 xy가 없을 때 → bbox의 점을 사용
+    //   if (Array.isArray(cellObj.vias)) {
+    //     cellObj.vias.forEach((v, i) => {
+    //       const key   = viaKey(v.layer);                   // "M2-M3" 또는 'via'
+    //       const label = v.name || key || `via#${i}`;
+
+    //       const hasBBox = Array.isArray(v.bbox) && v.bbox.length === 2
+    //                   && Array.isArray(v.bbox[0]) && Array.isArray(v.bbox[1]);
+    //       const hasXY   = Array.isArray(v.xy) && v.xy.length >= 2;
+
+    //       if (hasBBox) {
+    //         const [b0, b1] = v.bbox;
+    //         const dx = Math.abs(Number(b1[0]) - Number(b0[0]));
+    //         const dy = Math.abs(Number(b1[1]) - Number(b0[1]));
+
+    //         if (dx === 0 && dy === 0) {
+    //           // 점 via: xy가 있으면 xy를, 없으면 bbox의 점을 사용
+    //           const pt = hasXY ? v.xy : b0;
+    //           pushViaAtPoint(pt, label, v.layer);
+    //         } else {
+    //           // 구형: 직사각형 bbox 그대로 렌더 (kind='via', z는 금속 사이 중간값)
+    //           const meta = {
+    //             kind: "via",
+    //             layerPair: viaKey(v.layer),
+    //             rawLayer: v.layer,
+    //             z: viaZ(v.layer)
+    //           };
+    //           const color = viaColor(v.layer);
+    //           pushRectFromXY(v.bbox, color, label, "via", meta);
+    //         }
+    //       } else if (hasXY) {
+    //         // bbox가 없고 xy만 있는 경우
+    //         pushViaAtPoint(v.xy, label, v.layer);
+    //       } else {
+    //         // 좌표 정보가 전혀 없으면 스킵
+    //         console.warn("via skipped (no bbox/xy):", v);
+    //       }
+    //     });
+    //   }
+
+    //   // 2) pins
+    //   if (Array.isArray(cellObj.pins)){
+    //     cellObj.pins.forEach(p=>{
+    //       const name = p.name || p.netname || "pin";
+    //       pushRectFromXY(p.xy, "rgba(0,200,0,0.55)", String(name), "pin", {
+    //         layer:p.layer||"", netname:p.netname||"", z:Z.pin
+    //       });
+    //     });
+    //   }
+
+    //   // 3) subblocks
+    //   if (Array.isArray(cellObj.subblocks)){
+    //     cellObj.subblocks.forEach(sb=>{
+    //       const instName = sb.name || "(inst)";
+    //       const instLib  = sb.libname || "";
+    //       const instCell = sb.cellname || "";
+    //       const xy       = sb.xy || [0,0];
+    //       const tr       = sb.transform || "R0";
+
+    //       const bbox = sb.bbox || cellObj.__libBBoxes?.[`${instLib}:${instCell}`];
+    //       if (!bbox || bbox.length!==2){ console.warn("subblock bbox missing; skip:", sb); return; }
+
+    //       const w=(bbox[1][0]-bbox[0][0])*SCALE, h=(bbox[1][1]-bbox[0][1])*SCALE;
+    //       let ox=xy[0]*SCALE, oy=xy[1]*SCALE; if (tr==="MX") oy -= h;
+
+    //       rectList.push([ox,-oy,w,-h,"rgba(0,0,0,1.0)",instName,true,"subblock",{
+    //         kind:"subblock", instName, instLib, instCell, transform:tr, z:Z.subblock
+    //       }]);
+
+    //       L().push({ x:ox+2, y:-(oy)-2,  text:`Inst: ${instName}`, font:"12px sans-serif", fill:"#000",
+    //         align:"left", baseline:"top", z:Z.label, lz:Z.subblock, kind:"subblock" });
+    //       L().push({ x:ox+2, y:-(oy)-16, text:`Lib: ${instLib}, Cell: ${instCell}`, font:"11px sans-serif", fill:"#444",
+    //         align:"left", baseline:"top", z:Z.label, lz:Z.subblock, kind:"subblock" });
+
+          
+    //       if (sb.pins && typeof sb.pins === 'object') {
+    //         for (const [termName, pinObj] of Object.entries(sb.pins)) {
+    //           const localXY = pinObj.bbox;
+    //           if (!Array.isArray(localXY) || localXY.length !== 2) continue;
+
+    //           // 로컬 → 배치 좌표 변환 (네가 써둔 placeChildBBox 사용)
+    //           const placedXY = placeChildBBox(localXY, xy, bbox, tr);
+    //           if (!placedXY) continue;
+
+    //           // subpin은 서브블록과 같이 토글되도록 z = Z.subpin(=10)
+    //           const label = `${instName}.${termName}`;
+    //           pushRectFromXY(
+    //             placedXY,
+    //             "rgba(255,165,0,0.45)",        // 박스 색: 주황 반투명 (원하면 바꿔도 됨)
+    //             label,
+    //             "subpin",                      // ← kind를 subpin으로
+    //             {
+    //               instName, instLib, instCell,
+    //               termName,
+    //               z: Z.subpin,
+    //               kindHint: "subpin"
+    //             }
+    //           );
+
+    //           // (선택) 라벨 엔트리 별도로도 넣고 싶다면:
+    //           labelList.push({
+    //             x: placedXY[0][0]*SCALE + 4,
+    //             y: -(placedXY[0][1]*SCALE) - 4,
+    //             text: termName,
+    //             font: "12px sans-serif",
+    //             fill: "#111",
+    //             align: "left",
+    //             baseline: "bottom",
+    //             z: Z.label, lz: Z.subpin, kind: "subpin"
+    //           });
+    //         }
+    //       }
+
+    //     });
+    //   }
+
+    //   // 4) HUD 라벨
+    //   L().push({ x:10, y:10, text:`cellname: ${cellname}`, font:"bold 14px sans-serif", fill:"#111", align:"left", baseline:"top", z:Z.label });
+    //   L().push({ x:10, y:28, text:`libname: ${libname}`,   font:"12px sans-serif",       fill:"#333", align:"left", baseline:"top", z:Z.label });
+
+    //   // === 모두 채웠다면: 줌-투-핏 후 이벤트 알림 ===
+    //   ensureInit();
+    //   zoomToFit(20);
+    //   window.dispatchEvent(new CustomEvent('layout:ready'));
+    // };
+
     window.buildMap_ver2 = function(cellObj){
       const rectList = R(), labelList = L();
       const SCALE = 5;
@@ -452,14 +802,56 @@
       const libname  = cellObj.libname  || "(unknown)";
 
       const Z = { 
-      bbox:0, 
-      subblock:10, 
-      subpin:10,  // subblock의 pin
-      mask:20, 
-      metal:30, 
-      via: 50,
-      pin:100, 
-      label:1000 };
+        bbox:0, 
+        subblock:10, 
+        subpin:10,  // subblock의 pin
+        mask:20, 
+        metal:30, 
+        via: 50,
+        pin:100, 
+        label:1000 
+      };
+
+      // --- NEW: bbox/size 표준화 ---
+      // obj.bbox 또는 obj.size(+xy, anchor) → [[x0,y0],[x1,y1]]
+      function stdBBox(obj, {defaultXY=[0,0]} = {}) {
+        // 1) bbox 그대로
+        if (obj?.bbox && Array.isArray(obj.bbox) && obj.bbox.length === 2) return obj.bbox;
+
+        const s = obj?.size;
+        if (s) {
+          // 2-A) size가 "두 점"인 경우: [[x0,y0],[x1,y1]] → 그대로 bbox 취급
+          if (
+            Array.isArray(s) && s.length === 2 &&
+            Array.isArray(s[0]) && s[0].length === 2 &&
+            Array.isArray(s[1]) && s[1].length === 2
+          ) {
+            const x0 = Number(s[0][0]), y0 = Number(s[0][1]);
+            const x1 = Number(s[1][0]), y1 = Number(s[1][1]);
+            return [[x0, y0], [x1, y1]];
+          }
+
+          // 2-B) size가 폭/높이인 경우: [w,h] 또는 [[w,h]]
+          const wh = Array.isArray(s) && Array.isArray(s[0]) ? s[0] : s;
+          const w = Number(wh?.[0] ?? 0);
+          const h = Number(wh?.[1] ?? 0);
+          const xy = (Array.isArray(obj.xy) && obj.xy.length===2) ? obj.xy : defaultXY;
+          const anchor = obj.anchor || 'll'; // 'll' | 'center' | 'ur'
+
+          let x0 = xy[0], y0 = xy[1];
+          if (anchor === 'center') { x0 -= w/2; y0 -= h/2; }
+          else if (anchor === 'ur') { x0 -= w;  y0 -= h; }
+          return [[x0, y0], [x0 + w, y0 + h]];
+        }
+
+        // 3) xy가 두 점이면 그대로, 한 점이면 점-bbox
+        if (Array.isArray(obj?.xy)) {
+          if (Array.isArray(obj.xy[0]) && obj.xy.length === 2) return obj.xy;
+          if (obj.xy.length === 2) { const [x,y]=obj.xy; return [[x,y],[x,y]]; }
+        }
+        return null;
+      }
+
 
       function parseMetalIndex(layer=""){
         const L = String(layer).toLowerCase().replace(/\s+/g,"");
@@ -495,42 +887,32 @@
         });
       }
 
-      
-      // via 레이어(배열/문자열)에서 낮은/높은 metal 번호 추출
+      // via 파싱/표현
       function parseViaPair(layer){
-        // layer 가 ["Metal2","Metal3"] 또는 "Metal2,Metal3" 등일 수 있음
-        let a = [], s = layer;
+        let a = [];
         if (Array.isArray(layer)) a = layer;
         else if (typeof layer === 'string') a = layer.split(/[,\s/+-]+/);
         else return null;
-
         const nums = a.map(parseMetalIndex).filter(n => Number.isInteger(n));
         if (nums.length < 2) return null;
         nums.sort((x,y)=>x-y);
-        return [nums[0], nums[1]];  // [lo, hi]
+        return [nums[0], nums[1]];
       }
-
-      // via 쌍 표시용 키/라벨
       function viaKey(layer){
         const p = parseViaPair(layer);
         return p ? `M${p[0]}-M${p[1]}` : 'via';
       }
-
-      // via z: 금속 z 사이에 끼우기 (metalZ가 30,32,34… 식이라면 중간값)
       function viaZ(layer){
         const p = parseViaPair(layer);
-        if (!p) return Z.via;  // fallback
+        if (!p) return Z.via;
         const zLo = metalZ(`metal${p[0]}`);
         const zHi = metalZ(`metal${p[1]}`);
-        return Math.min(zLo, zHi) + (Math.abs(zHi - zLo) / 2); // 두 metal z의 중간
+        return Math.min(zLo, zHi) + (Math.abs(zHi - zLo) / 2);
       }
-
-      // via 색상: 쌍마다 다른 톤
       function viaColor(layer){
         const p = parseViaPair(layer);
         if (!p) return "rgba(80,80,80,0.8)";
         const [lo, hi] = p;
-        // 간단 팔레트 예시
         const palette = {
           'M1-M2': 'rgba(255,0,0,0.8)',
           'M2-M3': 'rgba(0,0,255,0.8)',
@@ -539,21 +921,17 @@
         };
         return palette[`M${lo}-M${hi}`] || 'rgba(80,80,80,0.8)';
       }
-
-      // via 크기(셀 좌표 단위) — 필요 시 쌍별로 다르게
       function viaSize(layer){
         const base = 60;
         const p = parseViaPair(layer);
         if (!p) return base;
         const [lo, hi] = p;
-        // 예: 더 높은 레벨일수록 약간 크게
         return base * (1 + (Math.max(lo,hi)-1)*0.1);
       }
-
-      // 포인트 중심 사각형 via 추가
-      function pushViaAtPoint(pt, label, layer){
+      // explicitSize가 있으면 그 크기 사용
+      function pushViaAtPoint(pt, label, layer, explicitSize){
         if (!Array.isArray(pt) || pt.length<2) return;
-        const size = viaSize(layer);
+        const size = explicitSize ?? viaSize(layer);
         const ox = (pt[0] - size/2) * SCALE;
         const oy = (pt[1] - size/2) * SCALE;
         const w  = size * SCALE;
@@ -561,25 +939,20 @@
 
         const meta = {
           kind: "via",
-          layerPair: viaKey(layer),    // "M2-M3"
-          rawLayer: layer,             // 원본(배열/문자열)
+          layerPair: viaKey(layer),
+          rawLayer: layer,
           z: viaZ(layer)
         };
         rectList.push([ox, -oy, w, -h, viaColor(layer), label, true, "via", meta]);
         labelList.push({
           x: ox+2, y: -(oy)-2, text: label,
           font: "11px sans-serif", fill:"#111",
-          align:"left", baseline:"top",
+          align: "left", baseline: "top",
           z: Z.label, lz: meta.z, kind:"via"
         });
       }
 
-
-      // 교체: local XY(BBox) -> placed(absolute) XY(BBox)
-      // localXY: [[lx0,ly0],[lx1,ly1]]  (서브블록 로컬)
-      // instXY:  [tx, ty]               (인스턴스 배치 원점)
-      // instBBox:[[bx0,by0],[bx1,by1]]  (서브블록 bbox; 원점 보정용)
-      // tr: "R0" | "MX"
+      // 로컬→배치 BBox 배치 (MX 보정 포함)
       function placeChildBBox(localXY, instXY, instBBox, tr) {
         if (!Array.isArray(localXY) || localXY.length !== 2) return null;
 
@@ -587,134 +960,98 @@
         const tx = +((instXY && instXY[0]) || 0);
         const ty = +((instXY && instXY[1]) || 0);
 
-        // bbox 원점/높이
         const bx0 = +((instBBox && instBBox[0] && instBBox[0][0]) || 0);
         const by0 = +((instBBox && instBBox[0] && instBBox[0][1]) || 0);
         const by1 = +((instBBox && instBBox[1] && instBBox[1][1]) || 0);
-        const H   = - by1 + by0; // ★ MX 보정에 반드시 필요 -> 더 테스트 필요
+        const H   = - by1 + by0; // MX 보정용 높이
 
-        // 로컬을 bbox LL로 정규화
         const x0n = lx0 - bx0, y0n = ly0 - by0;
         const x1n = lx1 - bx0, y1n = ly1 - by0;
 
         let x0w, y0w, x1w, y1w;
         if (tr === "MX") {
-          // X는 그대로, Y는 'H - y'로 뒤집은 뒤 ty를 더한다.
-          x0w = tx + x0n;  y0w = ty + (H - y0n);  // ★ 기존: ty - y0n  (오류 원인)
+          x0w = tx + x0n;  y0w = ty + (H - y0n);
           x1w = tx + x1n;  y1w = ty + (H - y1n);
         } else { // R0
           x0w = tx + x0n;  y0w = ty + y0n;
           x1w = tx + x1n;  y1w = ty + y1n;
         }
 
-        // ll/ur 정렬
         const llx = Math.min(x0w, x1w);
         const lly = Math.min(y0w, y1w);
         const urx = Math.max(x0w, x1w);
         const ury = Math.max(y0w, y1w);
-
-        // console.log("llx");
-        // console.log(x0w);
-        // console.log(x1w);
-        // console.log(llx);
-        // console.log("lly");
-        // console.log(y0w);
-        // console.log(y1w);
-        // console.log(lly);
-        // console.log("urx");
-        // console.log(x0w);
-        // console.log(x1w);
-        // console.log(urx);
-        // console.log("ury");
-        // console.log(y0w);
-        // console.log(y1w);
-        // console.log(urx);
-
         return [[llx, lly], [urx, ury]];
       }
 
-
-
-      // 0) bbox
-      if (Array.isArray(cellObj.bbox) && cellObj.bbox.length===2){
-        const [p0,p1] = cellObj.bbox;
+      // 0) top-level bbox (size 허용)
+      const topBBox = stdBBox(cellObj);
+      if (topBBox){
+        const [p0,p1] = topBBox;
         const ox=p0[0]*SCALE, oy=p0[1]*SCALE;
         const w=(p1[0]-p0[0])*SCALE, h=(p1[1]-p0[1])*SCALE;
         rectList.push([ox,-oy,w,-h,"rgba(128,128,128,0.12)","bbox",true,"bbox",{kind:"bbox",z:Z.bbox}]);
       }
 
-      // 1) metals
+      // 1) metals (size 허용)
       if (Array.isArray(cellObj.metals)){
         cellObj.metals.forEach((m,i)=>{
           const color = metalColor(m.layer);
           const label = `${m.layer || "Metal"} #${i}`;
-          pushRectFromXY(m.xy, color, label, "metal", {layer:m.layer||"", z:metalZ(m.layer)});
+          const box = stdBBox(m);
+          if (box) pushRectFromXY(box, color, label, "metal", {layer:m.layer||"", z:metalZ(m.layer)});
         });
       }
 
-      // // 1.5) vias  (예: [{xy:[x,y], layer:'via1', name:'V1'} ...])
-      // // vias — YAML에서 layer가 ["Metal2","Metal3"] 형태
-      // if (Array.isArray(cellObj.vias)) {
-      //   cellObj.vias.forEach((v, i) => {
-      //     const key = viaKey(v.layer);              // "M2-M3"
-      //     const name = v.name || key || `via#${i}`;  // 라벨
-      //     pushViaAtPoint(v.xy, name, v.layer);
-      //   });
-      // }
-
-      // - 새 형식: bbox가 점(= [pt]==[pt])이고 xy가 있음 → 점 중심 정사각형 via
-      // - 구 형식: bbox가 면적이 있는 직사각형 → 그 박스 그대로 렌더
-      // - 예외: bbox는 점인데 xy가 없을 때 → bbox의 점을 사용
+      // 1.5) vias (size 허용: 점-via의 size는 정사각형 한 변)
       if (Array.isArray(cellObj.vias)) {
         cellObj.vias.forEach((v, i) => {
-          const key   = viaKey(v.layer);                   // "M2-M3" 또는 'via'
+          const key   = viaKey(v.layer);
           const label = v.name || key || `via#${i}`;
 
-          const hasBBox = Array.isArray(v.bbox) && v.bbox.length === 2
-                      && Array.isArray(v.bbox[0]) && Array.isArray(v.bbox[1]);
+          const vBox    = stdBBox(v);
+          const hasBBox = !!vBox;
           const hasXY   = Array.isArray(v.xy) && v.xy.length >= 2;
 
           if (hasBBox) {
-            const [b0, b1] = v.bbox;
+            const [b0, b1] = vBox;
             const dx = Math.abs(Number(b1[0]) - Number(b0[0]));
             const dy = Math.abs(Number(b1[1]) - Number(b0[1]));
 
             if (dx === 0 && dy === 0) {
-              // 점 via: xy가 있으면 xy를, 없으면 bbox의 점을 사용
               const pt = hasXY ? v.xy : b0;
-              pushViaAtPoint(pt, label, v.layer);
+              const sz = Array.isArray(v.size)
+                ? (Array.isArray(v.size[0]) ? v.size[0][0] : v.size[0])
+                : undefined;
+              pushViaAtPoint(pt, label, v.layer, sz);
             } else {
-              // 구형: 직사각형 bbox 그대로 렌더 (kind='via', z는 금속 사이 중간값)
-              const meta = {
-                kind: "via",
-                layerPair: viaKey(v.layer),
-                rawLayer: v.layer,
-                z: viaZ(v.layer)
-              };
+              const meta = { kind: "via", layerPair: viaKey(v.layer), rawLayer: v.layer, z: viaZ(v.layer) };
               const color = viaColor(v.layer);
-              pushRectFromXY(v.bbox, color, label, "via", meta);
+              pushRectFromXY(vBox, color, label, "via", meta);
             }
           } else if (hasXY) {
-            // bbox가 없고 xy만 있는 경우
-            pushViaAtPoint(v.xy, label, v.layer);
+            const sz = Array.isArray(v.size)
+              ? (Array.isArray(v.size[0]) ? v.size[0][0] : v.size[0])
+              : undefined;
+            pushViaAtPoint(v.xy, label, v.layer, sz);
           } else {
-            // 좌표 정보가 전혀 없으면 스킵
             console.warn("via skipped (no bbox/xy):", v);
           }
         });
       }
 
-      // 2) pins
+      // 2) pins (size 허용)
       if (Array.isArray(cellObj.pins)){
         cellObj.pins.forEach(p=>{
           const name = p.name || p.netname || "pin";
-          pushRectFromXY(p.xy, "rgba(0,200,0,0.55)", String(name), "pin", {
+          const box = stdBBox(p);
+          if (box) pushRectFromXY(box, "rgba(0,200,0,0.55)", String(name), "pin", {
             layer:p.layer||"", netname:p.netname||"", z:Z.pin
           });
         });
       }
 
-      // 3) subblocks
+      // 3) subblocks (size 허용) + 내부 subpin(size 허용)
       if (Array.isArray(cellObj.subblocks)){
         cellObj.subblocks.forEach(sb=>{
           const instName = sb.name || "(inst)";
@@ -723,7 +1060,7 @@
           const xy       = sb.xy || [0,0];
           const tr       = sb.transform || "R0";
 
-          const bbox = sb.bbox || cellObj.__libBBoxes?.[`${instLib}:${instCell}`];
+          const bbox = stdBBox(sb) || cellObj.__libBBoxes?.[`${instLib}:${instCell}`];
           if (!bbox || bbox.length!==2){ console.warn("subblock bbox missing; skip:", sb); return; }
 
           const w=(bbox[1][0]-bbox[0][0])*SCALE, h=(bbox[1][1]-bbox[0][1])*SCALE;
@@ -738,32 +1075,23 @@
           L().push({ x:ox+2, y:-(oy)-16, text:`Lib: ${instLib}, Cell: ${instCell}`, font:"11px sans-serif", fill:"#444",
             align:"left", baseline:"top", z:Z.label, lz:Z.subblock, kind:"subblock" });
 
-          
           if (sb.pins && typeof sb.pins === 'object') {
             for (const [termName, pinObj] of Object.entries(sb.pins)) {
-              const localXY = pinObj.bbox;
+              const localXY = stdBBox(pinObj);
               if (!Array.isArray(localXY) || localXY.length !== 2) continue;
 
-              // 로컬 → 배치 좌표 변환 (네가 써둔 placeChildBBox 사용)
               const placedXY = placeChildBBox(localXY, xy, bbox, tr);
               if (!placedXY) continue;
 
-              // subpin은 서브블록과 같이 토글되도록 z = Z.subpin(=10)
               const label = `${instName}.${termName}`;
               pushRectFromXY(
                 placedXY,
-                "rgba(255,165,0,0.45)",        // 박스 색: 주황 반투명 (원하면 바꿔도 됨)
+                "rgba(255,165,0,0.45)",
                 label,
-                "subpin",                      // ← kind를 subpin으로
-                {
-                  instName, instLib, instCell,
-                  termName,
-                  z: Z.subpin,
-                  kindHint: "subpin"
-                }
+                "subpin",
+                { instName, instLib, instCell, termName, z: Z.subpin, kindHint: "subpin" }
               );
 
-              // (선택) 라벨 엔트리 별도로도 넣고 싶다면:
               labelList.push({
                 x: placedXY[0][0]*SCALE + 4,
                 y: -(placedXY[0][1]*SCALE) - 4,
@@ -776,7 +1104,6 @@
               });
             }
           }
-
         });
       }
 
@@ -789,6 +1116,7 @@
       zoomToFit(20);
       window.dispatchEvent(new CustomEvent('layout:ready'));
     };
+
 
     // ===================== 재렌더 트리거 =====================
     window.addEventListener('layout:ready', ()=>{
@@ -852,7 +1180,8 @@
 
       const body = new URLSearchParams(); for (const p of formData) body.append(p[0], p[1]);
 
-      const msgEl = document.getElementById("message");
+      // const msgEl = document.getElementById("message");
+      const msgEl = document.getElementById("message-draw");
       try {
         const response = await fetch(drawUrl, {
           method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
@@ -866,6 +1195,9 @@
           const libName  = cellObj.libname  || result.resolvedLibname  || 'logic_generated';
           const cellName = cellObj.cellname || result.resolvedCellname || '(unknown cell)';
           msgEl.innerText = `✅ Layout Draw 성공: ${libName} / ${cellName}`;
+          // 드로우 메시지는 항상 보이게 유지 (저장 페이드 타이머와 독립)
+          msgEl.classList.remove('fade-out');
+          msgEl.style.opacity = 1;  // 혹시 이전에 0이었으면 복구
 
           // 캔버스 데이터 초기화 후 build & draw
           layoutState.rectList.length = 0;
@@ -873,10 +1205,14 @@
           buildMap_ver2(cellObj);  // 내부에서 zoomToFit + layout:ready 발생
         } else {
           msgEl.innerText = result?.message || '⚠️ Layout Draw 실패';
+          msgEl.classList.remove('fade-out');
+          msgEl.style.opacity = 1;
         }
       } catch (err) {
         console.error("❌ Layout Draw 오류:", err);
         msgEl.innerText = "서버 오류로 Layout을 그릴 수 없습니다.";
+        msgEl.classList.remove('fade-out');
+        msgEl.style.opacity = 1;
       }
     });
 
@@ -887,7 +1223,8 @@
       const formData = new FormData(form);
       const data = new URLSearchParams(); for (const p of formData) data.append(p[0], p[1]);
 
-      const msg = document.getElementById("message");
+      // const msg = document.getElementById("message");
+      const msg = document.getElementById("message-save");
       try{
         const response = await fetch(form.action, {
           method:'PUT', headers:{'Content-Type':'application/x-www-form-urlencoded'},
@@ -896,17 +1233,35 @@
         const result = await response.json();
         if (response.ok && result.success){
           const generateSwitch = document.getElementById("generateSwitch");
-          msg.innerText = (generateSwitch && generateSwitch.checked) ? "Generate 완료되었습니다." : "저장되었습니다.";
+          if(result.fileTypeIsPy === false){
+            msg.innerText = "Python script만 generation이 가능합니다.";
+          }else{
+            msg.innerText = (generateSwitch && generateSwitch.checked) ? "Generate 완료되었습니다." : "저장되었습니다.";
+          }
         }else{
           msg.innerText = "저장에 실패했습니다.";
         }
-        msg.style.opacity=1;
-        setTimeout(()=>{ msg.style.transition="opacity 0.5s"; msg.style.opacity=0;}, 2000);
+        // msg.style.opacity=1;
+        // setTimeout(()=>{ msg.style.transition="opacity 0.5s"; msg.style.opacity=0;}, 2000);
+        // 저장 메시지에만 페이드아웃 클래스 적용
+        msg.classList.remove('fade-out');   // 보여주기
+        // 연속 클릭 대비: 이전 타이머 취소
+        if (msg._fadeTimer) { clearTimeout(msg._fadeTimer); msg._fadeTimer = null; }
+        msg._fadeTimer = setTimeout(() => {
+          msg.classList.add('fade-out');    // 천천히 사라짐
+          msg._fadeTimer = null;
+        }, 2000);
       }catch(err){
         console.error(err);
         msg.innerText="오류가 발생했습니다.";
-        msg.style.opacity=1;
-        setTimeout(()=>{ msg.style.transition="opacity 0.5s"; msg.style.opacity=0;}, 2000);
+        // msg.style.opacity=1;
+        // setTimeout(()=>{ msg.style.transition="opacity 0.5s"; msg.style.opacity=0;}, 2000);
+        msg.classList.remove('fade-out');
+        if (msg._fadeTimer) { clearTimeout(msg._fadeTimer); msg._fadeTimer = null; }
+        msg._fadeTimer = setTimeout(() => {
+          msg.classList.add('fade-out');
+          msg._fadeTimer = null;
+        }, 2000);
       }
     });
 
