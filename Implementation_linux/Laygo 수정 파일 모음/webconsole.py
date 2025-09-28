@@ -68,7 +68,6 @@ def export(
         if collection.find_one({'user': username, 'filetype': 'dir', 'filename': 'generated_drawing_yamls', 'filePath': '/'}) is None:
             testdb.files.insert_one({'user': username, 'filetype': 'dir', 'filename': 'generated_drawing_yamls', 'filePath': '/', 'createdAt': datetime.datetime.now(tz=tz), 'updatedAt': datetime.datetime.now(tz=tz)})
         
-        # 현재 수정 미비로 libname 디렉터리와 각 yaml 파일들의 경우, 상위의 generated_drawing_yamls 디렉터리 삭제해도 DB에는 남아있게 됨. 주의!
         if collection.find_one({'user': username, 'filetype': 'dir', 'filename': libname, 'filePath': '/generated_drawing_yamls/'}) is None:
             testdb.files.insert_one({'user': username, 'filetype': 'dir', 'filename': libname, 'filePath': '/generated_drawing_yamls/', 'createdAt': datetime.datetime.now(tz=tz), 'updatedAt': datetime.datetime.now(tz=tz)})    
         
