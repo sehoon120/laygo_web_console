@@ -6,8 +6,6 @@ FILENAME: test
 RUNDIR: /WORK/laygo_web_console/Implementation_linux/server
 CODE_PATH: /WORK/laygo_web_console/Implementation_linux/temp_code/jeyunp_test_temp.py
 Load templates
-webconsole mode
-/templates/test_logic_templates.yaml
 Load grids
 --------------------
 Creating inv_2x
@@ -26,6 +24,7 @@ Iterated nets:
 Export design
 
 webconsole mode
+yamlFile none
 --------------------
 Creating inv_4x
 Create instances
@@ -43,6 +42,7 @@ Iterated nets:
 Export design
 
 webconsole mode
+yamlFile not none
 --------------------
 Creating inv_6x
 Create instances
@@ -60,6 +60,7 @@ Iterated nets:
 Export design
 
 webconsole mode
+yamlFile not none
 --------------------
 Creating inv_8x
 Create instances
@@ -77,3 +78,4 @@ Iterated nets:
 Export design
 
 webconsole mode
+yamlFile not none

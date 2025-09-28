@@ -101,8 +101,7 @@
           </a>
           
 
-
-          <form action="/main/<%= file._id %>?_method=DELETE" method="POST" style="display: inline" onsubmit="return confirm('Are you sure to delete \' <%= file.filename %>.<%= file.filetype %> \'?');">
+          <form action="/main/<%= file._id %>?_method=DELETE&path=<%= currentPath %>" method="POST" style="display: inline" onsubmit="return confirm('Are you sure to delete \' <%= file.filename %>.<%= file.filetype %> at <%= currentPath %> \'?');">
             <input type="submit" class="btn-delete" title="삭제" value="X">
           </form>          
 

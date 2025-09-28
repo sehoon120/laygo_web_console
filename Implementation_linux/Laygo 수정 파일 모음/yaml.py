@@ -1,4 +1,3 @@
-#bag_workspace_gpdk045\laygo3\laygo2\interface\yaml.py
 #!/usr/bin/python
 ########################################################################################################################
 #
@@ -29,7 +28,6 @@ __status__ = "Prototype"
 
 import yaml
 import os.path
-import os
 import laygo2
 
 # Type checking
@@ -37,19 +35,24 @@ from typing import TYPE_CHECKING, overload, Generic, Dict
 from typing import List, Tuple, Iterable, Type, Union, Any, Optional
 from laygo2._typing import T, FilePath
 from pymongo import MongoClient     #Modified for webconsole
+import datetime
 if TYPE_CHECKING:
     import laygo2
 
 def export_template(
         template:"laygo2.object.template.Template", 
         filename:str, 
-        mode:str='append'):
+        mode:str='append',
+        export_mask:bool=False,
+        export_prelvs_info:bool=False,
+        export_internal_shapes:bool=False,
+        ):
     """Export a template to a yaml file.
 
     Parameters
     ----------
-    template: laygo2.object.template.Template
-        The template object to be exported.        
+    template: laygo2.object.template.Template or laygo2.object.database.Design
+        The template object to be exported. If laygo2.Design is given, it is converted to a template and exported.
     filename: str
         The name of the yaml file.
     mode: str
@@ -89,13 +92,15 @@ def export_template(
                     'netname': 'o'
     }}}}}
     """
+    if (template.__class__.__name__ == "Design"):  # if design is provided, convert it to template
+        template = template.export_to_template(export_prelvs_info=export_prelvs_info, export_internal_shapes=export_internal_shapes)
+
     libname = template.libname
     cellname = template.cellname
     pins = template.pins()
 
     db = dict()
 
-    #Modify: check webconsole environment
     if os.getenv('WC') is None:
         # load yaml file from local
         if mode == 'append':  # in append mode, the template is appended to 'filename' if the file exists.
@@ -120,7 +125,7 @@ def export_template(
 
         if libname not in db:
             db[libname] = dict()
-        db[libname][cellname] = template.export_to_dict()
+        db[libname][cellname] = template.export_to_dict(export_mask=export_mask, export_prelvs_info=export_prelvs_info, export_internal_shapes=export_internal_shapes)
         with open(filename, 'w') as stream:
             yaml.dump(db, stream, default_flow_style=None)
         #print("Your design was translated into YAML format.")
@@ -135,12 +140,16 @@ def export_template(
 
             DB_CONNECT = os.environ['DB_CONNECT']
             client = MongoClient(DB_CONNECT)
+            #print(client)
             testdb = client.test
             collection = testdb['files']
+            tz = datetime.timezone(datetime.timedelta(hours=9))
+
             yamlFile = collection.find_one({'user': username, 'filetype': 'yaml', 'filename': filename, 'filePath': filePath})
 
             if yamlFile is not None:
                 db = yaml.load(yamlFile['content'], Loader=yaml.FullLoader)
+                print("yamlFile not none")
             else:
                 dummy_string = f"{libname}:\n"
                 dummy_string += f"    dummy:\n"
@@ -152,14 +161,15 @@ def export_template(
                 dummy_string += f"        cellname: dummy\n"
                 dummy_string += f"        libname: {libname}\n"
                 db = yaml.safe_load(dummy_string)
-                testdb.files.insert_one({'user': username, 'filetype': 'yaml', 'filename': filename, 'filePath': filePath, 'content':""})
+                testdb.files.insert_one({'user': username, 'filetype': 'yaml', 'filename': filename, 'filePath': filePath, 'content':"", 'updatedAt': datetime.datetime.now(tz=tz)})
+                print("yamlFile none")
 
         if libname not in db:
             db[libname] = dict()
         db[libname][cellname] = template.export_to_dict()
         yaml_string = str()
         yaml_string = yaml.dump(db, default_flow_style=None)
-        testdb.files.update_one({'user': username, 'filetype': 'yaml', 'filename': filename, 'filePath': filePath}, {'$set':{'content':yaml_string}})
+        testdb.files.update_one({'user': username, 'filetype': 'yaml', 'filename': filename, 'filePath': filePath}, {'$set':{'content':yaml_string, 'updatedAt': datetime.datetime.now(tz=tz)}})
     
     return db
 
@@ -196,7 +206,6 @@ def import_template(filename:str):
             'mytemp': <laygo2.object.template.NativeInstanceTemplate object at 0x000001FE3440A2C0>
         }
     """
-
     #Modify: check webconsole environment
     if os.getenv('WC') is None:
         # load yaml file from local
@@ -224,7 +233,7 @@ def import_template(filename:str):
             #print(db)
         else:
             print("no such file: "+filePath+"/"+filename)
-
+    
     libname = list(db.keys())[0]  # assuming there's only one library defined in each file.
     # create template library
     tlib = laygo2.object.database.TemplateLibrary(name=libname)
@@ -234,11 +243,9 @@ def import_template(filename:str):
         if 'pins' in tdict:
             for pinname, pdict in tdict['pins'].items():
                 pins[pinname] = laygo2.object.physical.Pin(xy=pdict['xy'], layer=pdict['layer'], netname=pdict['netname'])
-        if 'masks' in tdict:
-            masks = tdict['masks']
-        else:
-            masks = None
-        t = laygo2.object.template.NativeInstanceTemplate(libname=libname, cellname=tn, bbox=tdict['bbox'], masks=masks, pins=pins)
+        masks = tdict.get('masks', None)
+        internal_shapes = tdict.get('internal_shapes', None)
+        t = laygo2.object.template.NativeInstanceTemplate(libname=libname, cellname=tn, bbox=tdict['bbox'], masks=masks, pins=pins, internal_shapes=internal_shapes)
         tlib.append(t)
     return tlib
 
