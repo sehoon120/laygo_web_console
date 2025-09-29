@@ -73,22 +73,22 @@ subblocks:
   libname: gpdk045_microtemplates_dense
   name: MN0
   pins:
-    D0:
+    D00:
       bbox:
       - [370, 235]
       - [450, 595]
       termName: D0
-    G0:
+    G00:
       bbox:
       - [320, 730]
       - [500, 850]
       termName: G0
-    S0:
+    S00:
       bbox:
       - [165, 235]
       - [245, 595]
       termName: S0
-    S1:
+    S10:
       bbox:
       - [575, 235]
       - [655, 595]
@@ -102,22 +102,22 @@ subblocks:
   libname: gpdk045_microtemplates_dense
   name: MP0
   pins:
-    D0:
+    D00:
       bbox:
       - [370, 235]
       - [450, 595]
       termName: D0
-    G0:
+    G00:
       bbox:
       - [320, 730]
       - [500, 850]
       termName: G0
-    S0:
+    S00:
       bbox:
       - [165, 235]
       - [245, 595]
       termName: S0
-    S1:
+    S10:
       bbox:
       - [575, 235]
       - [655, 595]

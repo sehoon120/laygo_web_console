@@ -1,4 +1,4 @@
-# C:\For_english_only_directories\LaygoWebConsole\bag_workspace_gpdk045\laygo3\laygo2\object\database.py Design 객체에 member function으로 추가
+# bag_workspace_gpdk045\laygo3\laygo2\object\database.py Design 객체에 member function으로 추가
     def export_to_webconsole(self, grids:list=[]):
         """
         Return data for drawing layout(libname, cellname, subblocks, vias, pins, metals)
@@ -90,14 +90,21 @@
             _sub_block['transform'] = vinst.transform
             _sub_block['pins'] = dict()
             if vinst.libname == 'gpdk045_microtemplates_dense':
+                #print(vinst)
                 for _instName, velem in vinst.native_elements.items():
                     if not isinstance(velem, Rect) and not isinstance(velem, Pin) and not velem.cellname in via_table:
                         if "NoName" in _instName:
                             continue
                         for _pinName, pin in velem.pins.items():
-                            _sub_block['pins'][_pinName] = dict()
-                            _sub_block['pins'][_pinName]['termName'] = _pinName 
-                            _sub_block['pins'][_pinName]['bbox'] = pin.bbox.tolist()
+                            #print(pin)
+                            #print(pin.elements)
+                            for idx, pinelem in np.ndenumerate(pin.elements):
+                                _sub_block['pins'][_pinName+str(idx[0])] = dict()
+                                _sub_block['pins'][_pinName+str(idx[0])]['termName'] = _pinName 
+                                _sub_block['pins'][_pinName+str(idx[0])]['bbox'] = pinelem.bbox.tolist()
+                                #print(idx)
+                                #print(pinelem)
+                            #    print(pinelem.bbox)
             else: 
                 for _pinName, pin in vinst.pins.items():
                     _sub_block['pins'][_pinName] = dict()
@@ -121,7 +128,7 @@
             _pin = dict(name = pin.name, xy = pin.xy.tolist(), layer=pin.layer[0], bbox=pin.bbox.tolist())
             dsn_dict['pins'].append(_pin)
 
-        # flatten virtual instances and add it to dict -> To show expanded circuit at console // 추후 추가 업데이트 시 필요할 수 있음. 일단 주석처리
+        # flatten virtual instances and add it to dict -> To show expanded circuit at console : Currently not supported
         '''
         pin_list, via_list, metal_list, cell_list = self.flatten_virtual_instance(via_table)
         dsn_dict["flatten"]["subblocks"].extend(cell_list)

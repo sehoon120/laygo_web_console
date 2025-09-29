@@ -1,4 +1,4 @@
-# C:\For_english_only_directories\LaygoWebConsole\bag_workspace_gpdk045\laygo3\laygo2\interface\core.py
+# bag_workspace_gpdk045\laygo3\laygo2\interface\core.py
 #!/usr/bin/python
 ########################################################################################################################
 #
@@ -202,7 +202,6 @@ def export(
         )
     elif target == 'webconsole':  # webconsole export
         consoleUsername = os.environ['LAYGO_USERNAME']
-        consoleFilepath = os.environ['LAYGO_BASENAME']
         
         return webconsole.export(
             db=db,

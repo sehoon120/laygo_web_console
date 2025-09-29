@@ -73,25 +73,65 @@ subblocks:
   libname: gpdk045_microtemplates_dense
   name: MN0
   pins:
-    D0:
+    D00:
       bbox:
       - [370, 235]
       - [450, 595]
       termName: D0
-    G0:
+    D01:
+      bbox:
+      - [780, 235]
+      - [860, 595]
+      termName: D0
+    D02:
+      bbox:
+      - [1190, 235]
+      - [1270, 595]
+      termName: D0
+    G00:
       bbox:
       - [320, 730]
       - [500, 850]
       termName: G0
-    S0:
+    G01:
+      bbox:
+      - [730, 730]
+      - [910, 850]
+      termName: G0
+    G02:
+      bbox:
+      - [1140, 730]
+      - [1320, 850]
+      termName: G0
+    S00:
       bbox:
       - [165, 235]
       - [245, 595]
       termName: S0
-    S1:
+    S01:
       bbox:
       - [575, 235]
       - [655, 595]
+      termName: S0
+    S02:
+      bbox:
+      - [985, 235]
+      - [1065, 595]
+      termName: S0
+    S10:
+      bbox:
+      - [575, 235]
+      - [655, 595]
+      termName: S1
+    S11:
+      bbox:
+      - [985, 235]
+      - [1065, 595]
+      termName: S1
+    S12:
+      bbox:
+      - [1395, 235]
+      - [1475, 595]
       termName: S1
   transform: R0
   xy: [0, 0]
@@ -102,25 +142,65 @@ subblocks:
   libname: gpdk045_microtemplates_dense
   name: MP0
   pins:
-    D0:
+    D00:
       bbox:
       - [370, 235]
       - [450, 595]
       termName: D0
-    G0:
+    D01:
+      bbox:
+      - [780, 235]
+      - [860, 595]
+      termName: D0
+    D02:
+      bbox:
+      - [1190, 235]
+      - [1270, 595]
+      termName: D0
+    G00:
       bbox:
       - [320, 730]
       - [500, 850]
       termName: G0
-    S0:
+    G01:
+      bbox:
+      - [730, 730]
+      - [910, 850]
+      termName: G0
+    G02:
+      bbox:
+      - [1140, 730]
+      - [1320, 850]
+      termName: G0
+    S00:
       bbox:
       - [165, 235]
       - [245, 595]
       termName: S0
-    S1:
+    S01:
       bbox:
       - [575, 235]
       - [655, 595]
+      termName: S0
+    S02:
+      bbox:
+      - [985, 235]
+      - [1065, 595]
+      termName: S0
+    S10:
+      bbox:
+      - [575, 235]
+      - [655, 595]
+      termName: S1
+    S11:
+      bbox:
+      - [985, 235]
+      - [1065, 595]
+      termName: S1
+    S12:
+      bbox:
+      - [1395, 235]
+      - [1475, 595]
       termName: S1
   transform: MX
   xy: [0, 2000]
