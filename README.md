@@ -1,4 +1,4 @@
-# Laygo Webconsole
+# Laygo Interactive Webconsole
 
 Laygo Webconsole은 **Laygo 기반 회로 설계/배치 자동화**를 웹 환경에서 실행할 수 있도록 만든 관리 도구이다.
 Node.js와 PM2를 기반으로 동작하며, MongoDB를 연동해 사용자/프로젝트 데이터를 관리한다.
@@ -75,6 +75,10 @@ git clone https://github.com/sehoon120/laygo_web_console.git laygo_web_console
 
 `laygo_web_console/Implementation_linux/Laygo/` 디렉토리에
 **수정된 파일 모음**이 있음. 해당 변경사항을 기존 Laygo 코드에 반영해야 한다.
+
+이외에 laygo2_tech/core.py, flex.py에서 tech_fname 변수를 아래와 같이 변경했다.
+base_dir = os.path.dirname(os.path.abspath(__file__))
+tech_fname = os>path.join(base_dir, 'lago2_tech.yaml')
 
 ---
 
